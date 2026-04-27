@@ -3,16 +3,16 @@ import { useState, useMemo } from 'react';
 import rawStudents from '../data/students.json';
 import rawCamps from '../data/camps.json';
 import Pagination from '../components/Pagination';
-import { avatarColor, initials, isoToDisplay, CalendarCell, DropdownCell } from '../components/board/cells';
+import { avatarColor, initials, isoToDisplay, CalendarCell } from '../components/board/cells';
 import { FilterPill } from '../components/FilterPill';
 import type { Student } from './StudentBoardPage';
+import { loadClasses } from './CampClassTab';
+import type { ClassLevel } from './CampClassTab';
 
 interface Camp { id: string; name: string; staff: string[]; }
 
 const rawStudentsArr = rawStudents as unknown as Student[];
 const allCamps = rawCamps as Camp[];
-
-const CLASSES = ['Class 1', 'Class 2', 'Class 3', 'Class 4'];
 
 const TAG_COLORS = [
   { bg: '#E0E9FE', color: '#3B82F6' },
@@ -87,6 +87,8 @@ function PickupRow({ label, status }: { label: string; status: string }) {
 export function CampUserBoardCompleted({ campId, students, agents = [] }: { campId: string; students: Student[]; agents?: { id: string; name: string }[] }) {
   const agentIdToName = Object.fromEntries(agents.map(a => [a.id, a.name]));
   const [query, setQuery] = useState('');
+  const classes: ClassLevel[] = useMemo(() => loadClasses(campId), [campId]);
+  function getStudentClass(studentId: string) { return classes.find(c => c.studentIds.includes(studentId)); }
   const allCampStudents = students.filter(s => s.history.current_camp_id === campId);
   const campStudents = query
     ? allCampStudents.filter(s => s.name_ko.includes(query) || s.name_en.toLowerCase().includes(query.toLowerCase()))
@@ -187,7 +189,11 @@ export function CampUserBoardCompleted({ campId, students, agents = [] }: { camp
                         }
                       </div>
                     </td>
-                    <td style={TD}><span style={{ fontSize: 13 }}>-</span></td>
+                    <td style={TD}>
+                      {(() => { const cls = getStudentClass(s.id); return cls
+                        ? <span className="ew-tag" style={{ background: '#EEF3FD', color: '#2F6FED' }}>{cls.name}</span>
+                        : <span style={{ fontSize: 12, color: '#D1D5DB' }}>-</span>; })()}
+                    </td>
                     <td style={TD}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                         {rooms.length > 0
@@ -291,8 +297,9 @@ function StudentPickerModal({ campId, allStudents, onAdd, onClose }: {
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
-export default function CampUserBoardPage({ campId: propCampId, students: propStudents, onStudentUpdate, agents = [] }: {
+export default function CampUserBoardPage({ campId: propCampId, students: propStudents, onStudentUpdate, onStudentClick, agents = [] }: {
   campId?: string; students?: Student[]; onStudentUpdate?: (s: Student) => void;
+  onStudentClick?: (studentId: string) => void;
   agents?: { id: string; name: string }[];
 }) {
   const agentIdToName = useMemo(() => Object.fromEntries(agents.map(a => [a.id, a.name])), [agents]);
@@ -316,6 +323,9 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
     const sel = activeCell === `${id}:${key}` ? 'ew-cell--selected' : '';
     return [sel, extra].filter(Boolean).join(' ') || undefined;
   }
+
+  const classes: ClassLevel[] = useMemo(() => loadClasses(campId), [campId]);
+  function getStudentClass(studentId: string) { return classes.find(c => c.studentIds.includes(studentId)); }
 
   const campStudents = useMemo(() => {
     let list = allStudentsSource.filter(s => s.history.current_camp_id === campId);
@@ -400,8 +410,8 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
               ) : pageData.map(s => {
                 const isRowSel = selected.has(s.id);
                 const agentVal = agentIdToName[getEdit(s.id, 'agent', s.history.agent_id)] ?? getEdit(s.id, 'agent', s.history.agent_id);
-                const classVal = getEdit(s.id, 'class', '');
                 const payVal   = getEdit(s.id, 'pay',   '');
+                const studentClass = getStudentClass(s.id);
 
                 const rec = getCampRecord(s, campId);
                 const familyRaw = loadStudentFamily(s.id);
@@ -416,12 +426,13 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
                     <td style={{ ...TD_STYLE, textAlign: 'center', padding: '0 12px' }} onClick={e => e.stopPropagation()}>
                       <input type="checkbox" className="ew-checkbox" checked={isRowSel} onChange={() => toggleRow(s.id)} />
                     </td>
-                    <td style={{ ...TD_STYLE, padding: '0 16px' }}>
+                    <td style={{ ...TD_STYLE, padding: '0 16px', cursor: onStudentClick ? 'pointer' : 'default' }}
+                        onClick={onStudentClick ? () => onStudentClick(s.id) : undefined}>
                       <div className="ew-camp-thumbnail-card">
                         <div className="ew-avatar" style={{ background: avatarColor(s.name_en), width: 32, height: 32, fontSize: 12 }}>{initials(s.name_en)}</div>
                         <div className="ew-camp-thumbnail-info">
                           <div className="ew-camp-thumbnail-name-row">
-                            <span className="ew-camp-thumbnail-name-en">{s.name_en}</span>
+                            <span className="ew-camp-thumbnail-name-en" style={{ color: onStudentClick ? 'var(--color-primary)' : undefined }}>{s.name_en}</span>
                             <span className="ew-camp-thumbnail-name-ko">{s.name_ko}</span>
                           </div>
                           <div className="ew-camp-thumbnail-meta-row">
@@ -452,11 +463,10 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
                         }
                       </div>
                     </td>
-                    <td className={tdCls(s.id, 'class', 'ew-cell--interactive')} style={{ ...TD_STYLE, padding: '0 12px' }}>
-                      <DropdownCell value={classVal} options={CLASSES} cellId={`${s.id}:class`}
-                        openCell={openCell} setOpenCell={setOpenCell}
-                        onChange={v => setEdit(s.id, 'class', v)}
-                        onCellClick={() => setActiveCell(`${s.id}:class`)} onEditDone={() => setActiveCell(null)} />
+                    <td style={TD_STYLE}>
+                      {studentClass
+                        ? <span className="ew-tag" style={{ background: '#EEF3FD', color: '#2F6FED' }}>{studentClass.name}</span>
+                        : <span style={{ fontSize: 12, color: '#D1D5DB' }}>-</span>}
                     </td>
                     <td style={TD_STYLE}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>

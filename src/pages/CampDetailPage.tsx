@@ -1,9 +1,10 @@
 // 캠프 상세 페이지 — Figma 496:2735
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { CampTab, Camp } from '../App';
 import CampUserBoardPage, { CampUserBoardCompleted } from './CampUserBoardPage';
 import CampTimetableView from './CampTimetableView';
 import CampTimetableEdit from './CampTimetableEdit';
+import type { TimetableEditHandle } from './CampTimetableEdit';
 import CampAccommodationTab, { HotelCompletedView } from './CampAccommodationTab';
 import CampStaffTab, { StaffCompletedView } from './CampStaffTab';
 import CampClassTab, { ClassCompletedView, loadClasses } from './CampClassTab';
@@ -73,7 +74,7 @@ function LeaveModal({ onConfirm, onCancel }: { onConfirm: () => void; onCancel: 
 const TABS: CampTab[] = ['Students', 'Accommodation', 'Staff', 'Class', 'Timetable'];
 
 export default function CampDetailPage({
-  camps, campId, activeTab, onTabChange, onBack, onEdit, students, onStudentUpdate, onCampUpdate, agents = [],
+  camps, campId, activeTab, onTabChange, onBack, onEdit, students, onStudentUpdate, onCampUpdate, onStudentClick, agents = [],
 }: {
   camps: Camp[];
   campId: string;
@@ -84,6 +85,7 @@ export default function CampDetailPage({
   students?: Student[];
   onStudentUpdate?: (s: Student) => void;
   onCampUpdate?: (camp: Camp) => void;
+  onStudentClick?: (studentId: string) => void;
   agents?: { id: string; name: string }[];
 }) {
   const camp = camps.find(c => c.id === campId);
@@ -108,6 +110,7 @@ export default function CampDetailPage({
   const [resetKeys,        setResetKeys]        = useState<Record<CampTab, number>>({
     'Students': 0, 'Accommodation': 0, 'Staff': 0, 'Class': 0, 'Timetable': 0,
   });
+  const timetableEditRef = useRef<TimetableEditHandle>(null);
   const [timetableEditing, setTimetableEditing] = useState(false);
   const [tabEditing,       setTabEditing]       = useState<Record<CampTab, boolean>>({
     'Students': false, 'Accommodation': false, 'Staff': false, 'Class': false, 'Timetable': false,
@@ -293,87 +296,87 @@ export default function CampDetailPage({
                     completedView={<CampUserBoardCompleted campId={campId} students={students ?? []} agents={agents} />}
                     onEditingChange={e => handleTabEditingChange('Students', e)}
                   >
-                    <CampUserBoardPage key={resetKeys['Students']} campId={campId} students={students} onStudentUpdate={onStudentUpdate} agents={agents} />
+                    <CampUserBoardPage key={resetKeys['Students']} campId={campId} students={students} onStudentUpdate={onStudentUpdate} onStudentClick={onStudentClick} agents={agents} />
                   </TabCard>
                 )}
 
-                {activeTab === 'Timetable' && (() => {
-                  const activeClass = classes.find(c => c.id === activeTimetableClassId);
-                  return (
-                    <div>
-                      {/* Class subtabs */}
-                      <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--color-border-table)', background: '#FAFBFF', padding: '0 16px' }}>
-                        {classes.map(cls => (
-                          <button
-                            key={cls.id}
-                            onClick={() => {
-                              if (timetableEditing) {
-                                setTimetableEditing(false);
-                                setTabEditing(prev => ({ ...prev, 'Timetable': false }));
-                              }
-                              setActiveTimetableClassId(cls.id);
-                              setResetKeys(prev => ({ ...prev, 'Timetable': prev['Timetable'] + 1 }));
-                            }}
-                            style={{
-                              padding: '8px 16px', fontSize: 13, fontFamily: 'var(--font-ko)',
-                              fontWeight: cls.id === activeTimetableClassId ? 600 : 400,
-                              color: cls.id === activeTimetableClassId ? 'var(--color-primary)' : 'var(--color-text-sub)',
-                              background: 'none', border: 'none',
-                              borderBottom: cls.id === activeTimetableClassId ? '2px solid var(--color-primary)' : '2px solid transparent',
-                              cursor: 'pointer', marginBottom: -1,
-                            }}
-                          >
-                            {cls.name || '(미입력)'}
-                            {cls.teacher && <span style={{ fontSize: 11, color: 'var(--color-text-muted)', marginLeft: 6 }}>{cls.teacher}</span>}
-                          </button>
-                        ))}
-                      </div>
-
-                      {/* Timetable content for selected class */}
+                {activeTab === 'Timetable' && (
+                  <div>
+                    {/* 툴바 — 다른 탭의 TabCard 헤더와 동일한 위치 */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 20px', borderBottom: '1px solid var(--color-border-table)', background: '#FAFBFF' }}>
+                      <div style={{ flex: 1 }} />
                       {timetableEditing ? (
-                        <div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 20px', borderBottom: '1px solid var(--color-border-table)', background: '#FAFBFF' }}>
-                            <div style={{ flex: 1 }} />
-                            <button className="ew-btn ew-btn--ghost ew-btn--sm" onClick={() => {
-                              try { localStorage.removeItem(getTimetableStorageKey()); } catch {}
-                              setResetKeys(prev => ({ ...prev, 'Timetable': prev['Timetable'] + 1 }));
-                            }}>초기화</button>
-                            <button className="ew-btn ew-btn--primary ew-btn--sm" onClick={() => {
-                              setTimetableEditing(false);
-                              setTabEditing(prev => ({ ...prev, 'Timetable': false }));
-                            }}>저장</button>
-                          </div>
-                          <CampTimetableEdit
-                            key={`${resetKeys['Timetable']}-${activeTimetableClassId}`}
-                            campId={campId}
-                            classId={activeTimetableClassId ?? undefined}
-                            startDate={camp?.start_date}
-                            endDate={camp?.end_date}
-                            onDateRangeChange={(s, e) => {
-                              if (!camp || !onCampUpdate) return;
-                              onCampUpdate({ ...camp, start_date: s, end_date: e });
-                            }}
-                          />
-                        </div>
+                        <>
+                          <button className="ew-btn ew-btn--ghost ew-btn--sm" onClick={() => {
+                            try { localStorage.removeItem(getTimetableStorageKey()); } catch {}
+                            setResetKeys(prev => ({ ...prev, 'Timetable': prev['Timetable'] + 1 }));
+                          }}>초기화</button>
+                          <button className="ew-btn ew-btn--primary ew-btn--sm" onClick={() => {
+                            timetableEditRef.current?.flush();
+                            setTimetableEditing(false);
+                            setTabEditing(prev => ({ ...prev, 'Timetable': false }));
+                          }}>저장</button>
+                        </>
                       ) : (
-                        <CampTimetableView
-                          key={`view-${activeTimetableClassId}`}
-                          campId={campId}
-                          classId={activeTimetableClassId ?? undefined}
-                          onEdit={() => {
-                            setTimetableEditing(true);
-                            handleTabEditingChange('Timetable', true);
-                          }}
-                        />
-                      )}
-                      {!activeClass && (
-                        <div style={{ padding: 32, textAlign: 'center', color: 'var(--color-text-muted)', fontSize: 14, fontFamily: 'var(--font-ko)' }}>
-                          클래스를 선택하세요
-                        </div>
+                        <button className="ew-btn ew-btn--ghost ew-btn--sm" onClick={() => {
+                          setTimetableEditing(true);
+                          handleTabEditingChange('Timetable', true);
+                        }}>수정</button>
                       )}
                     </div>
-                  );
-                })()}
+
+                    {/* Class subtabs */}
+                    <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--color-border-table)', background: '#FAFBFF', padding: '0 16px' }}>
+                      {classes.map(cls => (
+                        <button
+                          key={cls.id}
+                          onClick={() => {
+                            if (timetableEditing) {
+                              timetableEditRef.current?.flush();
+                              setTimetableEditing(false);
+                              setTabEditing(prev => ({ ...prev, 'Timetable': false }));
+                            }
+                            setActiveTimetableClassId(cls.id);
+                            setResetKeys(prev => ({ ...prev, 'Timetable': prev['Timetable'] + 1 }));
+                          }}
+                          style={{
+                            padding: '8px 16px', fontSize: 13, fontFamily: 'var(--font-ko)',
+                            fontWeight: cls.id === activeTimetableClassId ? 600 : 400,
+                            color: cls.id === activeTimetableClassId ? 'var(--color-primary)' : 'var(--color-text-sub)',
+                            background: 'none', border: 'none',
+                            borderBottom: cls.id === activeTimetableClassId ? '2px solid var(--color-primary)' : '2px solid transparent',
+                            cursor: 'pointer', marginBottom: -1,
+                          }}
+                        >
+                          {cls.name || '(미입력)'}
+                          {cls.teacher && <span style={{ fontSize: 11, color: 'var(--color-text-muted)', marginLeft: 6 }}>{cls.teacher}</span>}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* 시간표 컨텐츠 */}
+                    {timetableEditing ? (
+                      <CampTimetableEdit
+                        ref={timetableEditRef}
+                        key={`${resetKeys['Timetable']}-${activeTimetableClassId}`}
+                        campId={campId}
+                        classId={activeTimetableClassId ?? undefined}
+                        startDate={camp?.start_date}
+                        endDate={camp?.end_date}
+                        onDateRangeChange={(s, e) => {
+                          if (!camp || !onCampUpdate) return;
+                          onCampUpdate({ ...camp, start_date: s, end_date: e });
+                        }}
+                      />
+                    ) : (
+                      <CampTimetableView
+                        key={`view-${activeTimetableClassId}`}
+                        campId={campId}
+                        classId={activeTimetableClassId ?? undefined}
+                      />
+                    )}
+                  </div>
+                )}
 
                 {activeTab === 'Accommodation' && (
                   <TabCard tab="Accommodation" campId={campId} onReset={() => handleReset('Accommodation')}

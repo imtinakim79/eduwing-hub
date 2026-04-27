@@ -178,7 +178,7 @@ function TimetableGrid({ days, weekIdx, data, merges }: {
 }
 
 // ── Main ─────────────────────────────────────────────────────────────────────
-export default function CampTimetableView({ campId, classId, onEdit }: { campId: string; classId?: string; onEdit?: () => void }) {
+export default function CampTimetableView({ campId, classId }: { campId: string; classId?: string }) {
   const effectiveId = classId ? `${campId}-${classId}` : campId;
   const { start: startDate, end: endDate } = loadRange(effectiveId);
 
@@ -197,7 +197,6 @@ export default function CampTimetableView({ campId, classId, onEdit }: { campId:
   return (
     <div style={{ padding: '16px 24px' }}>
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginBottom: 20 }}>
-        {onEdit && <button className="ew-btn ew-btn--ghost ew-btn--sm" onClick={onEdit}>수정</button>}
         <button className="ew-btn ew-btn--ghost ew-btn--sm">인쇄</button>
         <button className="ew-btn ew-btn--ghost ew-btn--sm">공유</button>
         <button className="ew-btn ew-btn--ghost ew-btn--sm">다운로드</button>

@@ -1,5 +1,7 @@
 // 캠프 시간표 편집 — Figma 529:5820
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
+
+export interface TimetableEditHandle { flush: () => void; }
 import { CalendarRangeCell } from '../components/board/cells';
 
 type TimeSlot = 'Morning' | 'Lunch' | 'Afternoon' | 'Dinner' | 'Evening';
@@ -214,13 +216,16 @@ function EditableGrid({ days, weekIdx, data, merges, liveSelectedKeys, onMouseDo
 }
 
 // ── Main ─────────────────────────────────────────────────────────────────────
-export default function CampTimetableEdit({ campId, classId, startDate: initStart, endDate: initEnd, onDateRangeChange }: {
+interface CampTimetableEditProps {
   campId?: string;
   classId?: string;
   startDate?: string;
   endDate?: string;
   onDateRangeChange?: (start: string, end: string) => void;
-}) {
+}
+
+const CampTimetableEdit = forwardRef<TimetableEditHandle, CampTimetableEditProps>(
+function CampTimetableEdit({ campId, classId, startDate: initStart, endDate: initEnd, onDateRangeChange }, ref) {
   const effectiveId = campId && classId ? `${campId}-${classId}` : campId;
 
   // Fix: localStorage takes priority over prop so saved range persists after edits
@@ -244,6 +249,16 @@ export default function CampTimetableEdit({ campId, classId, startDate: initStar
   // Auto-save open cell on unmount
   const editRef = useRef({ selectedKeys, title, content, bgColor, fontColor, data, merges, effectiveId });
   editRef.current = { selectedKeys, title, content, bgColor, fontColor, data, merges, effectiveId };
+
+  useImperativeHandle(ref, () => ({
+    flush() {
+      const { selectedKeys: keys, title: t, content: c, bgColor: bg, fontColor: fc, data: d, merges: m, effectiveId: cid } = editRef.current;
+      if (keys.size === 1 && cid) {
+        const [key] = Array.from(keys);
+        persistStored(cid, { data: { ...d, [key]: { title: t, content: c, bgColor: bg, fontColor: fc } }, merges: m });
+      }
+    },
+  }));
   useEffect(() => {
     return () => {
       const { selectedKeys: keys, title: t, content: c, bgColor: bg, fontColor: fc, data: d, merges: m, effectiveId: cid } = editRef.current;
@@ -469,4 +484,6 @@ export default function CampTimetableEdit({ campId, classId, startDate: initStar
       )}
     </div>
   );
-}
+});
+
+export default CampTimetableEdit;

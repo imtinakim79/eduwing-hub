@@ -80,6 +80,24 @@ export default function App() {
     } catch { return rawCamps as Camp[]; }
   });
 
+  // One-time migration: remove orphaned teacher localStorage data
+  useEffect(() => {
+    try { localStorage.removeItem('ew-master-teacher'); } catch {}
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (!key?.startsWith('ew-campstaff-')) continue;
+        const raw = localStorage.getItem(key);
+        if (!raw) continue;
+        const parsed = JSON.parse(raw);
+        if ('teacherIds' in parsed) {
+          const { teacherIds: _removed, ...rest } = parsed;
+          localStorage.setItem(key, JSON.stringify(rest));
+        }
+      }
+    } catch {}
+  }, []);
+
   // Push the initial history entry so the first page is also in the stack
   useEffect(() => {
     window.history.replaceState(
@@ -191,7 +209,8 @@ export default function App() {
             <StudentDetailPage
               student={s}
               camps={camps}
-              onBack={() => navigate('students')}
+              initialCampId={activeCampId || undefined}
+              onBack={() => navigate(activeCampId ? 'campDetail' : 'students')}
               onEdit={() => navigate('addStudent', { editId: activeStudentId })}
               onStudentUpdate={updated => saveStudents(students.map(x => x.id === updated.id ? updated : x))}
             />
@@ -222,6 +241,7 @@ export default function App() {
             onTabChange={tab => navigate('campDetail', { tab })}
             onBack={() => navigate('camps')}
             onEdit={() => navigate('campCreate', { tab: activeCampTab })}
+            onStudentClick={id => navigate('studentDetail', { studentId: id })}
             students={students as any}
             agents={agents}
             onStudentUpdate={(updated: any) => saveStudents(students.map(s => s.id === updated.id ? { ...s, ...updated } : s))}
