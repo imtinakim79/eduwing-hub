@@ -4,6 +4,7 @@ import { useState, useMemo, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import rawStudents from '../data/students.json';
 import rawCamps from '../data/camps.json';
+import type { Agent } from './AgentBoardPage';
 import Pagination from '../components/Pagination';
 import BoardTable from '../components/board/BoardTable';
 import { FilterPill } from '../components/FilterPill';
@@ -74,19 +75,16 @@ const studentColumns: ColumnDef<Student>[] = [
     setValue: (_, v) => ({ field: 'birth_date', value: v }),
   },
   {
-    key: 'guardian', label: '보호자', width: 120, type: 'text',
-    getValue: (r, e) => e['guardian'] ?? `${r.guardian.name}(${relLabel(r.guardian.relation)})`,
-    setValue: (_, v) => ({ field: 'guardian', value: v }),
+    key: 'guardian', label: '보호자', width: 120, type: 'readonly',
+    getValue: (r) => `${r.guardian.name}(${relLabel(r.guardian.relation)})`,
   },
   {
-    key: 'contact', label: '연락처', width: 135, type: 'text',
-    getValue: (r, e) => e['contact'] ?? r.guardian.contact,
-    setValue: (_, v) => ({ field: 'contact', value: v }),
+    key: 'contact', label: '연락처', width: 135, type: 'readonly',
+    getValue: (r) => r.guardian.contact,
   },
   {
-    key: 'email', label: 'Email', width: 160, type: 'text',
-    getValue: (r, e) => e['email'] ?? r.guardian.email,
-    setValue: (_, v) => ({ field: 'email', value: v }),
+    key: 'email', label: 'Email', width: 160, type: 'readonly',
+    getValue: (r) => r.guardian.email,
   },
   {
     key: 'joined_date', label: '가입일', width: 109, sortKey: 'joined', type: 'calendar',
@@ -95,20 +93,15 @@ const studentColumns: ColumnDef<Student>[] = [
   },
   {
     key: 'agent_id', label: 'Agent', width: 130, type: 'dropdown',
-    options: (all) => [...new Set(all.map(s => s.history.agent_id))],
+    options: [],
     getValue: (r, e) => e['agent_id'] ?? r.history.agent_id,
     setValue: (_, v) => ({ field: 'agent_id', value: v }),
   },
   {
-    key: 'current_camp_id', label: '참여중인 캠프', width: 155, type: 'dropdown',
-    options: allCamps.map(c => c.name),
+    key: 'current_camp_id', label: '참여중인 캠프', width: 155, type: 'readonly',
     getValue: (r, e) => {
       const id = e['current_camp_id'] ?? r.history.current_camp_id;
       return campMap[id]?.name ?? id;
-    },
-    setValue: (_, v) => {
-      const camp = allCamps.find(c => c.name === v);
-      return { field: 'current_camp_id', value: camp?.id ?? v };
     },
   },
   {
@@ -196,12 +189,14 @@ function rowsToStudents(rows: Record<string, string>[]): Student[] {
 // ── Main ──────────────────────────────────────────────────────────────────────
 export default function StudentBoardPage({
   students = defaultStudents,
+  agents = [],
   onAdd,
   onStudentSelect,
   onStudentsImport,
   onStudentUpdate,
 }: {
   students?: Student[];
+  agents?: Agent[];
   onAdd?: () => void;
   onStudentSelect?: (id: string) => void;
   onStudentsImport?: (imported: Student[]) => void;
@@ -257,7 +252,23 @@ export default function StudentBoardPage({
     else { setSortKey(k); setSortDir('asc'); }
   }
 
-  const agents   = useMemo(() => [...new Set<string>(students.map(s => s.history.agent_id))],   [students]);
+  const agentOpts     = useMemo(() => agents.map(a => a.name), [agents]);
+  const agentNameToId = useMemo(() => Object.fromEntries(agents.map(a => [a.name, a.id])), [agents]);
+  const agentIdToName = useMemo(() => Object.fromEntries(agents.map(a => [a.id, a.name])), [agents]);
+
+  const columns = useMemo(() => studentColumns.map(col =>
+    col.key === 'agent_id'
+      ? {
+          ...col,
+          options: agentOpts,
+          getValue: (r: Student, e: Record<string, string>) => {
+            const id = e['agent_id'] ?? r.history.agent_id;
+            return agentIdToName[id] ?? id;
+          },
+          setValue: (_: Student, v: string) => ({ field: 'agent_id', value: agentNameToId[v] ?? v }),
+        }
+      : col
+  ), [agentOpts, agentIdToName, agentNameToId]);
   const campOpts = useMemo(() => [...new Set<string>(students.map(s => s.history.current_camp_id))], [students]);
 
   const filtered = useMemo(() => {
@@ -300,9 +311,9 @@ export default function StudentBoardPage({
         <FilterPill
           label="Agent"
           values={agentFilter ? [agentFilter] : []}
-          options={agents}
+          options={agentOpts}
           withCheckbox
-          onChange={vs => { setAgentFilter(vs[0] ?? ''); setPage(1); }}
+          onChange={vs => { setAgentFilter(agentNameToId[vs[0]] ?? vs[0] ?? ''); setPage(1); }}
         />
         <FilterPill
           label="Camp"
@@ -335,7 +346,7 @@ export default function StudentBoardPage({
         <BoardTable
           data={pageData}
           allData={students as Student[]}
-          columns={studentColumns}
+          columns={columns}
           selected={selected}
           onSelectedChange={setSelected}
           sortKey={sortKey}

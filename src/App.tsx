@@ -1,22 +1,24 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import TopNav from './components/TopNav';
 import StudentBoardPage, { defaultStudents, type Student } from './pages/StudentBoardPage';
 import CampBoardPage from './pages/CampBoardPage';
 import CampDetailPage from './pages/CampDetailPage';
-import CellGalleryPage from './pages/CellGalleryPage';
 import AddStudentPage from './pages/AddStudentPage';
 import StudentDetailPage from './pages/StudentDetailPage';
 import CampCreatePage from './pages/CampCreatePage';
+import AgentBoardPage, { type Agent } from './pages/AgentBoardPage';
 import rawCamps from './data/camps.json';
+import rawAgents from './data/agents.json';
 import './index.css';
 
-type Page = 'students' | 'addStudent' | 'studentDetail' | 'camps' | 'campDetail' | 'campCreate' | 'dashboard' | 'agent' | 'board' | 'account' | 'gallery';
-export type CampTab = '학생명단' | '시간표' | '숙박정보' | '스탭&강사';
+type Page = 'students' | 'addStudent' | 'studentDetail' | 'camps' | 'campDetail' | 'campCreate' | 'dashboard' | 'agent' | 'board' | 'account';
+export type CampTab = 'Students' | 'Accommodation' | 'Staff' | 'Class' | 'Timetable';
 
 export interface Camp {
   id: string; name: string; location: string; country: string;
   accommodation: string; capacity: number; status: string;
-  start_date: string; end_date: string; staff: string[]; teachers: string[];
+  start_date: string; end_date: string; staff: string[];
+  enrolledCount?: number;
 }
 
 interface NavState {
@@ -40,8 +42,30 @@ export default function App() {
   const [activeCampId,    setActiveCampId]   = useState<string>('');
   const [activeStudentId, setActiveStudentId] = useState<string>('');
   const [editStudentId,   setEditStudentId]  = useState<string>('');
-  const [activeCampTab,   setActiveCampTab]  = useState<CampTab>('학생명단');
-  const [students,        setStudents]       = useState<Student[]>(defaultStudents);
+  const [activeCampTab,   setActiveCampTab]  = useState<CampTab>('Students');
+  const [students,        setStudents]       = useState<Student[]>(() => {
+    try {
+      const stored = localStorage.getItem('ew-students');
+      if (!stored) return defaultStudents;
+      const parsed = JSON.parse(stored) as Student[];
+      if (parsed.length === 0) return defaultStudents;
+      const map = new Map(defaultStudents.map(s => [s.id, s]));
+      parsed.forEach(s => map.set(s.id, s));
+      return Array.from(map.values());
+    } catch { return defaultStudents; }
+  });
+  const [agents,          setAgents]         = useState<Agent[]>(() => {
+    try {
+      const defaults = rawAgents as Agent[];
+      const stored = localStorage.getItem('ew-agents');
+      if (!stored) return defaults;
+      const parsed = JSON.parse(stored) as Agent[];
+      if (parsed.length === 0) return defaults;
+      const map = new Map(defaults.map(a => [a.id, a]));
+      parsed.forEach(a => map.set(a.id, a));
+      return Array.from(map.values());
+    } catch { return rawAgents as Agent[]; }
+  });
   const [camps,           setCamps]          = useState<Camp[]>(() => {
     try {
       const defaults = rawCamps as Camp[];
@@ -59,7 +83,7 @@ export default function App() {
   // Push the initial history entry so the first page is also in the stack
   useEffect(() => {
     window.history.replaceState(
-      { page: 'students', activeCampId: '', activeStudentId: '', editStudentId: '', activeCampTab: '학생명단' } satisfies NavState,
+      { page: 'students', activeCampId: '', activeStudentId: '', editStudentId: '', activeCampTab: 'Students' } satisfies NavState,
       ''
     );
   }, []);
@@ -73,7 +97,7 @@ export default function App() {
       setActiveCampId(s.activeCampId ?? '');
       setActiveStudentId(s.activeStudentId ?? '');
       setEditStudentId(s.editStudentId ?? '');
-      setActiveCampTab(s.activeCampTab ?? '학생명단');
+      setActiveCampTab(s.activeCampTab ?? 'Students');
     }
     window.addEventListener('popstate', handlePop);
     return () => window.removeEventListener('popstate', handlePop);
@@ -100,41 +124,57 @@ export default function App() {
     if (opts.tab       !== undefined) setActiveCampTab(opts.tab);
   }
 
+  const enrichedCamps = useMemo(() =>
+    camps.map(c => ({
+      ...c,
+      enrolledCount: students.filter(s => s.camp_records.some(r => r.camp_id === c.id)).length,
+    })),
+  [camps, students]);
+
   function handleCampSave(camp: Camp) {
     const next = camps.some(c => c.id === camp.id)
       ? camps.map(c => c.id === camp.id ? camp : c)
       : [...camps, camp];
     setCamps(next);
     try { localStorage.setItem('ew-camps', JSON.stringify(next)); } catch {}
-    navigate('campDetail', { campId: camp.id, tab: '학생명단' });
+    navigate('campDetail', { campId: camp.id, tab: 'Students' });
+  }
+
+  function saveStudents(next: Student[]) {
+    setStudents(next);
+    try { localStorage.setItem('ew-students', JSON.stringify(next)); } catch {}
   }
 
   function handleSaveStudent(student: Student) {
     if (editStudentId) {
-      setStudents(prev => prev.map(x => x.id === student.id ? student : x));
+      saveStudents(students.map(x => x.id === student.id ? student : x));
       navigate('studentDetail', { studentId: student.id, editId: '' });
     } else {
-      setStudents(prev => [...prev, student]);
+      saveStudents([...students, student]);
       navigate('students', { editId: '' });
     }
   }
 
   return (
     <div style={{ minHeight: '100vh', background: '#fff', overflowX: 'auto' }}>
-      <TopNav activePage={page} onNavigate={(key) => navigate(key as Page, { editId: '', campId: '', studentId: '', tab: '학생명단' })} />
+      <TopNav activePage={page} onNavigate={(key) => navigate(key as Page, { editId: '', campId: '', studentId: '', tab: 'Students' })} />
 
       <main>
         {page === 'students' && (
           <StudentBoardPage
             students={students}
+            agents={agents}
             onAdd={() => navigate('addStudent', { editId: '' })}
             onStudentSelect={id => navigate('studentDetail', { studentId: id })}
-            onStudentsImport={imported => setStudents(prev => {
-              const map = new Map(prev.map(s => [s.id, s]));
-              imported.forEach(s => map.set(s.id, s));
-              return Array.from(map.values());
-            })}
-            onStudentUpdate={updated => setStudents(prev => prev.map(s => s.id === updated.id ? updated : s))}
+            onStudentsImport={imported => {
+              const next = (() => {
+                const map = new Map(students.map(s => [s.id, s]));
+                imported.forEach(s => map.set(s.id, s));
+                return Array.from(map.values());
+              })();
+              saveStudents(next);
+            }}
+            onStudentUpdate={updated => saveStudents(students.map(s => s.id === updated.id ? updated : s))}
           />
         )}
         {page === 'addStudent' && (
@@ -142,6 +182,7 @@ export default function App() {
             onBack={() => navigate(editStudentId ? 'studentDetail' : 'students')}
             onSave={handleSaveStudent}
             editStudent={editStudentId ? students.find(x => x.id === editStudentId) : undefined}
+            agents={agents}
           />
         )}
         {page === 'studentDetail' && (() => {
@@ -152,15 +193,25 @@ export default function App() {
               camps={camps}
               onBack={() => navigate('students')}
               onEdit={() => navigate('addStudent', { editId: activeStudentId })}
-              onStudentUpdate={updated => setStudents(prev => prev.map(x => x.id === updated.id ? updated : x))}
+              onStudentUpdate={updated => saveStudents(students.map(x => x.id === updated.id ? updated : x))}
             />
           ) : null;
         })()}
         {page === 'camps' && (
           <CampBoardPage
-            camps={camps}
-            onCampSelect={campId => navigate('campDetail', { campId, tab: '학생명단' })}
-            onCampCreate={() => navigate('campCreate', { tab: '학생명단' })}
+            camps={enrichedCamps}
+            onCampSelect={campId => navigate('campDetail', { campId, tab: 'Students' })}
+            onCampCreate={() => navigate('campCreate', { tab: 'Students' })}
+            onTimetableEdit={campId => navigate('campCreate', { campId, tab: 'Timetable' })}
+            onCampImport={imported => {
+              const next = (() => {
+                const map = new Map(camps.map(c => [c.id, c]));
+                imported.forEach(c => map.set(c.id, c));
+                return Array.from(map.values());
+              })();
+              setCamps(next);
+              try { localStorage.setItem('ew-camps', JSON.stringify(next)); } catch {}
+            }}
           />
         )}
         {page === 'campDetail' && (
@@ -172,7 +223,8 @@ export default function App() {
             onBack={() => navigate('camps')}
             onEdit={() => navigate('campCreate', { tab: activeCampTab })}
             students={students as any}
-            onStudentUpdate={(updated: any) => setStudents(prev => prev.map(s => s.id === updated.id ? { ...s, ...updated } : s))}
+            agents={agents}
+            onStudentUpdate={(updated: any) => saveStudents(students.map(s => s.id === updated.id ? { ...s, ...updated } : s))}
             onCampUpdate={(updated: Camp) => {
               const next = camps.map(c => c.id === updated.id ? updated : c);
               setCamps(next);
@@ -185,18 +237,37 @@ export default function App() {
             camps={camps}
             editCampId={activeCampId || undefined}
             allStudents={students as any}
-            onStudentUpdate={(updated: any) => setStudents(prev => prev.map(s => s.id === updated.id ? { ...s, ...updated } : s))}
+            agents={agents}
+            onStudentUpdate={(updated: any) => saveStudents(students.map(s => s.id === updated.id ? { ...s, ...updated } : s))}
             activeTab={activeCampTab}
             onTabChange={tab => navigate('campCreate', { tab })}
             onBack={() => navigate('camps')}
             onSave={handleCampSave}
           />
         )}
-        {page === 'gallery' && <CellGalleryPage />}
-        {page !== 'students' && page !== 'addStudent' && page !== 'studentDetail' && page !== 'camps' && page !== 'campDetail' && page !== 'campCreate' && page !== 'gallery' && (
+        {page === 'agent' && (
+          <AgentBoardPage
+            agents={agents}
+            onAgentAdd={agent => {
+              const next = [...agents, agent];
+              setAgents(next);
+              try { localStorage.setItem('ew-agents', JSON.stringify(next)); } catch {}
+            }}
+            onAgentUpdate={updated => {
+              const next = agents.map(a => a.id === updated.id ? updated : a);
+              setAgents(next);
+              try { localStorage.setItem('ew-agents', JSON.stringify(next)); } catch {}
+            }}
+            onAgentDelete={ids => {
+              const next = agents.filter(a => !ids.includes(a.id));
+              setAgents(next);
+              try { localStorage.setItem('ew-agents', JSON.stringify(next)); } catch {}
+            }}
+          />
+        )}
+        {page !== 'students' && page !== 'addStudent' && page !== 'studentDetail' && page !== 'camps' && page !== 'campDetail' && page !== 'campCreate' && page !== 'agent' && (
           <ComingSoon label={
             page === 'dashboard' ? 'Dashboard' :
-            page === 'agent'     ? 'Agent' :
             page === 'board'     ? '게시판' : '계정관리'
           } />
         )}

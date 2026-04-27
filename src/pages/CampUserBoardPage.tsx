@@ -84,7 +84,8 @@ function PickupRow({ label, status }: { label: string; status: string }) {
 }
 
 // ── Completed read-only board ─────────────────────────────────────────────────
-export function CampUserBoardCompleted({ campId, students }: { campId: string; students: Student[] }) {
+export function CampUserBoardCompleted({ campId, students, agents = [] }: { campId: string; students: Student[]; agents?: { id: string; name: string }[] }) {
+  const agentIdToName = Object.fromEntries(agents.map(a => [a.id, a.name]));
   const [query, setQuery] = useState('');
   const allCampStudents = students.filter(s => s.history.current_camp_id === campId);
   const campStudents = query
@@ -173,7 +174,7 @@ export function CampUserBoardCompleted({ campId, students }: { campId: string; s
                         <span style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>{s.guardian.email}</span>
                       </div>
                     </td>
-                    <td style={TD}><span style={{ fontSize: 13, fontFamily: 'var(--font-en)' }}>{s.history.agent_id}</span></td>
+                    <td style={TD}><span style={{ fontSize: 13, fontFamily: 'var(--font-en)' }}>{agentIdToName[s.history.agent_id] ?? s.history.agent_id}</span></td>
                     <td style={TD}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                         {familyMembers.length > 0
@@ -290,9 +291,11 @@ function StudentPickerModal({ campId, allStudents, onAdd, onClose }: {
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
-export default function CampUserBoardPage({ campId: propCampId, students: propStudents, onStudentUpdate }: {
+export default function CampUserBoardPage({ campId: propCampId, students: propStudents, onStudentUpdate, agents = [] }: {
   campId?: string; students?: Student[]; onStudentUpdate?: (s: Student) => void;
+  agents?: { id: string; name: string }[];
 }) {
+  const agentIdToName = useMemo(() => Object.fromEntries(agents.map(a => [a.id, a.name])), [agents]);
   const [campId,     setCampId]    = useState(propCampId ?? allCamps[0]?.id ?? '');
   const [query,      setQuery]     = useState('');
   const [selected,   setSelected]  = useState<Set<string>>(new Set());
@@ -322,7 +325,6 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
 
   const pageData   = campStudents.slice((page - 1) * perPage, page * perPage);
   const allChecked = pageData.length > 0 && pageData.every(s => selected.has(s.id));
-  const agentOpts  = useMemo(() => [...new Set(allStudentsSource.map(s => s.history.agent_id))], [allStudentsSource]);
 
   function handlePickerAdd(picked: Student[]) {
     if (!onStudentUpdate) return;
@@ -397,7 +399,7 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
                 </td></tr>
               ) : pageData.map(s => {
                 const isRowSel = selected.has(s.id);
-                const agentVal = getEdit(s.id, 'agent', s.history.agent_id);
+                const agentVal = agentIdToName[getEdit(s.id, 'agent', s.history.agent_id)] ?? getEdit(s.id, 'agent', s.history.agent_id);
                 const classVal = getEdit(s.id, 'class', '');
                 const payVal   = getEdit(s.id, 'pay',   '');
 
@@ -435,11 +437,8 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
                         <span style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>{s.guardian.email}</span>
                       </div>
                     </td>
-                    <td className={tdCls(s.id, 'agent', 'ew-cell--interactive')} style={{ ...TD_STYLE, padding: '0 12px' }}>
-                      <DropdownCell value={agentVal} options={agentOpts} cellId={`${s.id}:agent`}
-                        openCell={openCell} setOpenCell={setOpenCell}
-                        onChange={v => setEdit(s.id, 'agent', v)}
-                        onCellClick={() => setActiveCell(`${s.id}:agent`)} onEditDone={() => setActiveCell(null)} />
+                    <td style={TD_STYLE}>
+                      <span style={{ fontSize: 13, fontFamily: 'var(--font-en)' }}>{agentVal}</span>
                     </td>
                     <td style={TD_STYLE}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>

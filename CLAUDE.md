@@ -47,7 +47,7 @@ App.tsx (page 상태로 라우팅)
 | studentDetail | 수정 버튼   | addStudent                | editStudentId         |
 | studentDetail | 뒤로      | students                  | -                     |
 | camps         | 행 클릭    | campDetail                | campId                |
-| camps         | + 버튼    | campCreate                | tab: '학생명단'           |
+| camps         | + 버튼    | campCreate                | tab: 'Students'          |
 | campDetail    | 뒤로      | camps                     | -                     |
 | campDetail    | 정보수정    | campCreate                | tab: 현재 activeCampTab |
 | campCreate    | 저장      | camps                     | -                     |
@@ -70,12 +70,12 @@ navigate(page, { campId?, studentId?, editId?, tab? })
 
 **`CampTab` 타입** (`src/App.tsx`에서 export):
 ```ts
-export type CampTab = '학생명단' | '시간표' | '숙박정보' | '스탭&강사';
+export type CampTab = 'Students' | 'Accommodation' | 'Staff' | 'Class' | 'Timetable';
 ```
 
 | 탭 | Figma 노드 | 구현 상태 | 컴포넌트 |
 |---|---|---|---|
-| 학생명단 | `534:5316` | ✅ 구현 | `CampUserBoardPage` |
+| Students | `534:5316` | ✅ 구현 | `CampUserBoardPage` |
 | 시간표 | `511:3204` (상세) / `529:5820` (생성) | ✅ 구현 | `CampTimetableView` / `CampTimetableEdit` |
 | 숙박정보 | - | ✅ 구현 | `CampAccommodationTab` |
 | 스탭&강사 | - | ✅ 구현 | `CampStaffTab` |
@@ -112,13 +112,58 @@ students ───────────────────────�
        status  (enrolled | cancelled | waitlist)
 ```
 
+### 데이터 소유 원칙
+
+각 데이터는 **소유 페이지에서만 생성·수정·삭제** 가능. 다른 페이지에서는 **선택(참조)만** 가능.
+
+| 데이터 | 소유 (생성·수정·삭제) | 참조 (선택만) |
+|---|---|---|
+| 에이전트 마스터 (이름·연락처 등) | AgentBoardPage (인라인 편집) | AddStudentPage, StudentBoardPage (드롭다운 선택만) |
+| 학생-에이전트 연결 (agent_id) | AddStudentPage, StudentBoardPage Agent 컬럼 | CampUserBoardPage (readonly) |
+| 학생 기본 정보 | AddStudentPage | - |
+| 캠프 기본 정보 | CampCreatePage | - |
+| 호텔 옵션 목록 | CampAccommodationTab | StudentDetailPage (룸타입 선택) |
+| 시간표 | CampTimetableEdit | CampTimetableView (읽기 전용) |
+| 스탭·강사 | CampStaffTab | 캠프 기본 정보 (DisabledInput) |
+| 캠프 상태 (status) | CampBoardPage 인라인 편집, CampCreatePage | - |
+| 캠프 숙소명 (accommodation) | CampCreatePage 기본 정보, CampAccommodationTab | 나머지 모두 readonly |
+| 캠프 배정 | CampDetailPage 학생명단 탭 | StudentBoardPage "참여중인 캠프" (readonly) |
+| 학생 기본 정보 (보호자·연락처·이메일) | AddStudentPage | StudentBoardPage (readonly) |
+| 학생 참여 정보 (룸타입·항공·여권) | StudentDetailPage 캠프탭 | CampUserBoardPage (readonly) |
+
+> StudentBoardPage "참여중인 캠프" 컬럼과 AddStudentPage 캠프 선택은 **readonly 또는 제거** — 배정은 CampDetailPage에서만.
+
 ### 3계층 데이터 분류
 
 | 계층 | 소유 엔티티 | 데이터 내용 | 변경 주체 |
 |---|---|---|---|
-| **학생 프로필** | `students` | 이름·나이·보호자·에이전트 | AddStudentPage |
+| **에이전트 마스터** | `agents` | 에이전트명·담당자·연락처·이메일 | AgentBoardPage (인라인 편집) |
+| **학생 프로필** | `students` | 이름·나이·보호자·에이전트 선택 | AddStudentPage |
 | **캠프 마스터** | `camps` | 기간·지역·숙소 옵션 목록·스탭·강사·시간표 | CampCreatePage |
 | **참여 기록** | `student_camps` | 등록 상태·선택 룸타입·항공편·여권 | StudentDetailPage (캠프탭) |
+
+---
+
+### 데이터 생성 의존성 순서
+
+새 캠프를 운영할 때 데이터를 만들어야 하는 순서. 앞 단계가 없으면 뒷 단계를 진행할 수 없다.
+
+```
+[독립 생성 — 서로 순서 무관]
+
+에이전트 등록 (AgentBoardPage)     캠프 생성 (CampCreatePage)         학생 등록 (AddStudentPage)
+                                     └─ 호텔 옵션 등록 (숙박정보 탭)     └─ 에이전트 선택 (AgentBoardPage 목록에서)
+                                     └─ 시간표 등록 (시간표 탭)           ※ 캠프 선택 없음 — 배정은 아래에서만
+                                     └─ 스탭·강사 배정 (스탭&강사 탭)
+
+                    ↓ 캠프 + 학생 둘 다 있어야 가능
+             캠프에 학생 배정 (CampDetailPage 학생명단 탭) ← 유일한 배정 경로
+                └─ 학생에 귀속된 캠프 참여 정보 입력 (StudentDetailPage 캠프탭)
+                     ※ student.camp_records[]에 저장 — 학생 소유 데이터
+                     ※ 룸타입 선택은 캠프 호텔 옵션이 먼저 등록돼 있어야 함
+                   · 룸타입 / 체크인·체크아웃
+                   · 출발편 / 귀국편 / 여권번호
+```
 
 ---
 
@@ -126,44 +171,81 @@ students ───────────────────────�
 
 각 필드가 **어느 페이지의 어느 탭**에서 최초 생성/편집되는지 명시한다.
 
+#### agents 테이블 — AgentBoardPage에서 작성
+
+BoardTable 인라인 편집 방식. 별도 상세/추가 페이지 없음.
+
+| 필드 | 설명 |
+|---|---|
+| `id` `name` | 에이전트(업체)명 |
+| `contact_name` | 담당자 이름 |
+| `contact_phone` | 연락처 |
+| `contact_email` | 이메일 |
+
+> `agents[]`는 App.tsx `useState` + localStorage(`ew-agents`)에 저장. `ew-agents` 없으면 `src/data/agents.json` 초기값 사용.
+
+#### students 테이블 — AddStudentPage에서 작성
+
+| 필드 | 설명 |
+|---|---|
+| `id` `name_ko` `name_en` `gender` `birth_date` `age` | AddStudentPage 기본 정보 폼 |
+| `guardian { name, relation, contact, email }` | AddStudentPage 보호자 정보 섹션 |
+| `history.joined_date` | AddStudentPage 등록 정보 섹션 |
+| `history.agent_id` | AddStudentPage에서 에이전트 선택 — 학생에 귀속된 정보, 캠프와 무관 |
+| `history.current_camp_id` | AddStudentPage 저장 시 또는 StudentBoardPage 인라인 편집 |
+| `camp_records[]` | StudentDetailPage 캠프탭에서 호텔·항공·여권 입력 시 자동 생성 |
+
+> `students[]`는 App.tsx `useState` + localStorage(`ew-students`)에 저장된다. camps와 동일한 방식으로 유지.
+
 #### camps 테이블 — CampCreatePage에서 작성
 
 | 필드 | 탭 | 설명 |
 |---|---|---|
-| `name` `id` `location` `country` `accommodation` `capacity` `status` `start_date` `end_date` | 기본 정보 (탭 외부) | 캠프 헤더 폼에서 직접 입력 |
-| `timetable` | 시간표 탭 | 주차별 일정 격자 입력 → localStorage `ew-timetable-{cid}` |
-| `accommodation_options[]` | 숙박정보 탭 | 호텔명·룸타입·가격 옵션 목록 정의 → localStorage `ew-hotels-{cid}` |
-| `staff[]` `teachers[]` | 스탭&강사 탭 | 캠프 담당 스탭·강사 목록 → localStorage `ew-campstaff-{cid}` |
+| `name` `id` `location` `country` `accommodation` `capacity` `status` | 기본 정보 (탭 외부) | 캠프 헤더 폼에서 직접 입력 |
+| `start_date` `end_date` | 시간표 탭 → 기본 정보 자동 반영 | 시간표 탭 기간 선택 시 `onDateRangeChange` 콜백으로 동기화 |
+| `timetable` | 시간표 탭 | 주차별 일정 격자 입력 → `ew-timetable-{cid}` |
+| `accommodation_options[]` | 숙박정보 탭 | 호텔명·룸타입·가격 옵션 목록 정의 → `ew-hotels-{cid}` |
+| `accommodation` (기본 숙소명) | 숙박정보 탭 → 기본 정보 자동 반영 | 호텔명 수정 시 `onHotelsChange` 콜백으로 동기화 |
+| `staff[]` `teachers[]` | 스탭&강사 탭 → 기본 정보 자동 반영 | 배정 변경 시 `onStaffChange` 콜백으로 동기화 → `ew-campstaff-{cid}` |
 
 > `accommodation_options`는 캠프가 **제공 가능한 룸타입 목록**을 정의하는 것이지,
-> 학생별 선택값이 아니다. 학생 선택은 아래 `student_camps`에 저장된다.
+> 학생별 선택값이 아니다. 학생 선택은 아래 `camp_records[]`에 저장된다.
 
-#### student_camps 테이블 — StudentDetailPage에서 작성
+> `start_date` / `end_date` / `accommodation` / `staff[]` / `teachers[]` 는
+> 기본 정보 폼에서 **직접 입력 불가 (DisabledInput)** — 각 탭에서만 수정 가능.
 
-학생이 특정 캠프 탭을 열었을 때 입력하는 데이터. 캠프마다 별도로 존재한다.
+#### camp_records[] — StudentDetailPage 캠프탭에서 작성
+
+`Student.camp_records[]`에 embedded 저장. localStorage 키 없음.
+학생이 특정 캠프 탭을 열었을 때 입력하는 데이터. 캠프마다 별도 레코드.
 
 | 필드 | 입력 위치 | 설명 |
 |---|---|---|
-| `student_id` `camp_id` `status` | CampDetailPage 학생명단 탭 | 학생을 캠프에 등록할 때 레코드 생성 |
-| `selected_room_type` | StudentDetailPage > 캠프탭 > 호텔 정보 | `camp.accommodation_options` 중 하나 선택 |
-| `hotel_check_in` `hotel_check_out` | StudentDetailPage > 캠프탭 > 호텔 정보 | 학생 개인 체크인/아웃 날짜 |
-| `flight_outbound` | StudentDetailPage > 캠프탭 > 항공 정보 | 출발편 (편명·출발지·도착지·일시) |
-| `flight_return` | StudentDetailPage > 캠프탭 > 항공 정보 | 귀국편 (편명·출발지·도착지·일시) |
-| `passport_no` `passport_name` | StudentDetailPage > 캠프탭 > 항공 정보 | 여권번호·여권상 이름 |
+| `camp_id` `status` | CampDetailPage 학생명단 탭 | 학생을 캠프에 배정할 때 레코드 생성 |
+| `stay.selected_room_type` | StudentDetailPage > 캠프탭 > 호텔 정보 | `camp.accommodation_options` 중 하나 선택 |
+| `stay.hotel_check_in` `stay.hotel_check_out` | StudentDetailPage > 캠프탭 > 호텔 정보 | 학생 개인 체크인/아웃 날짜 |
+| `flight.departure` | StudentDetailPage > 캠프탭 > 항공 정보 | 출발편 (편명·출발지·도착지·일시) |
+| `flight.return` | StudentDetailPage > 캠프탭 > 항공 정보 | 귀국편 (편명·출발지·도착지·일시) |
+| `flight.passport_no` `flight.passport_name` | StudentDetailPage > 캠프탭 > 항공 정보 | 여권번호·여권상 이름 |
 
 > **핵심 원칙**: 같은 학생이라도 캠프마다 룸타입·항공편이 다를 수 있다.
-> `student_camps`는 `(student_id, camp_id)` 복합키로 구분된 독립 레코드다.
+> `camp_records[]`는 `camp_id`로 구분되는 독립 레코드다.
 
-#### 현재 localStorage 키 매핑
+#### 현재 localStorage 키 매핑 (실제 코드 기준)
 
 ```
-ew-timetable-{cid}          → camps.timetable
-ew-timetable-range-{cid}    → camps.start_date / end_date (시간표용 기간)
-ew-hotels-{cid}             → camps.accommodation_options[]
-ew-campstaff-{cid}          → camps.staff[] / teachers[]
-ew-hotel-{sid}-{cid}        → student_camps.selected_room_type + check_in/out
-ew-flight-{sid}-{cid}       → student_camps.flight_outbound + flight_return + passport
-ew-family-{sid}             → (별도 테이블 예정, camps와 무관한 학생 가족 정보)
+ew-camps                    → camps[] 전체 목록 (App.tsx)
+ew-students                 → students[] 전체 목록 (App.tsx)
+ew-agents                   → agents[] 전체 목록 (App.tsx)
+ew-tab-status-{cid}         → 탭별 편집 저장/취소 상태 (TabCard.tsx)
+ew-timetable-{cid}          → camps.timetable (CampTimetableEdit)
+ew-timetable-range-{cid}    → camps.start_date / end_date (CampTimetableEdit)
+ew-hotels-{cid}             → camps.accommodation_options[] (CampAccommodationTab)
+ew-campstaff-{cid}          → camps.staff[] / teachers[] (CampStaffTab)
+ew-family-{sid}             → 가족 구성원 목록 (StudentDetailPage — 별도 테이블 예정)
+
+※ ew-hotel-{sid}-{cid}, ew-flight-{sid}-{cid} 는 B안 리팩토링 때 삭제됨
+   → Student.camp_records[].stay / .flight 로 대체 (localStorage 아님)
 ```
 
 ---
@@ -213,7 +295,7 @@ WHERE student_id = :studentId AND camp_id = :campId;
 
 | Entity | 현재 저장 위치 | 생성 페이지 | Supabase 테이블 |
 |---|---|---|---|
-| Student | `students.json` + App.tsx useState | AddStudentPage | `students` |
+| Student | `students.json` + App.tsx useState + localStorage(`ew-students`) | AddStudentPage | `students` |
 | Camp | `camps.json` (목업) + App.tsx useState + localStorage(`ew-camps`) | CampCreatePage | `camps` |
 | StudentCamp | localStorage `ew-hotel-{sid}-{cid}`, `ew-flight-{sid}-{cid}` | StudentDetailPage | `student_camps` |
 
@@ -261,7 +343,7 @@ const campIds = [...student.history.previous_camps, student.history.current_camp
 
 | 데이터 | 저장 위치 | Supabase 대응 테이블 | 범위 |
 |---|---|---|---|
-| students[] | App.tsx useState (defaultStudents) | `students` | 새로고침 시 리셋 |
+| students[] | App.tsx useState + localStorage(`ew-students`) | `students` | 브라우저 유지 |
 | camps[] | camps.json 목업 + App.tsx useState + localStorage(`ew-camps`) | `camps` | 브라우저 유지 |
 | Hotel Info (선택 룸타입) | localStorage `ew-hotel-{sid}-{cid}` | `student_camps` | 브라우저 유지 |
 | Flight Info | localStorage `ew-flight-{sid}-{cid}` | `student_camps` | 브라우저 유지 |
@@ -320,8 +402,29 @@ const campIds = [...student.history.previous_camps, student.history.current_camp
 
 ---
 
+## 작업 원칙
+
+- 구현 전 반드시 계획을 먼저 제시하고 승인을 받는다.
+
+---
+
 ## 현재 미구현 (예정)
 
-- 캠프 데이터 App.tsx 상태로 통합 (현재 정적 JSON, CampCreatePage 저장 미연결)
-- Supabase 연동 (UI 완성 후)
+### 데이터 입력 불가 항목 (UI 없음)
+
+| 데이터 | 이유 | 향후 위치 |
+|---|---|---|
+| Family Info 입력 UI | `ew-family-{sid}` 키는 있으나 입력 폼 미구현 | StudentDetailPage Family Info 섹션 |
+
+### 미구현 페이지
+
+| 페이지 | Figma | 설명 |
+|---|---|---|
+| `camptimetableDetail` | `511:3144` | 시간표 상세 보기 (읽기 전용) |
+| `camptimetableCreate` | `529:5774` | 시간표 신규/수정 편집 페이지 |
+| `dashboard` / `agent` / `board` / `account` | - | ComingSoon 상태 |
+
+### 기타 예정
+
+- Supabase 연동 (UI 완성 후) — `api/` 레이어 교체 방식
 - 다국어(i18n) 처리

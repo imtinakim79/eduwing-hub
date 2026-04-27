@@ -1,20 +1,13 @@
 // 학생 추가/수정 페이지 — Figma node 329:1983
 import { useState, useRef } from 'react';
-import rawCamps from '../data/camps.json';
 import {
   CalendarCell, DropdownCell, isoToDisplay,
 } from '../components/board/cells';
 import type { Student } from './StudentBoardPage';
-
-interface Camp { id: string; name: string; start_date?: string; end_date?: string; }
-const allCamps    = rawCamps as Camp[];
-const campNameToId = Object.fromEntries(allCamps.map(c => [c.name, c.id]));
-const campById    = Object.fromEntries(allCamps.map(c => [c.id, c]));
+import type { Agent } from './AgentBoardPage';
 
 const GENDER_OPTIONS   = ['Male', 'Female', 'Other', 'Prefer not to say'];
 const RELATION_OPTIONS = ['아빠', '엄마', '기타'];
-const AGENT_OPTIONS    = ['AGT-A', 'AGT-B', 'AGT-C'];
-const CAMP_NAMES       = allCamps.map(c => c.name);
 
 function todayISO() {
   const d = new Date();
@@ -103,20 +96,6 @@ function CellWrapper({ children, height = FIELD_H }: {
   );
 }
 
-function DisabledRangeCell({ value }: { value: string }) {
-  const [startISO, endISO] = value.split('||');
-  const display = startISO
-    ? `${isoToDisplay(startISO)} ~ ${endISO ? endISO.slice(5).replace(/-/g, '/') : '?'}`
-    : 'YY-MM-DD ~ MM-DD';
-  return (
-    <div style={{ flex: 1, height: FIELD_H, ...CELL_BORDER, background: '#F3F4F6', display: 'flex', alignItems: 'center', gap: 6, padding: '0 12px' }}>
-      <img src="/icon/Calendar.svg" alt="" style={{ width: 14, height: 14, flexShrink: 0, opacity: 0.5 }} />
-      <span style={{ fontSize: 13, color: startISO ? '#6B7280' : '#9CA3AF', fontFamily: 'var(--font-en)' }}>
-        {display}
-      </span>
-    </div>
-  );
-}
 
 function DisabledDateCell({ iso }: { iso: string }) {
   return (
@@ -130,10 +109,11 @@ function DisabledDateCell({ iso }: { iso: string }) {
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
-export default function AddStudentPage({ onBack, onSave, editStudent }: {
+export default function AddStudentPage({ onBack, onSave, editStudent, agents = [] }: {
   onBack: () => void;
   onSave: (student: Student) => void;
   editStudent?: Student;
+  agents?: Agent[];
 }) {
   const isEdit = !!editStudent;
   const [openCell,    setOpenCell]   = useState<string | null>(null);
@@ -151,16 +131,6 @@ export default function AddStudentPage({ onBack, onSave, editStudent }: {
   const initRelationCustom = editStudent && !relLabelToKo(editStudent.guardian.relation)
     ? editStudent.guardian.relation
     : '';
-  const initCurrentCampName = editStudent?.history.current_camp_id
-    ? (campById[editStudent.history.current_camp_id]?.name ?? editStudent.history.current_camp_id)
-    : '';
-  const initCampPeriod = editStudent?.history.current_camp_id
-    ? (() => {
-        const c = campById[editStudent.history.current_camp_id];
-        return c?.start_date && c?.end_date ? `${c.start_date}||${c.end_date}` : '';
-      })()
-    : '';
-
   const [form, setForm] = useState({
     name_ko:  editStudent?.name_ko  ?? '',
     name_en:  editStudent?.name_en  ?? '',
@@ -173,8 +143,6 @@ export default function AddStudentPage({ onBack, onSave, editStudent }: {
     contact: editStudent?.guardian.contact ?? '',
     email:   editStudent?.guardian.email   ?? '',
     agent_id: editStudent?.history.agent_id ?? '',
-    current_camp_id: initCurrentCampName,
-    camp_period:     initCampPeriod,
   });
 
   function set(field: string, value: string) {
@@ -190,23 +158,12 @@ export default function AddStudentPage({ onBack, onSave, editStudent }: {
     reader.readAsDataURL(file);
   }
 
-  function handleCampChange(campName: string) {
-    set('current_camp_id', campName);
-    const camp = allCamps.find(c => c.name === campName);
-    if (camp?.start_date && camp?.end_date) {
-      set('camp_period', `${camp.start_date}||${camp.end_date}`);
-    } else {
-      set('camp_period', '');
-    }
-  }
-
   function handleSave() {
     const koOk = !!form.name_ko.trim();
     const enOk = !!form.name_en.trim();
     if (!koOk) setNameError(true);
     if (!enOk) setNameEnError(true);
     if (!koOk || !enOk) return;
-    const currentCampId = campNameToId[form.current_camp_id] ?? form.current_camp_id;
     const relationValue = form.guardian_relation === '기타' && form.guardian_relation_custom
       ? form.guardian_relation_custom
       : form.guardian_relation;
@@ -227,7 +184,7 @@ export default function AddStudentPage({ onBack, onSave, editStudent }: {
       history: {
         joined_date:     joinedDate,
         agent_id:        form.agent_id,
-        current_camp_id: currentCampId,
+        current_camp_id: editStudent?.history.current_camp_id ?? '',
       },
       camp_records: editStudent?.camp_records ?? [],
     };
@@ -452,29 +409,16 @@ export default function AddStudentPage({ onBack, onSave, editStudent }: {
           <FieldRow label="Agent">
             <CellWrapper>
               <DropdownCell
-                value={form.agent_id} options={AGENT_OPTIONS}
+                value={agents.find(a => a.id === form.agent_id)?.name ?? form.agent_id}
+                options={agents.map(a => a.name)}
                 cellId="agent_id" openCell={openCell} setOpenCell={setOpenCell}
-                onChange={v => set('agent_id', v)}
+                onChange={v => {
+                  const agent = agents.find(a => a.name === v);
+                  set('agent_id', agent?.id ?? v);
+                }}
                 onCellClick={() => {}} onEditDone={() => {}}
               />
             </CellWrapper>
-          </FieldRow>
-
-          <div style={{ height: 10 }} />
-          <FieldRow label="참여중인 캠프">
-            <CellWrapper>
-              <DropdownCell
-                value={form.current_camp_id} options={CAMP_NAMES}
-                cellId="current_camp_id" openCell={openCell} setOpenCell={setOpenCell}
-                onChange={handleCampChange}
-                onCellClick={() => {}} onEditDone={() => {}}
-              />
-            </CellWrapper>
-          </FieldRow>
-
-          <div style={{ height: 10 }} />
-          <FieldRow label="참여 캠프 기간">
-            <DisabledRangeCell value={form.camp_period} />
           </FieldRow>
 
         </div>

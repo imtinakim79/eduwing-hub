@@ -214,19 +214,22 @@ function EditableGrid({ days, weekIdx, data, merges, liveSelectedKeys, onMouseDo
 }
 
 // ── Main ─────────────────────────────────────────────────────────────────────
-export default function CampTimetableEdit({ campId, startDate: initStart, endDate: initEnd, onDateRangeChange }: {
+export default function CampTimetableEdit({ campId, classId, startDate: initStart, endDate: initEnd, onDateRangeChange }: {
   campId?: string;
+  classId?: string;
   startDate?: string;
   endDate?: string;
   onDateRangeChange?: (start: string, end: string) => void;
 }) {
+  const effectiveId = campId && classId ? `${campId}-${classId}` : campId;
+
   // Fix: localStorage takes priority over prop so saved range persists after edits
-  const [rangeStart, setRangeStart] = useState(() => loadRange(campId).start || initStart || '');
-  const [rangeEnd,   setRangeEnd]   = useState(() => loadRange(campId).end   || initEnd   || '');
+  const [rangeStart, setRangeStart] = useState(() => loadRange(effectiveId).start || initStart || '');
+  const [rangeEnd,   setRangeEnd]   = useState(() => loadRange(effectiveId).end   || initEnd   || '');
   const [openCell,   setOpenCell]   = useState<string | null>(null);
 
-  const [data,   setData]   = useState<TimetableData>(() => loadStored(campId).data);
-  const [merges, setMerges] = useState<MergeGroup[]>(() => loadStored(campId).merges);
+  const [data,   setData]   = useState<TimetableData>(() => loadStored(effectiveId).data);
+  const [merges, setMerges] = useState<MergeGroup[]>(() => loadStored(effectiveId).merges);
 
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
   const [title,        setTitle]        = useState('');
@@ -239,11 +242,11 @@ export default function CampTimetableEdit({ campId, startDate: initStart, endDat
   const [dragVer, setDragVer] = useState(0); // incremented on drag move to force rerender
 
   // Auto-save open cell on unmount
-  const editRef = useRef({ selectedKeys, title, content, bgColor, fontColor, data, merges, campId });
-  editRef.current = { selectedKeys, title, content, bgColor, fontColor, data, merges, campId };
+  const editRef = useRef({ selectedKeys, title, content, bgColor, fontColor, data, merges, effectiveId });
+  editRef.current = { selectedKeys, title, content, bgColor, fontColor, data, merges, effectiveId };
   useEffect(() => {
     return () => {
-      const { selectedKeys: keys, title: t, content: c, bgColor: bg, fontColor: fc, data: d, merges: m, campId: cid } = editRef.current;
+      const { selectedKeys: keys, title: t, content: c, bgColor: bg, fontColor: fc, data: d, merges: m, effectiveId: cid } = editRef.current;
       if (keys.size === 1 && cid) {
         const [key] = Array.from(keys);
         persistStored(cid, { data: { ...d, [key]: { title: t, content: c, bgColor: bg, fontColor: fc } }, merges: m });
@@ -290,7 +293,7 @@ export default function CampTimetableEdit({ campId, startDate: initStart, endDat
       const [key] = Array.from(selectedKeys);
       const newData = { ...data, [key]: { title, content, bgColor, fontColor } };
       setData(newData);
-      if (campId) persistStored(campId, { data: newData, merges });
+      if (effectiveId) persistStored(effectiveId, { data: newData, merges });
     }
     dragRef.current = { active: true, wIdx, startD: dIdx, startS: sIdx, curD: dIdx, curS: sIdx };
     setSelectedKeys(new Set());
@@ -309,7 +312,7 @@ export default function CampTimetableEdit({ campId, startDate: initStart, endDat
     const [key] = Array.from(selectedKeys);
     const newData = { ...data, [key]: { title, content, bgColor, fontColor } };
     setData(newData);
-    if (campId) persistStored(campId, { data: newData, merges });
+    if (effectiveId) persistStored(effectiveId, { data: newData, merges });
     setSelectedKeys(new Set());
   }
 
@@ -339,7 +342,7 @@ export default function CampTimetableEdit({ campId, startDate: initStart, endDat
     const newMerges = [...merges.filter(mg => !mg.keys.some(k => rectKeys.includes(k))), newMerge];
 
     setMerges(newMerges);
-    if (campId) persistStored(campId, { data, merges: newMerges });
+    if (effectiveId) persistStored(effectiveId, { data, merges: newMerges });
 
     setSelectedKeys(new Set([master]));
     const existing = data[master];
@@ -374,7 +377,7 @@ export default function CampTimetableEdit({ campId, startDate: initStart, endDat
                 onSave={v => {
                   const [s, e] = v.split('||');
                   setRangeStart(s ?? ''); setRangeEnd(e ?? '');
-                  if (campId) persistRange(campId, s ?? '', e ?? '');
+                  if (effectiveId) persistRange(effectiveId, s ?? '', e ?? '');
                   onDateRangeChange?.(s ?? '', e ?? '');
                 }}
                 onCellClick={() => {}}

@@ -379,12 +379,6 @@ export default function StudentDetailPage({
                   </div>
                 </div>
                 <div style={{ flex: 1, padding: '16px 16px 0 0', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <span style={{ fontSize: 12, color: '#73808F', fontFamily: 'var(--font-ko)' }}>강사</span>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-                    {camp.teachers?.map(t => <Pill key={t} label={t} />) ?? <span style={{ fontSize: 14, color: '#21262E' }}>-</span>}
-                  </div>
-                </div>
-                <div style={{ flex: 1, padding: '16px 16px 0 0', display: 'flex', flexDirection: 'column', gap: 6 }}>
                   <span style={{ fontSize: 12, color: '#73808F', fontFamily: 'var(--font-ko)' }}>정원</span>
                   <span style={{ fontSize: 14, fontWeight: 500, color: '#21262E', fontFamily: 'var(--font-ko)' }}>{camp.capacity ? `${camp.capacity}명` : '-'}</span>
                 </div>

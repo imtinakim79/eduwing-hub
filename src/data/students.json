@@ -15,12 +15,40 @@
     },
     "history": {
       "joined_date": "2024-01-10",
-      "agent_id": "AGT-A",
+      "agent_id": "AGT-001",
       "current_camp_id": "C26S"
     },
     "camp_records": [
-      { "camp_id": "D25W" },
-      { "camp_id": "C26S" }
+      {
+        "camp_id": "D25W",
+        "stay": {
+          "checkIn": "2025-12-27",
+          "checkOut": "2026-01-10",
+          "invoiceName": "김성호",
+          "rooms": [{ "id": "r1", "roomType": "Deluxe Room", "extraBed": "No" }]
+        },
+        "flight": {
+          "passportNo": "M12345678",
+          "passportName": "KIM MIN",
+          "departure": { "flightNo": "VJ958", "dateEntry": "2025-12-27", "timeEntry": "09:00", "dateReturn": "2025-12-27", "timeReturn": "13:30", "pickDrop": "Pick", "pickDropPlace": "다낭 국제공항" },
+          "return": { "flightNo": "VJ957", "dateEntry": "2026-01-10", "timeEntry": "14:00", "dateReturn": "2026-01-10", "timeReturn": "19:30", "pickDrop": "Drop", "pickDropPlace": "다낭 국제공항" }
+        }
+      },
+      {
+        "camp_id": "C26S",
+        "stay": {
+          "checkIn": "2026-03-28",
+          "checkOut": "2026-04-11",
+          "invoiceName": "김성호",
+          "rooms": [{ "id": "r1", "roomType": "Deluxe Room", "extraBed": "No" }]
+        },
+        "flight": {
+          "passportNo": "M12345678",
+          "passportName": "KIM MIN",
+          "departure": { "flightNo": "KE621", "dateEntry": "2026-03-28", "timeEntry": "08:30", "dateReturn": "2026-03-28", "timeReturn": "11:50", "pickDrop": "Pick", "pickDropPlace": "막탄 세부 국제공항" },
+          "return": { "flightNo": "KE622", "dateEntry": "2026-04-11", "timeEntry": "13:00", "dateReturn": "2026-04-11", "timeReturn": "18:20", "pickDrop": "Drop", "pickDropPlace": "막탄 세부 국제공항" }
+        }
+      }
     ]
   },
   {
@@ -39,11 +67,25 @@
     },
     "history": {
       "joined_date": "2024-03-05",
-      "agent_id": "AGT-B",
+      "agent_id": "AGT-002",
       "current_camp_id": "C26S"
     },
     "camp_records": [
-      { "camp_id": "C26S" }
+      {
+        "camp_id": "C26S",
+        "stay": {
+          "checkIn": "2026-03-28",
+          "checkOut": "2026-04-11",
+          "invoiceName": "이지혜",
+          "rooms": [{ "id": "r1", "roomType": "Ocean View Suite", "extraBed": "No" }]
+        },
+        "flight": {
+          "passportNo": "M23456789",
+          "passportName": "LEE SEOYEON",
+          "departure": { "flightNo": "KE621", "dateEntry": "2026-03-28", "timeEntry": "08:30", "dateReturn": "2026-03-28", "timeReturn": "11:50", "pickDrop": "Pick", "pickDropPlace": "막탄 세부 국제공항" },
+          "return": { "flightNo": "KE622", "dateEntry": "2026-04-11", "timeEntry": "13:00", "dateReturn": "2026-04-11", "timeReturn": "18:20", "pickDrop": "Drop", "pickDropPlace": "막탄 세부 국제공항" }
+        }
+      }
     ]
   },
   {
@@ -62,12 +104,40 @@
     },
     "history": {
       "joined_date": "2024-05-20",
-      "agent_id": "AGT-A",
+      "agent_id": "AGT-001",
       "current_camp_id": "N26S"
     },
     "camp_records": [
-      { "camp_id": "D25W" },
-      { "camp_id": "N26S" }
+      {
+        "camp_id": "D25W",
+        "stay": {
+          "checkIn": "2025-12-27",
+          "checkOut": "2026-01-10",
+          "invoiceName": "박현우",
+          "rooms": [{ "id": "r1", "roomType": "Beachfront Villa", "extraBed": "Yes" }]
+        },
+        "flight": {
+          "passportNo": "M34567890",
+          "passportName": "PARK JIHO",
+          "departure": { "flightNo": "VJ958", "dateEntry": "2025-12-27", "timeEntry": "09:00", "dateReturn": "2025-12-27", "timeReturn": "13:30", "pickDrop": "Pick", "pickDropPlace": "다낭 국제공항" },
+          "return": { "flightNo": "VJ957", "dateEntry": "2026-01-10", "timeEntry": "14:00", "dateReturn": "2026-01-10", "timeReturn": "19:30", "pickDrop": "Drop", "pickDropPlace": "다낭 국제공항" }
+        }
+      },
+      {
+        "camp_id": "N26S",
+        "stay": {
+          "checkIn": "2026-06-20",
+          "checkOut": "2026-07-04",
+          "invoiceName": "박현우",
+          "rooms": [{ "id": "r1", "roomType": "Deluxe Room", "extraBed": "No" }]
+        },
+        "flight": {
+          "passportNo": "M34567890",
+          "passportName": "PARK JIHO",
+          "departure": { "flightNo": "VJ964", "dateEntry": "2026-06-20", "timeEntry": "10:00", "dateReturn": "2026-06-20", "timeReturn": "13:45", "pickDrop": "Pick", "pickDropPlace": "나트랑 깜라인 국제공항" },
+          "return": { "flightNo": "VJ963", "dateEntry": "2026-07-04", "timeEntry": "14:30", "dateReturn": "2026-07-04", "timeReturn": "19:50", "pickDrop": "Drop", "pickDropPlace": "나트랑 깜라인 국제공항" }
+        }
+      }
     ]
   },
   {
@@ -86,12 +156,40 @@
     },
     "history": {
       "joined_date": "2024-06-15",
-      "agent_id": "AGT-C",
+      "agent_id": "AGT-003",
       "current_camp_id": "C26S"
     },
     "camp_records": [
-      { "camp_id": "D25W" },
-      { "camp_id": "C26S" }
+      {
+        "camp_id": "D25W",
+        "stay": {
+          "checkIn": "2025-12-27",
+          "checkOut": "2026-01-10",
+          "invoiceName": "최성진",
+          "rooms": [{ "id": "r1", "roomType": "Deluxe Room", "extraBed": "No" }]
+        },
+        "flight": {
+          "passportNo": "M45678901",
+          "passportName": "CHOI ARIN",
+          "departure": { "flightNo": "VJ958", "dateEntry": "2025-12-27", "timeEntry": "09:00", "dateReturn": "2025-12-27", "timeReturn": "13:30", "pickDrop": "Pick", "pickDropPlace": "다낭 국제공항" },
+          "return": { "flightNo": "VJ957", "dateEntry": "2026-01-10", "timeEntry": "14:00", "dateReturn": "2026-01-10", "timeReturn": "19:30", "pickDrop": "Drop", "pickDropPlace": "다낭 국제공항" }
+        }
+      },
+      {
+        "camp_id": "C26S",
+        "stay": {
+          "checkIn": "2026-03-28",
+          "checkOut": "2026-04-11",
+          "invoiceName": "최성진",
+          "rooms": [{ "id": "r1", "roomType": "Deluxe Room", "extraBed": "Yes" }]
+        },
+        "flight": {
+          "passportNo": "M45678901",
+          "passportName": "CHOI ARIN",
+          "departure": { "flightNo": "KE621", "dateEntry": "2026-03-28", "timeEntry": "08:30", "dateReturn": "2026-03-28", "timeReturn": "11:50", "pickDrop": "Pick", "pickDropPlace": "막탄 세부 국제공항" },
+          "return": { "flightNo": "KE622", "dateEntry": "2026-04-11", "timeEntry": "13:00", "dateReturn": "2026-04-11", "timeReturn": "18:20", "pickDrop": "Drop", "pickDropPlace": "막탄 세부 국제공항" }
+        }
+      }
     ]
   },
   {
@@ -110,11 +208,25 @@
     },
     "history": {
       "joined_date": "2024-08-01",
-      "agent_id": "AGT-B",
+      "agent_id": "AGT-002",
       "current_camp_id": "N26S"
     },
     "camp_records": [
-      { "camp_id": "N26S" }
+      {
+        "camp_id": "N26S",
+        "stay": {
+          "checkIn": "2026-06-20",
+          "checkOut": "2026-07-04",
+          "invoiceName": "정은혜",
+          "rooms": [{ "id": "r1", "roomType": "Superior Twin", "extraBed": "No" }]
+        },
+        "flight": {
+          "passportNo": "M56789012",
+          "passportName": "JUNG MINSEO",
+          "departure": { "flightNo": "VJ964", "dateEntry": "2026-06-20", "timeEntry": "10:00", "dateReturn": "2026-06-20", "timeReturn": "13:45", "pickDrop": "Pick", "pickDropPlace": "나트랑 깜라인 국제공항" },
+          "return": { "flightNo": "VJ963", "dateEntry": "2026-07-04", "timeEntry": "14:30", "dateReturn": "2026-07-04", "timeReturn": "19:50", "pickDrop": "Drop", "pickDropPlace": "나트랑 깜라인 국제공항" }
+        }
+      }
     ]
   },
   {
@@ -133,11 +245,25 @@
     },
     "history": {
       "joined_date": "2025-01-10",
-      "agent_id": "AGT-A",
+      "agent_id": "AGT-001",
       "current_camp_id": "D25W"
     },
     "camp_records": [
-      { "camp_id": "D25W" }
+      {
+        "camp_id": "D25W",
+        "stay": {
+          "checkIn": "2025-12-27",
+          "checkOut": "2026-01-10",
+          "invoiceName": "한미라",
+          "rooms": [{ "id": "r1", "roomType": "Deluxe Room", "extraBed": "No" }]
+        },
+        "flight": {
+          "passportNo": "M67890123",
+          "passportName": "HAN YUJIN",
+          "departure": { "flightNo": "VJ958", "dateEntry": "2025-12-27", "timeEntry": "09:00", "dateReturn": "2025-12-27", "timeReturn": "13:30", "pickDrop": "Pick", "pickDropPlace": "다낭 국제공항" },
+          "return": { "flightNo": "VJ957", "dateEntry": "2026-01-10", "timeEntry": "14:00", "dateReturn": "2026-01-10", "timeReturn": "19:30", "pickDrop": "Drop", "pickDropPlace": "다낭 국제공항" }
+        }
+      }
     ]
   },
   {
@@ -156,11 +282,25 @@
     },
     "history": {
       "joined_date": "2025-02-14",
-      "agent_id": "AGT-C",
+      "agent_id": "AGT-003",
       "current_camp_id": "N26S"
     },
     "camp_records": [
-      { "camp_id": "N26S" }
+      {
+        "camp_id": "N26S",
+        "stay": {
+          "checkIn": "2026-06-20",
+          "checkOut": "2026-07-04",
+          "invoiceName": "오기현",
+          "rooms": [{ "id": "r1", "roomType": "Deluxe Room", "extraBed": "Yes" }]
+        },
+        "flight": {
+          "passportNo": "M78901234",
+          "passportName": "OH JUNHYEOK",
+          "departure": { "flightNo": "VJ964", "dateEntry": "2026-06-20", "timeEntry": "10:00", "dateReturn": "2026-06-20", "timeReturn": "13:45", "pickDrop": "Pick", "pickDropPlace": "나트랑 깜라인 국제공항" },
+          "return": { "flightNo": "VJ963", "dateEntry": "2026-07-04", "timeEntry": "14:30", "dateReturn": "2026-07-04", "timeReturn": "19:50", "pickDrop": "Drop", "pickDropPlace": "나트랑 깜라인 국제공항" }
+        }
+      }
     ]
   },
   {
@@ -179,11 +319,25 @@
     },
     "history": {
       "joined_date": "2025-03-20",
-      "agent_id": "AGT-B",
+      "agent_id": "AGT-002",
       "current_camp_id": "C26S"
     },
     "camp_records": [
-      { "camp_id": "C26S" }
+      {
+        "camp_id": "C26S",
+        "stay": {
+          "checkIn": "2026-03-28",
+          "checkOut": "2026-04-11",
+          "invoiceName": "신도훈",
+          "rooms": [{ "id": "r1", "roomType": "Deluxe Room", "extraBed": "No" }]
+        },
+        "flight": {
+          "passportNo": "M89012345",
+          "passportName": "SHIN CHAEWON",
+          "departure": { "flightNo": "KE621", "dateEntry": "2026-03-28", "timeEntry": "08:30", "dateReturn": "2026-03-28", "timeReturn": "11:50", "pickDrop": "Pick", "pickDropPlace": "막탄 세부 국제공항" },
+          "return": { "flightNo": "KE622", "dateEntry": "2026-04-11", "timeEntry": "13:00", "dateReturn": "2026-04-11", "timeReturn": "18:20", "pickDrop": "Drop", "pickDropPlace": "막탄 세부 국제공항" }
+        }
+      }
     ]
   }
 ]
