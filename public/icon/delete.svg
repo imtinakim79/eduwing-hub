@@ -1,0 +1,6 @@
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect x="4.25" y="2.25" width="6.5" height="0.5" stroke="#202023" stroke-opacity="0.8" stroke-width="0.5"/>
+<path d="M13 5H12V11C12 12.0357 11.2128 12.887 10.2041 12.9893L10 13H5L4.7959 12.9893C3.85435 12.8938 3.1062 12.1457 3.01074 11.2041L3 11V5H2V4H13V5ZM4 11C4 11.5523 4.44772 12 5 12H10C10.5523 12 11 11.5523 11 11V5H4V11Z" fill="#202023" fill-opacity="0.8"/>
+<path d="M6.53516 7V10.0166" stroke="#202023" stroke-opacity="0.8"/>
+<path d="M8.56055 7V10.0166" stroke="#202023" stroke-opacity="0.8"/>
+</svg>

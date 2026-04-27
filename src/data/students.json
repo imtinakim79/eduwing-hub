@@ -1,0 +1,189 @@
+[
+  {
+    "id": "STU-2024-001",
+    "profile_img_url": null,
+    "name_ko": "김민준",
+    "name_en": "MIN KIM",
+    "gender": "Male",
+    "birth_date": "2010-03-15",
+    "age": 16,
+    "guardian": {
+      "name": "김성호",
+      "relation": "Father",
+      "contact": "010-1234-5678",
+      "email": "minjun@email.com"
+    },
+    "history": {
+      "joined_date": "2024-01-10",
+      "agent_id": "AGT-A",
+      "current_camp_id": "C26S"
+    },
+    "camp_records": [
+      { "camp_id": "D25W" },
+      { "camp_id": "C26S" }
+    ]
+  },
+  {
+    "id": "STU-2024-002",
+    "profile_img_url": null,
+    "name_ko": "이서연",
+    "name_en": "SEOYEON LEE",
+    "gender": "Female",
+    "birth_date": "2012-07-22",
+    "age": 14,
+    "guardian": {
+      "name": "이지혜",
+      "relation": "Mother",
+      "contact": "010-2345-6789",
+      "email": "seoyeon@email.com"
+    },
+    "history": {
+      "joined_date": "2024-03-05",
+      "agent_id": "AGT-B",
+      "current_camp_id": "C26S"
+    },
+    "camp_records": [
+      { "camp_id": "C26S" }
+    ]
+  },
+  {
+    "id": "STU-2024-003",
+    "profile_img_url": null,
+    "name_ko": "박지호",
+    "name_en": "JIHO PARK",
+    "gender": "Male",
+    "birth_date": "2011-11-08",
+    "age": 15,
+    "guardian": {
+      "name": "박현우",
+      "relation": "Father",
+      "contact": "010-3456-7890",
+      "email": "jiho@email.com"
+    },
+    "history": {
+      "joined_date": "2024-05-20",
+      "agent_id": "AGT-A",
+      "current_camp_id": "N26S"
+    },
+    "camp_records": [
+      { "camp_id": "D25W" },
+      { "camp_id": "N26S" }
+    ]
+  },
+  {
+    "id": "STU-2024-004",
+    "profile_img_url": null,
+    "name_ko": "최아린",
+    "name_en": "ARIN CHOI",
+    "gender": "Female",
+    "birth_date": "2010-05-30",
+    "age": 16,
+    "guardian": {
+      "name": "최성진",
+      "relation": "Etc",
+      "contact": "010-4567-8901",
+      "email": "arin@email.com"
+    },
+    "history": {
+      "joined_date": "2024-06-15",
+      "agent_id": "AGT-C",
+      "current_camp_id": "C26S"
+    },
+    "camp_records": [
+      { "camp_id": "D25W" },
+      { "camp_id": "C26S" }
+    ]
+  },
+  {
+    "id": "STU-2024-005",
+    "profile_img_url": null,
+    "name_ko": "정민서",
+    "name_en": "MINSEO JUNG",
+    "gender": "Male",
+    "birth_date": "2010-09-14",
+    "age": 16,
+    "guardian": {
+      "name": "정은혜",
+      "relation": "Etc",
+      "contact": "010-5678-9012",
+      "email": "minseo@email.com"
+    },
+    "history": {
+      "joined_date": "2024-08-01",
+      "agent_id": "AGT-B",
+      "current_camp_id": "N26S"
+    },
+    "camp_records": [
+      { "camp_id": "N26S" }
+    ]
+  },
+  {
+    "id": "STU-2024-006",
+    "profile_img_url": null,
+    "name_ko": "한유진",
+    "name_en": "YUJIN HAN",
+    "gender": "Female",
+    "birth_date": "2013-02-19",
+    "age": 13,
+    "guardian": {
+      "name": "한미라",
+      "relation": "Mother",
+      "contact": "010-6789-0123",
+      "email": "yujin@email.com"
+    },
+    "history": {
+      "joined_date": "2025-01-10",
+      "agent_id": "AGT-A",
+      "current_camp_id": "D25W"
+    },
+    "camp_records": [
+      { "camp_id": "D25W" }
+    ]
+  },
+  {
+    "id": "STU-2025-007",
+    "profile_img_url": null,
+    "name_ko": "오준혁",
+    "name_en": "JUNHYEOK OH",
+    "gender": "Male",
+    "birth_date": "2009-12-03",
+    "age": 17,
+    "guardian": {
+      "name": "오기현",
+      "relation": "Father",
+      "contact": "010-7890-1234",
+      "email": "junho@email.com"
+    },
+    "history": {
+      "joined_date": "2025-02-14",
+      "agent_id": "AGT-C",
+      "current_camp_id": "N26S"
+    },
+    "camp_records": [
+      { "camp_id": "N26S" }
+    ]
+  },
+  {
+    "id": "STU-2025-008",
+    "profile_img_url": null,
+    "name_ko": "신채원",
+    "name_en": "CHAEWON SHIN",
+    "gender": "Female",
+    "birth_date": "2011-06-27",
+    "age": 15,
+    "guardian": {
+      "name": "신도훈",
+      "relation": "Father",
+      "contact": "010-8901-2345",
+      "email": "chaewon@email.com"
+    },
+    "history": {
+      "joined_date": "2025-03-20",
+      "agent_id": "AGT-B",
+      "current_camp_id": "C26S"
+    },
+    "camp_records": [
+      { "camp_id": "C26S" }
+    ]
+  }
+]
