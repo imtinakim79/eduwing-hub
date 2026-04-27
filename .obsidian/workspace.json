@@ -1,0 +1,198 @@
+{
+  "main": {
+    "id": "261599d95ac506e4",
+    "type": "split",
+    "children": [
+      {
+        "id": "50bc0ed7a9817193",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "c9d5dc476f0ecd68",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "eduwing-hub/CLAUDE.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "CLAUDE"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "6e11ba2399441031",
+    "type": "split",
+    "children": [
+      {
+        "id": "95754c289b374cf6",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "82ccde754ce835f5",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "파일 탐색기"
+            }
+          },
+          {
+            "id": "40db52f6cc5dd1c3",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "검색"
+            }
+          },
+          {
+            "id": "19ba568211747053",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "북마크"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "6d0832dd35e797f1",
+    "type": "split",
+    "children": [
+      {
+        "id": "dc9d559a73ddb9ac",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "572cc94cf1508be2",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "eduwing-hub/CLAUDE.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "CLAUDE 의 백링크"
+            }
+          },
+          {
+            "id": "78d48a0a7154a152",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "eduwing-hub/CLAUDE.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "CLAUDE 의 나가는 링크"
+            }
+          },
+          {
+            "id": "b68236220f8a7a19",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "태그"
+            }
+          },
+          {
+            "id": "bc9d6fd0a74ce059",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "모든 속성"
+            }
+          },
+          {
+            "id": "1af483717ccfd7ab",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "eduwing-hub/CLAUDE.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "CLAUDE 의 개요"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:빠른 전환기 열기": false,
+      "graph:그래프 뷰 열기": false,
+      "canvas:새 캔버스 만들기": false,
+      "daily-notes:오늘의 일일 노트 열기": false,
+      "templates:템플릿 삽입": false,
+      "command-palette:명령어 팔레트 열기": false,
+      "bases:새 베이스 생성하기": false
+    }
+  },
+  "active": "c9d5dc476f0ecd68",
+  "lastOpenFiles": [
+    "eduwing-hub/src/pages/CampCreatePage.tsx",
+    "eduwing-hub/src/pages/CampCreatePage.tsx.tmp.34724.1776584095039",
+    "eduwing-hub/CSS_NAMING.md",
+    "eduwing-hub/CLAUDE.md",
+    "eduwing-hub/src/App.tsx.tmp.34724.1776584026894",
+    "eduwing-hub/src/pages/CampBoardPage.tsx.tmp.34724.1776584021602",
+    "eduwing-hub/src/pages/CampBoardPage.tsx.tmp.34724.1776584017352",
+    "eduwing-hub/src/App.tsx.tmp.34724.1776584009854",
+    "eduwing-hub/src/App.tsx.tmp.34724.1776584000304"
+  ]
+}

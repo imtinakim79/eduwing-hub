@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__plugin_figma_figma__whoami",
+      "mcp__plugin_figma_figma__get_design_context",
+      "Bash(npm --version)",
+      "Bash(npm create:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Read(//c/Users/user/Documents/Obsidian Vault/**)",
+      "Read(//c/Users/user/.claude/projects/d--2026-Eduwing-Project/memory/**)",
+      "mcp__plugin_figma_figma__search_design_system",
+      "mcp__plugin_figma_figma__get_metadata",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173)",
+      "Bash(node -e \"const c=require\\('./eduwing-hub/src/data/camps.json'\\); console.log\\(JSON.stringify\\(c[0],null,2\\)\\); console.log\\('총',c.length,'개'\\)\")",
+      "Bash(node -e \"const s=require\\('./eduwing-hub/src/data/students.json'\\); const agents=[...new Set\\(s.map\\(x=>x.history.agent_id\\)\\)]; console.log\\('agents:', agents\\)\")",
+      "Bash(node -e \"const s=require\\('./eduwing-hub/src/data/students.json'\\); console.log\\(JSON.stringify\\(s[0],null,2\\)\\)\")",
+      "Bash(node -e \"const s = require\\('./src/data/students.json'\\); const counts = {}; s.forEach\\(x => { counts[x.history.current_camp_id] = \\(counts[x.history.current_camp_id]||0\\)+1; }\\); console.log\\(JSON.stringify\\(counts, null, 2\\)\\); console.log\\('total:', s.length\\);\")",
+      "Bash(node -e \"const c = require\\('./src/data/camps.json'\\); console.log\\(c.map\\(x => x.id + ' ' + x.name\\).join\\('\\\\n'\\)\\);\")",
+      "Bash(node -e ' *)",
+      "Read(//d/d/2026_Eduwing_Project/eduwing-hub/src/pages/**)",
+      "Read(//d/d/2026_Eduwing_Project/eduwing-hub/src/**)",
+      "Read(//d/d/2026_Eduwing_Project/eduwing-hub/**)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\user\\Documents\\Obsidian Vault",
+      "d:\\Obsidian Vault\\3-스터디\\콘텐츠 공유용"
+    ]
+  }
+}

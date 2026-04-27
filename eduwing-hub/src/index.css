@@ -1,0 +1,1273 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700;900&family=Roboto:wght@400;500&display=swap');
+@import "tailwindcss";
+
+/* ============================================================
+   EduWing Hub — Design System Tokens & Global Styles
+   Based on Figma: EduWing-Hub (node 35:964)
+   ============================================================ */
+
+:root {
+  /* Primary */
+  --color-primary:        #3B82F6;
+  --color-primary-hover:  #2563EB;
+  --color-primary-light:  #E0E9FE;
+  --color-primary-bg:     #F0F5FF;
+
+  /* Semantic */
+  --color-error:          #EF4444;
+  --color-error-light:    #FEF2F2;
+  --color-error-border:   #FF7070;
+  --color-success:        #22C55E;
+  --color-success-light:  #F0FDF4;
+  --color-warning:        #F59E0B;
+  --color-warning-light:  #FFF7ED;
+
+  /* Neutrals */
+  --color-bg-white:       #FFFFFF;
+  --color-bg-gray:        #F5F7FA;
+  --color-bg-table-head:  #F8F9FB;
+  --color-bg-disabled:    #F3F4F6;
+
+  /* Text */
+  --color-text-primary:   #1A1D23;
+  --color-text-dark:      #263238;
+  --color-text-medium:    #434446;
+  --color-text-sub:       #6B7280;
+  --color-text-muted:     #8C99AB;
+  --color-text-placeholder: #808080;
+  --color-text-nav:       #646E7D;
+
+  /* Border */
+  --color-border-default: #D1D5DB;
+  --color-border-hover:   #9CA3AF;
+  --color-border-focus:   #3B82F6;
+  --color-border-table:   #E2E5EA;
+  --color-border-light:   #E5EAF0;
+  --color-border-divider: #E6EFF5;
+
+  /* Shadow */
+  --shadow-filter: 0px 4px 8px 0px rgba(16,24,40,0.10), 0px 2px 4px 0px rgba(16,24,40,0.06);
+  --shadow-card:   0px 2px 8px 0px rgba(0,0,0,0.06);
+
+  /* Typography */
+  --font-sans:  'Inter', 'Noto Sans KR', 'Roboto', sans-serif;
+  --font-ko:    'Noto Sans KR', sans-serif;
+  --font-en:    'Inter', sans-serif;
+  --font-input: 'Roboto', sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: var(--font-sans);
+  background: var(--color-bg-white);
+  color: var(--color-text-primary);
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* ============================================================
+   INPUT STATES  (Spec §1.1)
+   ============================================================ */
+
+.ew-input {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border-default);
+  background: var(--color-bg-white);
+  font-family: var(--font-input);
+  font-size: 14px;
+  color: var(--color-text-primary);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.ew-input::placeholder { color: var(--color-text-placeholder); }
+.ew-input:hover:not(:focus):not(:disabled):not(.ew-input--error) {
+  border-color: var(--color-border-hover);
+}
+.ew-input:focus:not(.ew-input--error):not(:disabled) {
+  border-color: var(--color-border-focus);
+  box-shadow: 0 0 0 2px rgba(59,130,246,0.2);
+}
+.ew-input--error,
+.ew-input--error:hover,
+.ew-input--error:focus {
+  border-color: var(--color-error-border);
+  box-shadow: none;
+}
+.ew-input:disabled {
+  background: var(--color-bg-disabled);
+  cursor: not-allowed;
+  color: var(--color-text-sub);
+}
+.ew-input-error-msg {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--color-error);
+}
+
+/* ============================================================
+   BUTTON VARIANTS  (Spec §1.2)
+   ============================================================ */
+
+.ew-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: background 0.15s, opacity 0.15s;
+  white-space: nowrap;
+  gap: 6px;
+}
+.ew-btn--xsm { height: 26px; padding: 0 10px; font-size: 12px; }
+.ew-btn--sm  { height: 32px; padding: 0 14px; font-size: 12px; }
+.ew-btn--md  { height: 40px; padding: 0 16px; font-size: 13px; }
+.ew-btn--lg  { height: 48px; padding: 0 20px; font-size: 14px; font-weight: 600; }
+
+.ew-btn--primary   { background: var(--color-primary); color: #fff; }
+.ew-btn--primary:hover  { background: var(--color-primary-hover); }
+.ew-btn--primary:active { background: #1D4ED8; }
+
+.ew-btn--secondary { background: #fff; color: var(--color-primary); border: 1px solid var(--color-border-table); }
+.ew-btn--secondary:hover  { border-color: var(--color-border-hover); }
+.ew-btn--secondary:active { background: #F0F5FF; border-color: var(--color-primary); }
+
+.ew-btn--danger { background: var(--color-bg-gray); color: var(--color-error-border); border: 1px solid var(--color-error-border); }
+.ew-btn--danger:hover  { background: var(--color-error-light); }
+.ew-btn--danger:active { background: #FFE0E0; }
+
+.ew-btn--ghost { background: #F3F4F6; color: var(--color-primary); }
+.ew-btn--ghost:hover  { background: #E5E7EB; }
+.ew-btn--ghost:active { background: #D1D5DB; }
+
+.ew-btn:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+
+/* ============================================================
+   TAG / BADGE
+   ============================================================ */
+
+.ew-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: var(--font-en);
+  white-space: nowrap;
+  line-height: 1;
+}
+.ew-tag--blue   { background: var(--color-primary-light); color: var(--color-primary); }
+.ew-tag--green  { background: var(--color-success-light); color: var(--color-success); }
+.ew-tag--yellow { background: var(--color-warning-light); color: var(--color-warning); }
+.ew-tag--red    { background: var(--color-error-light);   color: var(--color-error); }
+.ew-tag--gray   { background: #F3F4F6; color: #6B7280; }
+
+/* ============================================================
+   CHECKBOX
+   ============================================================ */
+
+.ew-checkbox {
+  width: 16px;
+  height: 16px;
+  border: 1px solid #6F7582;
+  border-radius: 2px;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  background: #fff;
+  position: relative;
+  flex-shrink: 0;
+}
+.ew-checkbox:hover:not(:disabled) { border-color: var(--color-primary); }
+.ew-checkbox:checked { background: var(--color-primary); border-color: var(--color-primary); }
+.ew-checkbox:checked:hover:not(:disabled) { background: var(--color-primary-hover); border-color: var(--color-primary-hover); }
+.ew-checkbox:checked::after {
+  content: '';
+  position: absolute;
+  left: 3px; top: 1px;
+  width: 8px; height: 5px;
+  border-left: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+  transform: rotate(-45deg);
+}
+.ew-checkbox:disabled {
+  background: var(--color-bg-disabled);
+  border-color: var(--color-border-default);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* ============================================================
+   MOBILE MENU BUTTON  (Figma node 112:1175)
+   사용법: <button class="ew-mobile-menu-btn"><span></span><span></span><span></span></button>
+   열린 상태: ew-mobile-menu-btn.is-open → X 아이콘으로 전환
+   ============================================================ */
+
+.ew-mobile-menu-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  overflow: hidden;
+  flex-shrink: 0;
+  padding: 0;
+}
+.ew-mobile-menu-btn span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: var(--color-text-primary);
+  border-radius: 1px;
+  transition: transform 0.2s, opacity 0.2s;
+}
+/* close 상태 (is-open) → X */
+.ew-mobile-menu-btn.is-open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.ew-mobile-menu-btn.is-open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.ew-mobile-menu-btn.is-open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* ============================================================
+   LOGIN / LOGOUT  (Figma node 50:6311)
+   - Logout(비로그인): ew-login-btn — 파란 배경 로그인 버튼
+   - Login(로그인됨): ew-user-profile — 아바타 + 이름/역할
+   ============================================================ */
+
+/* 비로그인 상태: 로그인 버튼 */
+.ew-login-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 162px;
+  height: 66px;
+  background: #E7F0FF;
+  border-radius: 12px;
+  border: none;
+  font-size: 16px;
+  font-weight: 500;
+  font-family: var(--font-ko);
+  color: var(--color-text-nav);
+  letter-spacing: -0.04em;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.ew-login-btn:hover { background: var(--color-primary-light); }
+
+/* 로그인 상태: 아바타 + 이름/역할 */
+.ew-user-profile {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 66px;
+}
+.ew-user-profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+.ew-user-profile-name {
+  font-size: 15px;
+  font-weight: 400;
+  font-family: var(--font-ko);
+  color: var(--color-text-primary);
+  line-height: 1.07;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ew-user-profile-role {
+  font-size: 14px;
+  font-weight: 400;
+  font-family: var(--font-ko);
+  color: #717171;
+  line-height: 1.14;
+  white-space: nowrap;
+}
+
+/* ============================================================
+   TAB / TAB BAR  (Figma node 529:5690)
+   구조: <div class="ew-tab-bar"><button class="ew-tab active">탭1</button>...</div>
+   ============================================================ */
+
+.ew-tab-bar {
+  display: flex;
+  align-items: flex-end;
+  border-bottom: 1px solid var(--color-border-divider);
+  background: #fff;
+}
+
+.ew-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 16px 0;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: var(--font-ko);
+  color: var(--color-text-nav);
+  cursor: pointer;
+  white-space: nowrap;
+  border: none;
+  background: transparent;
+  transition: color 0.15s;
+}
+.ew-tab::after {
+  content: '';
+  height: 2px;
+  width: 100%;
+  border-radius: 1px;
+  background: transparent;
+  transition: background 0.15s;
+}
+.ew-tab:hover { color: var(--color-text-primary); }
+.ew-tab.active { color: var(--color-primary); }
+.ew-tab.active::after { background: var(--color-primary); }
+
+/* ============================================================
+   NAV MENU (TopNav 메뉴 아이템)
+   ============================================================ */
+
+.ew-nav-menu {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  height: 36px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-nav);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.ew-nav-menu:hover {
+  background: var(--color-bg-gray);
+  color: var(--color-text-primary);
+}
+.ew-nav-menu.active {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* ============================================================
+   TABLE / BOARD
+   ============================================================ */
+
+.ew-board {
+  width: 100%;
+  background: #fff;
+  border: 1px solid var(--color-border-table);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.ew-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.ew-table th {
+  background: var(--color-bg-table-head);
+  border-top: 1px solid var(--color-border-table);
+  border-right: 1px solid var(--color-border-table);
+  border-bottom: 1px solid var(--color-border-table);
+  padding: 0 10px;
+  height: 40px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-sub);
+  text-align: left;
+  white-space: nowrap;
+  user-select: none;
+}
+.ew-table th:first-child { border-left: 1px solid var(--color-border-table); }
+.ew-table td {
+  border-right: 1px solid var(--color-border-table);
+  border-bottom: 1px solid var(--color-border-table);
+  padding: 0 12px;
+  height: 48px;
+  font-size: 13px;
+  color: var(--color-text-dark);
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  position: relative; /* overlay(dropdown/calendar) 기준점 */
+  transition: background 0.1s;
+}
+.ew-table td:first-child { border-left: 1px solid var(--color-border-table); }
+/* Row 상태 */
+.ew-table tbody tr:hover td { background: #FAFBFC; }
+.ew-table tbody tr.row-selected td { background: var(--color-primary-bg); }
+.ew-table tbody tr.row-selected { border-left: 3px solid var(--color-primary); }
+/* Cell 선택(편집 포커스) — row-selected보다 우선 */
+.ew-table tbody td.ew-cell--selected {
+  background: #EEF3FD !important;
+  border-bottom: 3px solid #2F6FED !important;
+  overflow: visible; /* overlay 클리핑 방지 */
+}
+/* interactive 셀은 항상 overflow visible */
+.ew-table tbody td.ew-cell--interactive { overflow: visible; }
+
+/* ============================================================
+   PERSON THUMBNAIL
+   ============================================================ */
+
+.ew-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  flex-shrink: 0;
+  font-family: var(--font-en);
+}
+
+/* ============================================================
+   NAV TOPBAR
+   ============================================================ */
+
+.ew-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 20px;
+  height: 68px;
+  background: #fff;
+  border-bottom: 1px solid var(--color-border-divider);
+  min-width: 1440px;
+}
+
+/* ============================================================
+   FILTER BAR
+   ============================================================ */
+
+.ew-filter-bar {
+  background: #fff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 100px;
+  box-shadow: var(--shadow-filter);
+  min-width: 1440px;
+}
+
+.ew-filter-input-wrap {
+  position: relative;
+  height: 50px;
+  border-radius: 40px;
+  background: var(--color-bg-gray);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  border: 1px solid transparent;
+  box-sizing: border-box;
+  transition: background 0.1s, border-color 0.1s;
+}
+.ew-filter-input-wrap:hover { background: #E7E8EA; }
+.ew-filter-input-wrap:focus-within {
+  background: var(--color-bg-gray);
+  border-color: #18A0FB;
+}
+.ew-filter-input-wrap input {
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: var(--font-input);
+  font-size: 16px;
+  color: var(--color-text-primary);
+  height: 100%;
+  padding: 0 20px 0 44px;
+  width: 100%;
+  border-radius: 40px;
+}
+.ew-filter-input-wrap input::placeholder { color: var(--color-text-placeholder); }
+.ew-filter-input-wrap .search-icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #9CA3AF;
+}
+
+/* ── FilterPill (custom dropdown pill) ── */
+.ew-filter-pill {
+  height: 50px;
+  border-radius: 40px;
+  background: var(--color-bg-gray);
+  border: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px 0 20px;
+  cursor: pointer;
+  font-family: var(--font-input);
+  font-size: 16px;
+  color: #808080;
+  box-sizing: border-box;
+  transition: background 0.1s, border-color 0.1s;
+  white-space: nowrap;
+  gap: 8px;
+}
+.ew-filter-pill:hover:not(.open) { background: #E7E8EA; }
+.ew-filter-pill.open {
+  background: var(--color-bg-gray);
+  border-color: #18A0FB;
+}
+.ew-filter-pill-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 200;
+  background: #fff;
+  border: 1px solid #18A0FB;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.08);
+}
+.ew-filter-pill-item {
+  height: 38px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-right: 12px;
+  cursor: pointer;
+  font-family: var(--font-ko);
+  font-size: 14px;
+  color: #202023;
+  transition: background 0.1s;
+}
+.ew-filter-pill-item:hover { background: #F5F7FA; }
+.ew-filter-pill-item.selected { background: #F0F2F5; }
+
+.ew-filter-select-wrap {
+  position: relative;
+  height: 50px;
+  border-radius: 40px;
+  background: var(--color-bg-gray);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.ew-filter-select-wrap select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: var(--font-input);
+  font-size: 16px;
+  color: var(--color-text-placeholder);
+  height: 100%;
+  padding: 0 40px 0 20px;
+  width: 100%;
+  cursor: pointer;
+  border-radius: 40px;
+}
+.ew-filter-select-wrap select:not([value=""]) { color: var(--color-text-primary); }
+.ew-filter-select-wrap .arrow {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #9CA3AF;
+  font-size: 11px;
+}
+
+/* ============================================================
+   PAGINATION
+   ============================================================ */
+
+.ew-page-btn {
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 6px; font-size: 13px; cursor: pointer;
+  border: 1px solid var(--color-border-light);
+  background: #fff; color: var(--color-text-dark);
+  transition: background 0.1s;
+  font-family: var(--font-en);
+}
+.ew-page-btn.active { background: var(--color-primary); color: #fff; border-color: var(--color-primary); font-weight: 600; }
+.ew-page-btn:hover:not(.active) { background: var(--color-bg-gray); }
+.ew-page-btn.dots { border: none; color: var(--color-text-muted); cursor: default; }
+
+/* ============================================================
+   FIELD CELL — 테이블 셀 타입별 × 상태별
+   Figma node 167:1305 (FieldCell Library) 기반
+   ============================================================ */
+
+/* ── 공통 셀 기본 ── */
+.ew-cell {
+  border-right: 1px solid var(--color-border-table);
+  border-bottom: 1px solid var(--color-border-table);
+  padding: 0 12px;
+  height: 48px;
+  font-size: 13px;
+  color: var(--color-text-dark);
+  background: #fff;
+  vertical-align: middle;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Empty — placeholder 텍스트만 */
+.ew-cell--empty {
+  color: var(--color-text-placeholder);
+}
+
+/* Hover */
+.ew-cell--hover,
+.ew-cell:hover { background: #FAFBFC; }
+
+/* Selected / Focus — bg 연파랑 + 하단 3px 파란 테두리 */
+.ew-cell--selected {
+  background: #EEF3FD !important;
+  border-bottom: 3px solid #2F6FED !important;
+}
+
+/* Error — 빨간 테두리 + 하단 에러 문구 */
+.ew-cell--error {
+  border: 1px solid var(--color-error) !important;
+}
+.ew-cell-wrap--error {
+  display: flex;
+  flex-direction: column;
+}
+.ew-cell-wrap--error .ew-cell { border: 1px solid var(--color-error) !important; }
+.ew-cell-error-msg {
+  padding: 4px 16px 2px;
+  font-size: 11px;
+  color: var(--color-error);
+  font-family: var(--font-ko);
+  line-height: 1.3;
+}
+
+/* Disable — 회색 bg, cursor not-allowed */
+.ew-cell--disable {
+  background: var(--color-bg-disabled) !important;
+  color: var(--color-text-sub);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ── Text cell ── */
+.ew-cell--text input {
+  width: 100%; height: 100%; border: none; outline: none;
+  background: transparent; font-size: 13px; font-family: var(--font-en);
+  color: var(--color-text-primary);
+}
+
+/* ── Headline (정렬 가능 헤더) ── */
+/* 테이블 th 안에서 사용 시 border는 th가 이미 담당하므로 제거 */
+.ew-cell--headline {
+  background: var(--color-bg-table-head);
+  height: 100%;
+  min-height: 40px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-sub);
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 10px;
+  white-space: nowrap;
+}
+.ew-cell--headline:hover { background: #F0F2F5; }
+.ew-cell--headline.sorted { color: var(--color-primary); }
+.ew-cell--headline .sort-arrow { font-size: 10px; color: #9EA7B5; }
+
+/* ── Dropdown Overlay ── */
+.ew-dropdown-overlay {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 100;
+  min-width: 180px;
+  background: #fff;
+  border: 1px solid #E4E6EA;
+  border-radius: 8px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.10);
+  overflow: hidden;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.ew-dropdown-item {
+  height: 36px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--color-text-primary);
+  font-family: var(--font-en);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.ew-dropdown-item:not(:last-child) { border-bottom: 1px solid #E4E6EA; }
+.ew-dropdown-item:hover { background: #F5F7FA; }
+.ew-dropdown-item.selected {
+  color: var(--color-primary);
+  font-weight: 500;
+}
+.ew-dropdown-divider {
+  height: 1px;
+  background: #E4E6EA;
+  margin: 0 11px;
+}
+
+/* ── SmartOverlay portal: override position:absolute on all overlay children ── */
+.ew-smart-overlay-portal > .ew-dropdown-overlay,
+.ew-smart-overlay-portal > .ew-dropdown-multi-overlay,
+.ew-smart-overlay-portal > .ew-calendar-overlay,
+.ew-smart-overlay-portal > .ew-calendar-range-overlay {
+  position: static;
+  top: unset;
+  left: unset;
+}
+
+/* ── Dropdown Multi Overlay ── */
+.ew-dropdown-multi-overlay {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 100;
+  min-width: 180px;
+  background: #fff;
+  border: 1px solid #E4E6EA;
+  border-radius: 8px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.10);
+  overflow: hidden;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.ew-dropdown-multi-item {
+  height: 36px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--color-text-primary);
+  font-family: var(--font-en);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.ew-dropdown-multi-item:hover { background: #F5F7FA; }
+.ew-dropdown-multi-item.selected {
+  color: var(--color-primary);
+  font-weight: 500;
+}
+.ew-dropdown-multi-item .ew-checkbox { pointer-events: none; }
+
+/* ── Calendar Picker Overlay ── */
+.ew-calendar-overlay {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 100;
+  width: 284px;
+  background: #fff;
+  border: 1px solid #E4E6EA;
+  border-radius: 12px;
+  box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.10);
+  overflow: hidden;
+}
+.ew-calendar-header {
+  height: 48px;
+  border-bottom: 1px solid #E4E6EA;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 0 8px;
+}
+.ew-calendar-nav-btn {
+  position: absolute;
+  width: 28px; height: 28px;
+  background: #F5F7FA;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: #666E7D;
+  font-size: 16px;
+  border: none;
+  transition: background 0.1s;
+}
+.ew-calendar-nav-btn:hover { background: #E5E7EB; }
+.ew-calendar-nav-btn.prev { left: 8px; }
+.ew-calendar-nav-btn.next { right: 8px; }
+.ew-calendar-month-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  font-family: var(--font-en);
+}
+.ew-calendar-grid {
+  padding: 8px 8px 0;
+}
+.ew-calendar-day-headers {
+  display: grid;
+  grid-template-columns: repeat(7, 36px);
+  gap: 0;
+  padding: 4px 0;
+}
+.ew-calendar-day-header {
+  height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 500;
+  color: #666E7D;
+  font-family: var(--font-en);
+}
+.ew-calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 36px);
+}
+.ew-calendar-day {
+  width: 32px; height: 32px;
+  margin: 2px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  font-family: var(--font-en);
+  transition: background 0.1s;
+  border: none;
+  background: transparent;
+}
+.ew-calendar-day:hover:not(.selected):not(.other-month) { background: #F5F7FA; }
+.ew-calendar-day.selected {
+  background: var(--color-primary);
+  color: #fff;
+  font-weight: 700;
+}
+.ew-calendar-day.other-month { color: #C7CCD4; cursor: default; }
+.ew-calendar-day.today:not(.selected) {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+.ew-calendar-today-btn {
+  margin: 4px 15px 12px;
+  height: 32px;
+  background: #F5F7FA;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 500;
+  color: #2F6FED;
+  cursor: pointer;
+  border: none;
+  transition: background 0.1s;
+}
+.ew-calendar-today-btn:hover { background: #E5E7EB; }
+
+/* ── CalendarRange Overlay ── */
+.ew-calendar-range-overlay {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 100;
+  background: #fff;
+  border: 1px solid #E4E6EA;
+  border-radius: 12px;
+  box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.10);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.ew-calendar-range-day.in-range {
+  background: #EEF3FD;
+  border-radius: 0;
+  color: var(--color-text-primary);
+}
+.ew-calendar-range-day.range-start { border-radius: 50% 0 0 50%; background: var(--color-primary); color: #fff; }
+.ew-calendar-range-day.range-end   { border-radius: 0 50% 50% 0; background: var(--color-primary); color: #fff; }
+
+/* Range apply button */
+.ew-calendar-apply-btn {
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  height: 32px;
+  padding: 0 20px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.ew-calendar-apply-btn:hover { background: var(--color-primary-hover); }
+
+/* ── CalendarTime — 날짜+시간 ── */
+.ew-calendar-time-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-top: 1px solid #E4E6EA;
+}
+.ew-time-input {
+  width: 60px; height: 32px;
+  border: 1px solid #E4E6EA;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 13px;
+  font-family: var(--font-en);
+  color: var(--color-text-primary);
+  outline: none;
+}
+.ew-time-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(59,130,246,0.15);
+}
+.ew-time-separator { font-size: 13px; color: var(--color-text-sub); }
+
+/* ── Gender cell overlay ── */
+.ew-gender-overlay {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 100;
+  background: #fff;
+  border: 1px solid #E4E6EA;
+  border-radius: 8px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.10);
+  min-width: 100px;
+  overflow: hidden;
+}
+.ew-gender-item {
+  height: 36px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.ew-gender-item:hover { background: #F5F7FA; }
+.ew-gender-item.male   { color: #1D4ED8; }
+.ew-gender-item.female { color: #BE185D; }
+
+/* ── UserThumbnail / CampUserThumbnail cell ── */
+.ew-cell--thumbnail {
+  padding: 8px 12px;
+  height: 100px;
+  vertical-align: middle;
+}
+.ew-thumbnail-card {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.ew-thumbnail-card .ew-avatar { width: 40px; height: 40px; font-size: 13px; }
+.ew-thumbnail-info { display: flex; flex-direction: column; gap: 2px; overflow: hidden; }
+.ew-thumbnail-name-ko { font-size: 13px; font-weight: 500; color: var(--color-text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ew-thumbnail-name-en { font-size: 11px; color: var(--color-text-sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ew-thumbnail-meta    { font-size: 11px; color: var(--color-text-sub); }
+
+/* ── CampUserThumbnail cell ── */
+/* UserThumbnail과 달리 각 행이 가로 배치 */
+.ew-cell--camp-thumbnail {
+  padding: 8px 12px;
+  height: 100px;
+  vertical-align: middle;
+}
+.ew-camp-thumbnail-card {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.ew-camp-thumbnail-card .ew-avatar { width: 32px; height: 32px; font-size: 12px; }
+.ew-camp-thumbnail-info { display: flex; flex-direction: column; gap: 2px; overflow: hidden; min-width: 0; }
+/* 1행: 영문명 + 한글명 가로 */
+.ew-camp-thumbnail-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+}
+.ew-camp-thumbnail-name-en {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.ew-camp-thumbnail-name-ko {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* 2행: 나이 · 성별 가로 */
+.ew-camp-thumbnail-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--color-text-sub);
+}
+.ew-camp-thumbnail-meta-dot { color: var(--color-text-muted); }
+
+/* ── ParentsInfo cell ── */
+.ew-cell--parents {
+  padding: 8px 12px;
+  height: 100px;
+  vertical-align: middle;
+}
+.ew-parents-name   { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
+.ew-parents-relation { font-size: 11px; color: var(--color-text-sub); margin-top: 2px; }
+.ew-parents-contact  { font-size: 11px; color: var(--color-text-sub); margin-top: 2px; }
+
+/* ── Switch ── */
+/* 사용법: <label class="ew-switch ew-switch--lg"><input type="checkbox"><span class="ew-switch-track"></span></label> */
+.ew-switch {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.ew-switch--lg { width: 60px; height: 30px; }
+.ew-switch--sm { width: 40px; height: 20px; }
+
+.ew-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.ew-switch-track {
+  position: absolute;
+  inset: 0;
+  border-radius: 44px;
+  background: #F0F2F5;
+  border: 1px solid rgba(32, 32, 35, 0.1);
+  transition: background 0.2s;
+}
+.ew-switch input:checked + .ew-switch-track {
+  background: #18A0FB;
+}
+
+/* 노브 (::after 슈도 엘리먼트) */
+.ew-switch-track::after {
+  content: '';
+  position: absolute;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+  transition: transform 0.2s;
+}
+.ew-switch--lg .ew-switch-track::after {
+  width: 24px; height: 24px;
+  top: 2px; left: 3px;
+}
+.ew-switch--lg input:checked + .ew-switch-track::after {
+  transform: translateX(30px);
+}
+.ew-switch--sm .ew-switch-track::after {
+  width: 14px; height: 14px;
+  top: 2px; left: 2px;
+}
+.ew-switch--sm input:checked + .ew-switch-track::after {
+  transform: translateX(20px);
+}
+
+/* ── Tag cell ── */
+.ew-cell--tag {
+  padding: 6px 12px;
+  height: auto;
+  min-height: 48px;
+  vertical-align: middle;
+  white-space: normal;
+}
+.ew-tag-area {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* ============================================================
+   ICON — /public/icon/ 로컬 SVG 참조
+   Figma MCP 에셋 URL 대체용 (만료: 2026-04-23)
+   ============================================================ */
+
+:root {
+  /* ── 네비게이션 아이콘 ── */
+  --icon-calendar:          url('/icon/Calendar.svg');
+  --icon-calendar-selected: url('/icon/Calendar_selected.svg');
+  --icon-clock:             url('/icon/Clock.svg');
+  --icon-clock-selected:    url('/icon/Clock_selected.svg');
+
+  /* ── 화살표 / 방향 ── */
+  --icon-arrow-right:       url('/icon/arrow2_right.svg');
+  --icon-arrow-up:          url('/icon/arrow3_up.svg');
+  --icon-arrow-down:        url('/icon/arrow_bottom.svg');
+  --icon-chevron-down:      url('/icon/Frame.svg');
+  --icon-chevron-left:      url('/icon/Vector-1.svg');
+  --icon-chevron-right:     url('/icon/Vector.svg');
+  --icon-arrow-fill-up:     url('/icon/arrow_fill_top.svg');
+  --icon-arrow-fill-down:   url('/icon/arrow_fill_bottom.svg');
+  --icon-arrow-fill-left:   url('/icon/arrow_fill_left.svg');
+  --icon-arrow-fill-right:  url('/icon/arrow_fill_right.svg');
+  --icon-sort-up:           url('/icon/arrowup.svg');
+  --icon-sort-down:         url('/icon/arrowdown.svg');
+
+  /* ── 액션 ── */
+  --icon-close:             url('/icon/close.svg');
+  --icon-delete:            url('/icon/delete.svg');
+  --icon-export:            url('/icon/export.svg');
+  --icon-import:            url('/icon/import.svg');
+  --icon-link:              url('/icon/link.svg');
+  --icon-modify:            url('/icon/modify.svg');
+  --icon-more:              url('/icon/more.svg');
+  --icon-plus:              url('/icon/plus.svg');
+  --icon-reload:            url('/icon/reload.svg');
+
+  /* ── 상태 ── */
+  --icon-ecu-dot:           url('/icon/ecu_dot.svg');
+  --icon-ecu-dot-plus:      url('/icon/ecu_dot_plus.svg');
+
+  /* ── Nav 아이콘 ── */
+  --icon-settings:               url('/icon/settings.svg');
+  --icon-settings-hover:         url('/icon/settings_hover.svg');
+  --icon-settings-selected:      url('/icon/settings_selected.svg');
+  --icon-notification:           url('/icon/notification.svg');
+  --icon-notification-hover:     url('/icon/notification_hover.svg');
+  --icon-notification-selected:  url('/icon/notification_selected.svg');
+
+  /* ── CampUserBoard 전용 ── */
+  --icon-camp-clock:        url('/icon/CampUserBoard/ClockIcon.svg');
+  --icon-camp-calendar:     url('/icon/CampUserBoard/Frame-1.svg');
+  --icon-camp-dropdown:     url('/icon/CampUserBoard/Frame-2.svg');
+  --icon-camp-check:        url('/icon/CampUserBoard/Subtract.svg');
+}
+
+/* 아이콘 기본 클래스 */
+.ew-icon {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+/* 사이즈 variant */
+.ew-icon--sm { width: 12px; height: 12px; }
+.ew-icon--md { width: 16px; height: 16px; }
+.ew-icon--lg { width: 20px; height: 20px; }
+
+/* 네비게이션 */
+.ew-icon--calendar         { background-image: var(--icon-calendar); }
+.ew-icon--calendar.active  { background-image: var(--icon-calendar-selected); }
+.ew-icon--clock            { background-image: var(--icon-clock); }
+.ew-icon--clock.active     { background-image: var(--icon-clock-selected); }
+
+/* 화살표 */
+.ew-icon--arrow-right      { background-image: var(--icon-arrow-right); }
+.ew-icon--arrow-up         { background-image: var(--icon-arrow-up); }
+.ew-icon--arrow-down       { background-image: var(--icon-arrow-down); }
+.ew-icon--chevron-down     { background-image: var(--icon-chevron-down); width: 12px; height: 12px; }
+.ew-icon--chevron-left     { background-image: var(--icon-chevron-left); width: 7px; height: 12px; }
+.ew-icon--chevron-right    { background-image: var(--icon-chevron-right); width: 7px; height: 12px; }
+.ew-icon--sort-up          { background-image: var(--icon-sort-up); }
+.ew-icon--sort-down        { background-image: var(--icon-sort-down); }
+
+/* 액션 */
+.ew-icon--close            { background-image: var(--icon-close); }
+.ew-icon--delete           { background-image: var(--icon-delete); }
+.ew-icon--export           { background-image: var(--icon-export); }
+.ew-icon--import           { background-image: var(--icon-import); }
+.ew-icon--link             { background-image: var(--icon-link); }
+.ew-icon--modify           { background-image: var(--icon-modify); }
+.ew-icon--more             { background-image: var(--icon-more); }
+.ew-icon--plus             { background-image: var(--icon-plus); }
+.ew-icon--reload           { background-image: var(--icon-reload); }
+
+/* 상태 */
+.ew-icon--ecu-dot          { width: 17px; height: 17px; background-image: var(--icon-ecu-dot); }
+.ew-icon--ecu-dot-plus     { width: 17px; height: 17px; background-image: var(--icon-ecu-dot-plus); }
+
+/* Nav */
+.ew-icon--settings                    { width: 32px; height: 32px; background-image: var(--icon-settings); }
+.ew-icon--settings:hover              { background-image: var(--icon-settings-hover); }
+.ew-icon--settings.active             { background-image: var(--icon-settings-selected); }
+.ew-icon--notification                { width: 32px; height: 32px; background-image: var(--icon-notification); }
+.ew-icon--notification:hover          { background-image: var(--icon-notification-hover); }
+.ew-icon--notification.active         { background-image: var(--icon-notification-selected); }
+
+/* CampUserBoard 전용 (14px 기준) */
+.ew-icon--camp-clock       { width: 14px; height: 14px; background-image: var(--icon-camp-clock); }
+.ew-icon--camp-calendar    { width: 14px; height: 14px; background-image: var(--icon-camp-calendar); }
+.ew-icon--camp-dropdown    { width: 12px; height: 16px; background-image: var(--icon-camp-dropdown); }
+.ew-icon--camp-check       { width: 14px; height: 14px; background-image: var(--icon-camp-check); }
+
+/* ── 필터바 셀렉트 드롭다운 화살표 → SVG로 교체 ── */
+.ew-filter-select-wrap .arrow {
+  width: 12px;
+  height: 12px;
+  background-image: var(--icon-chevron-down);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  font-size: 0; /* 텍스트 문자 숨김 */
+}
+
+/* ── 캘린더 네비 버튼 → SVG로 교체 ── */
+.ew-calendar-nav-btn.prev {
+  background-image: var(--icon-chevron-left);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 7px 12px;
+  font-size: 0;
+}
+.ew-calendar-nav-btn.next {
+  background-image: var(--icon-chevron-right);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 7px 12px;
+  font-size: 0;
+}
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(224,224,229,0.8); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(180,180,190,0.9); }
