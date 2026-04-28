@@ -162,6 +162,7 @@ export default function AgentBoardPage({
           onSort={toggleSort}
           localEdits={localEdits}
           onEdit={handleEdit}
+          tableId="agents"
         />
         <Pagination
           total={filtered.length}

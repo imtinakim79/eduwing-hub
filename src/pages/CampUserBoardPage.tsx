@@ -22,7 +22,10 @@ const TAG_COLORS = [
 ];
 
 function relLabel(r: string) {
-  return r === 'Father' ? '아빠' : r === 'Mother' ? '엄마' : r || '기타';
+  if (r === 'Father' || r === '아빠') return '아빠';
+  if (r === 'Mother' || r === '엄마') return '엄마';
+  if (r === 'Etc'   || r === '기타') return '기타';
+  return r || '기타';
 }
 
 // ── 학생 데이터 헬퍼 ──────────────────────────────────────────────────────────
@@ -73,12 +76,15 @@ function FlightRow({ label, flightNo, date, time }: { label: string; flightNo: s
   );
 }
 
-function PickupRow({ label, status }: { label: string; status: string }) {
+function PickupRow({ label, status, place }: { label: string; status: string; place?: string }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
       <span style={{ fontSize: 13, color: 'var(--color-text-primary)', whiteSpace: 'nowrap' }}>{label}</span>
       <div style={{ width: 1, height: 14, background: 'var(--color-border-table)', flexShrink: 0 }} />
       <span style={{ fontSize: 12, color: 'var(--color-text-sub)', whiteSpace: 'nowrap' }}>{status || '-'}</span>
+      {status && status !== '없음' && place && (
+        <span style={{ fontSize: 12, color: 'var(--color-text-muted)', whiteSpace: 'nowrap' }}>· {place}</span>
+      )}
     </div>
   );
 }
@@ -182,7 +188,7 @@ export function CampUserBoardCompleted({ campId, students, agents = [] }: { camp
                         {familyMembers.length > 0
                           ? familyMembers.map((f, i) => (
                               <span key={i} className="ew-tag" style={{ background: TAG_COLORS[i % TAG_COLORS.length].bg, color: TAG_COLORS[i % TAG_COLORS.length].color }}>
-                                {f.name}({f.relation})
+                                {f.name}({f.relation === '기타' ? ((f as any).relationCustom || '기타') : f.relation})
                               </span>
                             ))
                           : <span style={{ fontSize: 12, color: '#D1D5DB' }}>-</span>
@@ -215,8 +221,8 @@ export function CampUserBoardCompleted({ campId, students, agents = [] }: { camp
                     </td>
                     <td style={TD}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                        <PickupRow label="Pick up" status={dep.pickDrop ?? ''} />
-                        <PickupRow label="Drop"    status={ret.pickDrop ?? ''} />
+                        <PickupRow label="Pick up" status={dep.pickDrop ?? ''} place={dep.pickDropPlace ?? ''} />
+                        <PickupRow label="Drop"    status={ret.pickDrop ?? ''} place={ret.pickDropPlace ?? ''} />
                       </div>
                     </td>
                     <td style={TD}><span style={{ fontSize: 12, color: '#D1D5DB' }}>-</span></td>
@@ -456,7 +462,7 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
                         {familyMembers.length > 0
                           ? familyMembers.map((f, i) => (
                               <span key={i} className="ew-tag" style={{ background: TAG_COLORS[i % TAG_COLORS.length].bg, color: TAG_COLORS[i % TAG_COLORS.length].color }}>
-                                {f.name}({f.relation})
+                                {f.name}({f.relation === '기타' ? ((f as any).relationCustom || '기타') : f.relation})
                               </span>
                             ))
                           : <span style={{ fontSize: 12, color: '#D1D5DB' }}>-</span>
@@ -489,8 +495,8 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
                     </td>
                     <td style={TD_STYLE}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                        <PickupRow label="Pick up" status={dep.pickDrop ?? ''} />
-                        <PickupRow label="Drop"    status={ret.pickDrop ?? ''} />
+                        <PickupRow label="Pick up" status={dep.pickDrop ?? ''} place={dep.pickDropPlace ?? ''} />
+                        <PickupRow label="Drop"    status={ret.pickDrop ?? ''} place={ret.pickDropPlace ?? ''} />
                       </div>
                     </td>
                     <td className={tdCls(s.id, 'pay', 'ew-cell--interactive')} style={{ ...TD_STYLE, padding: '0 12px' }}>

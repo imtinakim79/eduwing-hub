@@ -49,6 +49,7 @@ const campMap  = Object.fromEntries(allCamps.map(c => [c.id, c]));
 function relLabel(r: string) {
   if (r === 'Father' || r === '아빠') return '아빠';
   if (r === 'Mother' || r === '엄마') return '엄마';
+  if (r === 'Etc'   || r === '기타') return '기타';
   return r || '기타';
 }
 
@@ -355,6 +356,7 @@ export default function StudentBoardPage({
           localEdits={localEdits}
           onEdit={handleEdit}
           onRowClick={onStudentSelect}
+          tableId="students"
         />
         <Pagination
           total={filtered.length}

@@ -171,16 +171,21 @@ function makeCampColumns(
 ): ColumnDef<Camp>[] {
   return [
   {
-    key: 'name', label: '캠프명', minWidth: 200, sortKey: 'name', type: 'custom',
+    key: 'name', label: '캠프명', width: 200, sortKey: 'name', type: 'custom',
     tdStyle: { padding: '0 12px' },
     getValue: (r, e) => e['name'] ?? r.name,
     setValue: (_, v) => ({ field: 'name', value: v }),
     render: ({ value, row }) => (
       <span
-        style={{ fontSize: 13, fontWeight: 400, cursor: onCampSelect ? 'pointer' : 'default', color: onCampSelect ? 'var(--color-primary)' : 'inherit', textDecoration: onCampSelect ? 'underline' : 'none' }}
+        title={value}
+        style={{ fontSize: 13, fontWeight: 400, cursor: onCampSelect ? 'pointer' : 'default', color: onCampSelect ? 'var(--color-primary)' : 'inherit', textDecoration: onCampSelect ? 'underline' : 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}
         onClick={e => { e.stopPropagation(); onCampSelect?.((row as Camp).id); }}
       >{value}</span>
     ),
+  },
+  {
+    key: 'id', label: '캠프 코드', width: 160, type: 'readonly',
+    getValue: (r) => r.id,
   },
   {
     key: 'period', label: '기간', width: 185, type: 'readonly',
@@ -413,6 +418,7 @@ export default function CampBoardPage({
           localEdits={localEdits}
           onEdit={handleEdit}
           rowHeight={72}
+          tableId="camps"
         />
         <Pagination
           total={filtered.length}
