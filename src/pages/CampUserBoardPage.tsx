@@ -77,14 +77,15 @@ function FlightRow({ label, flightNo, date, time }: { label: string; flightNo: s
 }
 
 function PickupRow({ label, status, place }: { label: string; status: string; place?: string }) {
+  const hasPickup = status && status !== '없음';
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
       <span style={{ fontSize: 13, color: 'var(--color-text-primary)', whiteSpace: 'nowrap' }}>{label}</span>
       <div style={{ width: 1, height: 14, background: 'var(--color-border-table)', flexShrink: 0 }} />
-      <span style={{ fontSize: 12, color: 'var(--color-text-sub)', whiteSpace: 'nowrap' }}>{status || '-'}</span>
-      {status && status !== '없음' && place && (
-        <span style={{ fontSize: 12, color: 'var(--color-text-muted)', whiteSpace: 'nowrap' }}>· {place}</span>
-      )}
+      {hasPickup && place
+        ? <span style={{ fontSize: 12, color: 'var(--color-text-muted)', whiteSpace: 'nowrap' }}>{place}</span>
+        : <span style={{ fontSize: 12, color: 'var(--color-text-muted)', whiteSpace: 'nowrap' }}>-</span>
+      }
     </div>
   );
 }

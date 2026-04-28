@@ -620,7 +620,7 @@ export default function StudentDetailPage({
                         style={{ border: 'none', outline: 'none', background: 'transparent', fontSize: 12, fontFamily: 'var(--font-ko)', color: row.pickDrop ? '#1A1D23' : '#B7BECA', cursor: 'pointer', flexShrink: 0 }}
                       >
                         <option value="" disabled>선택</option>
-                        {['픽업', '드랍', '없음'].map(o => <option key={o} value={o}>{o}</option>)}
+                        {(rowKey === 'dep' ? ['픽업', '없음'] : ['드랍', '없음']).map(o => <option key={o} value={o}>{o}</option>)}
                       </select>
                       {row.pickDrop && row.pickDrop !== '없음' && (
                         <>
