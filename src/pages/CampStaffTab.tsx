@@ -228,8 +228,15 @@ export default function CampStaffTab({ campId, onStaffChange }: {
     const next = { staffIds: ids };
     setAssignment(next);
     if (campId) saveCampStaff(campId, next);
-    onStaffChange?.(staffMaster.filter(m => ids.includes(m.id)).map(m => m.name));
   }
+
+  // staffMaster 상태 업데이트 이후 최신값으로 onStaffChange 호출
+  const mounted = useRef(false);
+  useEffect(() => {
+    if (!mounted.current) { mounted.current = true; return; }
+    const names = staffMaster.filter(m => assignment.staffIds.includes(m.id)).map(m => m.name);
+    onStaffChange?.(names);
+  }, [assignment, staffMaster]);
 
   return (
     <div style={{ padding: '20px 24px' }}>
