@@ -76,7 +76,7 @@ export type CampTab = 'Students' | 'Accommodation' | 'Staff' | 'Class' | 'Timeta
 | Accommodation | ✅ | `CampAccommodationTab` |
 | Staff | ✅ | `CampStaffTab` |
 | Class | ✅ | `CampClassTab` |
-| Timetable | ✅ | `CampTimetableView` / `CampTimetableEdit` (클래스별 분리) |
+| Timetable | ✅ | `CampTimetableEdit` (항상 편집 모드, 클래스별 분리) / `CampTimetableView` (CampBoardPage 모달 전용) |
 
 - `CampDetailPage`와 `CampCreatePage`가 공유하는 탭 타입
 - `NavState`에 포함되어 브라우저 뒤로가기 시 탭 위치도 복원됨
@@ -156,7 +156,7 @@ agents                    students ───────────────
 | history.current_camp_id / previous_camps | AddStudentPage 저장 로직, StudentBoardPage (인라인) | StudentBoardPage (현재 캠프 컬럼), StudentDetailPage (캠프 탭 목록) |
 | **camp_records[].camp_id, status** | **CampDetailPage Students 탭** | CampUserBoardPage, StudentDetailPage, StudentBoardPage |
 | camp_records[].stay (roomtype, check_in/out) | StudentDetailPage 캠프탭 호텔정보 | StudentDetailPage |
-| camp_records[].flight (편명, 여권) | StudentDetailPage 캠프탭 항공정보 | StudentDetailPage |
+| camp_records[].flight (편명, 여권, pickDrop, pickDropPlace) | StudentDetailPage 캠프탭 항공정보 | StudentDetailPage, CampUserBoardPage (pickDrop·pickDropPlace 표시) |
 
 > `camp_records[]`는 `Student` 객체에 embedded 저장. 별도 localStorage 키 없음.
 > 같은 학생이라도 캠프마다 룸타입·항공편이 다를 수 있다 — `camp_id`로 구분되는 독립 레코드.
@@ -175,14 +175,9 @@ agents                    students ───────────────
 
 | 필드 | 쓰기 | 읽는 곳 |
 |---|---|---|
-| name | CampClassTab | CampDetailPage Timetable 서브탭, CampBoardPage TimetableModal 서브탭 |
+| name | CampClassTab | CampDetailPage Timetable 서브탭, CampBoardPage TimetableModal 서브탭, CampUserBoardPage 소속 클래스 컬럼, StudentDetailPage 캠프탭 |
 | teacher | CampClassTab | CampDetailPage Timetable 서브탭 (보조텍스트) |
-| studentIds[] | CampClassTab (체크박스 배정) | CampClassTab (체크박스 상태) |
-
-**미구현 소비처 (갭):**
-- ❌ `name`, `studentIds[]` → CampUserBoardPage 학생명단에 "소속 클래스" 컬럼 없음
-- ❌ `name`, `studentIds[]` → StudentDetailPage 캠프 섹션에 "소속 클래스" 표시 없음
-- ❌ `teacher` → CampDetailPage 헤더 및 CampUserBoardPage에 강사 표시 없음
+| studentIds[] | CampClassTab (체크박스 배정) | CampClassTab (체크박스 상태), CampUserBoardPage 소속 클래스 컬럼, StudentDetailPage 캠프탭 |
 
 ### ew-campstaff-{campId}
 
@@ -212,13 +207,13 @@ agents                    students ───────────────
 ew-camps                           → camps[] 전체 목록 (App.tsx)
 ew-students                        → students[] 전체 목록 (App.tsx)
 ew-agents                          → agents[] 전체 목록 (App.tsx)
-ew-tab-status-{cid}                → 탭별 편집 저장/취소 상태 (TabCard.tsx)
 ew-classes-{cid}                   → ClassLevel[] — 클래스명·강사·학생 배정 (CampClassTab)
 ew-timetable-{cid}-{classId}       → 시간표 data + merges (CampTimetableEdit)
 ew-timetable-range-{cid}-{classId} → 시간표 기간 start/end (CampTimetableEdit)
 ew-hotels-{cid}                    → accommodation_options[] (CampAccommodationTab)
 ew-campstaff-{cid}                 → staffIds[] (CampStaffTab)
-ew-family-{sid}                    → 가족 구성원 목록 (StudentDetailPage — 입력 UI 미구현)
+ew-family-{sid}                    → 가족 구성원 목록 (StudentDetailPage)
+ew-col-widths-{tableId}            → BoardTable 컬럼 너비 (BoardTable.tsx, tableId: camps/students/agents)
 ```
 
 ---
@@ -306,6 +301,8 @@ WHERE sc.camp_id = :campId AND sc.status = 'enrolled';
 - 정렬/선택/인라인편집 공통 테이블
 - `columns: ColumnDef<T>[]` 로 컬럼 정의
 - `onRowClick` 으로 행 클릭 처리
+- `tableId` prop으로 컬럼 너비 드래그 리사이즈 + `ew-col-widths-{tableId}` localStorage 저장
+- `table-layout: fixed` + `width: 100%` — 컬럼이 화면 너비를 꽉 채우고 드래그 초과 시 스크롤
 
 ---
 
@@ -332,9 +329,8 @@ WHERE sc.camp_id = :campId AND sc.status = 'enrolled';
 
 ### 구현 갭 (데이터는 있지만 읽는 곳 없음)
 
-| 우선순위 | 갭 | 영향 |
-|---|---|---|
-| 낮음 | CampUserBoardPage → StudentDetailPage 딥링크 (campId 전달, 해당 캠프 탭 자동 선택) | 캠프 컨텍스트 없이 열려 current_camp_id 탭으로 fallback |
+없음 — 현재 모든 갭 해소 완료.
+
 ### 데이터 입력 UI 미구현
 
 없음 — 현재 모든 입력 UI 구현 완료.

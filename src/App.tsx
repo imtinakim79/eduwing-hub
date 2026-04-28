@@ -7,6 +7,8 @@ import AddStudentPage from './pages/AddStudentPage';
 import StudentDetailPage from './pages/StudentDetailPage';
 import CampCreatePage from './pages/CampCreatePage';
 import AgentBoardPage, { type Agent } from './pages/AgentBoardPage';
+import DashboardPage from './pages/DashboardPage';
+import SettingsPage from './pages/SettingsPage';
 import rawCamps from './data/camps.json';
 import rawAgents from './data/agents.json';
 import './index.css';
@@ -158,6 +160,16 @@ export default function App() {
     navigate('campDetail', { campId: camp.id, tab: 'Students' });
   }
 
+  const [trashedStudents, setTrashedStudents] = useState<(Student & { deletedAt: string })[]>(() => {
+    try { const r = localStorage.getItem('ew-trash-students'); return r ? JSON.parse(r) : []; }
+    catch { return []; }
+  });
+
+  function saveTrashed(next: (Student & { deletedAt: string })[]) {
+    setTrashedStudents(next);
+    try { localStorage.setItem('ew-trash-students', JSON.stringify(next)); } catch {}
+  }
+
   function saveStudents(next: Student[]) {
     setStudents(next);
     try { localStorage.setItem('ew-students', JSON.stringify(next)); } catch {}
@@ -211,6 +223,10 @@ export default function App() {
                   localStorage.setItem(key, JSON.stringify(updated));
                 } catch {}
               });
+              const deleted = students
+                .filter(s => ids.includes(s.id))
+                .map(s => ({ ...s, deletedAt: new Date().toISOString() }));
+              saveTrashed([...trashedStudents, ...deleted]);
               saveStudents(students.filter(s => !ids.includes(s.id)));
             }}
           />
@@ -333,11 +349,27 @@ export default function App() {
             }}
           />
         )}
-        {page !== 'students' && page !== 'addStudent' && page !== 'studentDetail' && page !== 'camps' && page !== 'campDetail' && page !== 'campCreate' && page !== 'agent' && (
-          <ComingSoon label={
-            page === 'dashboard' ? 'Dashboard' :
-            page === 'board'     ? '게시판' : '계정관리'
-          } />
+        {page === 'dashboard' && (
+          <DashboardPage
+            students={students}
+            camps={enrichedCamps}
+            agents={agents}
+            onNavigate={(p, opts) => navigate(p as Page, { campId: opts?.campId ?? '', studentId: opts?.studentId ?? '' })}
+          />
+        )}
+        {page === 'account' && (
+          <SettingsPage
+            trashedStudents={trashedStudents}
+            onRestore={ids => {
+              const toRestore = trashedStudents.filter(s => ids.includes(s.id)).map(({ deletedAt: _d, ...s }) => s);
+              saveStudents([...students, ...toRestore]);
+              saveTrashed(trashedStudents.filter(s => !ids.includes(s.id)));
+            }}
+            onPermanentDelete={ids => saveTrashed(trashedStudents.filter(s => !ids.includes(s.id)))}
+          />
+        )}
+        {page !== 'students' && page !== 'addStudent' && page !== 'studentDetail' && page !== 'camps' && page !== 'campDetail' && page !== 'campCreate' && page !== 'agent' && page !== 'dashboard' && page !== 'account' && (
+          <ComingSoon label="게시판" />
         )}
       </main>
     </div>

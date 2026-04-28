@@ -50,7 +50,7 @@ export default function TopNav({ activePage, onNavigate }: TopNavProps) {
 
       {/* Right: settings, notifications, user */}
       <div style={{ display: 'flex', gap: 20, alignItems: 'center', flexShrink: 0, width: 280, justifyContent: 'flex-end' }}>
-        <button style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
+        <button style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }} onClick={() => onNavigate('account')}>
           <img src="/icon/settings.svg" alt="Settings" style={{ width: 32, height: 32 }} />
         </button>
         <button style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
