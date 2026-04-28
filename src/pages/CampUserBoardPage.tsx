@@ -1,7 +1,5 @@
 // 캠프별 학생 리스트 페이지 — 학생명단 탭
 import { useState, useMemo } from 'react';
-import rawStudents from '../data/students.json';
-import rawCamps from '../data/camps.json';
 import Pagination from '../components/Pagination';
 import { avatarColor, initials, isoToDisplay, CalendarCell } from '../components/board/cells';
 import { FilterPill } from '../components/FilterPill';
@@ -11,8 +9,6 @@ import type { ClassLevel } from './CampClassTab';
 
 interface Camp { id: string; name: string; staff: string[]; }
 
-const rawStudentsArr = rawStudents as unknown as Student[];
-const allCamps = rawCamps as Camp[];
 
 const TAG_COLORS = [
   { bg: '#E0E9FE', color: '#3B82F6' },
@@ -86,154 +82,6 @@ function PickupRow({ label, status, place }: { label: string; status: string; pl
         ? <span style={{ fontSize: 12, color: 'var(--color-text-muted)', whiteSpace: 'nowrap' }}>{place}</span>
         : <span style={{ fontSize: 12, color: 'var(--color-text-muted)', whiteSpace: 'nowrap' }}>-</span>
       }
-    </div>
-  );
-}
-
-// ── Completed read-only board ─────────────────────────────────────────────────
-export function CampUserBoardCompleted({ campId, students, agents = [] }: { campId: string; students: Student[]; agents?: { id: string; name: string }[] }) {
-  const agentIdToName = Object.fromEntries(agents.map(a => [a.id, a.name]));
-  const [query, setQuery] = useState('');
-  const classes: ClassLevel[] = useMemo(() => loadClasses(campId), [campId]);
-  function getStudentClass(studentId: string) { return classes.find(c => c.studentIds.includes(studentId)); }
-  const allCampStudents = students.filter(s => s.history.current_camp_id === campId);
-  const campStudents = query
-    ? allCampStudents.filter(s => s.name_ko.includes(query) || s.name_en.toLowerCase().includes(query.toLowerCase()))
-    : allCampStudents;
-
-  const TD: React.CSSProperties = {
-    borderRight: '1px solid var(--color-border-table)',
-    borderBottom: '1px solid var(--color-border-table)',
-    padding: '10px 16px',
-    verticalAlign: 'middle',
-    height: 103,
-    whiteSpace: 'nowrap',
-    position: 'relative',
-  };
-
-  return (
-    <div>
-      <div className="ew-filter-bar">
-        <div className="ew-filter-input-wrap" style={{ width: 220 }}>
-          <span className="search-icon"><SearchIcon /></span>
-          <input type="text" placeholder="학생 이름 검색" value={query} onChange={e => setQuery(e.target.value)} />
-        </div>
-      </div>
-
-      {allCampStudents.length === 0 ? (
-        <div style={{ padding: 24, color: 'var(--color-text-muted)', fontSize: 13, fontFamily: 'var(--font-ko)' }}>
-          등록된 학생이 없습니다.
-        </div>
-      ) : (
-        <div style={{ overflowX: 'auto' }}>
-          <table className="ew-table" style={{ minWidth: 1280 }}>
-            <colgroup>
-              <col style={{ width: 172 }} />
-              <col style={{ width: 140 }} />
-              <col style={{ width: 107 }} />
-              <col style={{ width: 110 }} />
-              <col style={{ width: 94 }} />
-              <col style={{ width: 131 }} />
-              <col style={{ width: 242 }} />
-              <col style={{ width: 110 }} />
-              <col style={{ width: 112 }} />
-            </colgroup>
-            <thead>
-              <tr>
-                <TH>Student</TH>
-                <TH>Adult</TH>
-                <TH>Agent</TH>
-                <TH>Family info</TH>
-                <TH>Class</TH>
-                <TH>Hotel info</TH>
-                <TH>Flight Info</TH>
-                <TH>Pick up&amp;Drop</TH>
-                <TH>Payment Deadline</TH>
-              </tr>
-            </thead>
-            <tbody>
-              {campStudents.map(s => {
-                const rec = getCampRecord(s, campId);
-                const familyRaw = loadStudentFamily(s.id);
-                const familyMembers: { name: string; relation: string }[] = familyRaw
-                  ?? [{ name: s.guardian.name, relation: relLabel(s.guardian.relation) }];
-                const rooms: { roomType: string }[] = rec?.stay?.rooms ?? [];
-                const dep = rec?.flight?.departure ?? EMPTY_FLIGHT;
-                const ret = rec?.flight?.return    ?? EMPTY_FLIGHT;
-                return (
-                  <tr key={s.id} style={{ height: 103 }}>
-                    <td style={{ ...TD, padding: '0 16px' }}>
-                      <div className="ew-camp-thumbnail-card">
-                        <div className="ew-avatar" style={{ background: avatarColor(s.name_en), width: 32, height: 32, fontSize: 12 }}>{initials(s.name_en)}</div>
-                        <div className="ew-camp-thumbnail-info">
-                          <div className="ew-camp-thumbnail-name-row">
-                            <span className="ew-camp-thumbnail-name-en">{s.name_en}</span>
-                            <span className="ew-camp-thumbnail-name-ko">{s.name_ko}</span>
-                          </div>
-                          <div className="ew-camp-thumbnail-meta-row">
-                            <span>{s.age}세</span><span className="ew-camp-thumbnail-meta-dot">·</span><span>{s.gender}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td style={TD}>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                        <span style={{ fontSize: 12, color: 'var(--color-text-primary)' }}>보호자 : {s.guardian.name}({relLabel(s.guardian.relation)})</span>
-                        <span style={{ fontSize: 12, color: 'var(--color-text-sub)' }}>{s.guardian.contact}</span>
-                        <span style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>{s.guardian.email}</span>
-                      </div>
-                    </td>
-                    <td style={TD}><span style={{ fontSize: 13, fontFamily: 'var(--font-en)' }}>{agentIdToName[s.history.agent_id] ?? s.history.agent_id}</span></td>
-                    <td style={TD}>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                        {familyMembers.length > 0
-                          ? familyMembers.map((f, i) => (
-                              <span key={i} className="ew-tag" style={{ background: TAG_COLORS[i % TAG_COLORS.length].bg, color: TAG_COLORS[i % TAG_COLORS.length].color }}>
-                                {f.name}({f.relation === '기타' ? ((f as any).relationCustom || '기타') : f.relation})
-                              </span>
-                            ))
-                          : <span style={{ fontSize: 12, color: '#D1D5DB' }}>-</span>
-                        }
-                      </div>
-                    </td>
-                    <td style={TD}>
-                      {(() => { const cls = getStudentClass(s.id); return cls
-                        ? <span className="ew-tag" style={{ background: '#EEF3FD', color: '#2F6FED' }}>{cls.name}</span>
-                        : <span style={{ fontSize: 12, color: '#D1D5DB' }}>-</span>; })()}
-                    </td>
-                    <td style={TD}>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                        {rooms.length > 0
-                          ? rooms.map((r, i) => (
-                              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                                <span className="ew-tag ew-tag--blue">{r.roomType || '(미입력)'}</span>
-                                <span style={{ fontSize: 13, color: 'var(--color-text-sub)' }}>X1</span>
-                              </div>
-                            ))
-                          : <span style={{ fontSize: 12, color: '#D1D5DB' }}>-</span>
-                        }
-                      </div>
-                    </td>
-                    <td style={TD}>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                        <FlightRow label="출국" flightNo={dep.flightNo ?? ''} date={dep.dateEntry ?? ''} time={dep.timeEntry ?? ''} />
-                        <FlightRow label="귀국" flightNo={ret.flightNo ?? ''} date={ret.dateReturn ?? ret.dateEntry ?? ''} time={ret.timeReturn ?? ret.timeEntry ?? ''} />
-                      </div>
-                    </td>
-                    <td style={TD}>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                        <PickupRow label="Pick up" status={dep.pickDrop ?? ''} place={dep.pickDropPlace ?? ''} />
-                        <PickupRow label="Drop"    status={ret.pickDrop ?? ''} place={ret.pickDropPlace ?? ''} />
-                      </div>
-                    </td>
-                    <td style={TD}><span style={{ fontSize: 12, color: '#D1D5DB' }}>-</span></td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
     </div>
   );
 }

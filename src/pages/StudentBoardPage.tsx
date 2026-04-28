@@ -313,7 +313,7 @@ export default function StudentBoardPage({
         </div>
         <FilterPill
           label="Agent"
-          values={agentFilter ? [agentFilter] : []}
+          values={agentFilter ? [agentIdToName[agentFilter] ?? agentFilter] : []}
           options={agentOpts}
           withCheckbox
           onChange={vs => { setAgentFilter(agentNameToId[vs[0]] ?? vs[0] ?? ''); setPage(1); }}
