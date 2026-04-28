@@ -10,7 +10,6 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Agent',     key: 'agent' },
   { label: '게시판',    key: 'board' },
   { label: '계정관리',  key: 'account' },
-  { label: '🎨 Gallery', key: 'gallery' },
 ];
 
 interface TopNavProps {
@@ -22,11 +21,16 @@ export default function TopNav({ activePage, onNavigate }: TopNavProps) {
   return (
     <nav className="ew-nav" style={{ justifyContent: 'space-between', minWidth: 1440 }}>
       {/* Logo */}
-      <div style={{ flexShrink: 0, width: 180 }}>
+      <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
         <img
           src="/image/EDUWING WORLD_LOGO 34 3-1.png"
-          alt="EduWing World"
+          alt=""
           style={{ height: 38, objectFit: 'contain' }}
+        />
+        <img
+          src="/image/EDUWING WORLD_LOGO 34 4.png"
+          alt="EduWing World"
+          style={{ height: 20, objectFit: 'contain' }}
         />
       </div>
 
