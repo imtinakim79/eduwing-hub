@@ -235,7 +235,7 @@ export default function DashboardPage({ students, camps, agents, onNavigate }: P
                     onMouseLeave={e => (e.currentTarget as HTMLTableRowElement).style.background = 'transparent'}
                   >
                     <td style={{ ...tdStyle, fontWeight: 600 }}>{s.name_ko} <span style={{ fontSize: 12, color: 'var(--color-text-muted)', fontFamily: 'var(--font-en)', fontWeight: 400 }}>{s.name_en}</span></td>
-                    <td style={tdStyle}>{s.gender === 'M' ? '남' : s.gender === 'F' ? '여' : '-'}</td>
+                    <td style={tdStyle}>{s.gender === 'Male' ? '남' : s.gender === 'Female' ? '여' : '-'}</td>
                     <td style={{ ...tdStyle, fontFamily: 'var(--font-en)' }}>{formatDate(s.history.joined_date)}</td>
                     <td style={tdStyle}>{agentName}</td>
                     <td style={tdStyle}>
