@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
+import * as XLSX from 'xlsx';
 import BoardTable from '../components/board/BoardTable';
 import Pagination from '../components/Pagination';
 import type { ColumnDef } from '../components/board/types';
@@ -43,6 +44,29 @@ const agentColumns: ColumnDef<Agent>[] = [
   },
 ];
 
+function agentsToRows(list: Agent[]) {
+  return list.map(a => ({
+    'ID':     a.id,
+    '에이전시명': a.name,
+    '담당자':  a.contact_name,
+    '연락처':  a.contact_phone,
+    'Email':  a.contact_email,
+  }));
+}
+
+function rowsToAgents(rows: Record<string, string>[]): Agent[] {
+  const toStr = (v: unknown) => (v == null ? '' : String(v).trim());
+  return rows
+    .filter(r => toStr(r['에이전시명']))
+    .map(r => ({
+      id:            toStr(r['ID']) || `AGT-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      name:          toStr(r['에이전시명']),
+      contact_name:  toStr(r['담당자']),
+      contact_phone: toStr(r['연락처']),
+      contact_email: toStr(r['Email']),
+    }));
+}
+
 function applyEditsToAgent(a: Agent, edits: Record<string, string>): Agent {
   const result = { ...a };
   for (const [field, value] of Object.entries(edits)) {
@@ -61,11 +85,13 @@ export default function AgentBoardPage({
   onAgentAdd,
   onAgentUpdate,
   onAgentDelete,
+  onAgentsImport,
 }: {
   agents?: Agent[];
   onAgentAdd?: (agent: Agent) => void;
   onAgentUpdate?: (agent: Agent) => void;
   onAgentDelete?: (ids: string[]) => void;
+  onAgentsImport?: (imported: Agent[]) => void;
 }) {
   const [query,      setQuery]      = useState('');
   const [selected,   setSelected]   = useState<Set<string>>(new Set());
@@ -74,6 +100,30 @@ export default function AgentBoardPage({
   const [sortKey,    setSortKey]    = useState<string | null>(null);
   const [sortDir,    setSortDir]    = useState<'asc' | 'desc'>('asc');
   const [localEdits, setLocalEdits] = useState<Record<string, Record<string, string>>>({});
+  const uploadRef = useRef<HTMLInputElement>(null);
+
+  function handleDownload() {
+    const ws = XLSX.utils.json_to_sheet(agentsToRows(agents));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, '에이전시목록');
+    XLSX.writeFile(wb, '에이전시목록.xlsx');
+  }
+
+  function handleUploadFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = '';
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const data = new Uint8Array(ev.target!.result as ArrayBuffer);
+      const wb   = XLSX.read(data, { type: 'array' });
+      const ws   = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json<Record<string, string>>(ws, { raw: false });
+      const imported = rowsToAgents(rows);
+      if (imported.length > 0) onAgentsImport?.(imported);
+    };
+    reader.readAsArrayBuffer(file);
+  }
 
   function handleAdd() {
     const newAgent: Agent = {
@@ -147,6 +197,9 @@ export default function AgentBoardPage({
         {selected.size > 0 && (
           <button className="ew-btn ew-btn--danger ew-btn--xsm" onClick={handleDelete}>삭제</button>
         )}
+        <input ref={uploadRef} type="file" accept=".xlsx,.xls" style={{ display: 'none' }} onChange={handleUploadFile} />
+        <button className="ew-btn ew-btn--secondary ew-btn--xsm" onClick={() => uploadRef.current?.click()}>엑셀 업로드</button>
+        <button className="ew-btn ew-btn--secondary ew-btn--xsm" onClick={handleDownload}>엑셀 다운로드</button>
       </div>
 
       {/* Table */}

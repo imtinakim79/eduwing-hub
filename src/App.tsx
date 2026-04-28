@@ -348,6 +348,15 @@ export default function App() {
               setAgents(next);
               try { localStorage.setItem('ew-agents', JSON.stringify(next)); } catch {}
             }}
+            onAgentsImport={imported => {
+              const next = (() => {
+                const map = new Map(agents.map(a => [a.id, a]));
+                imported.forEach(a => map.set(a.id, a));
+                return Array.from(map.values());
+              })();
+              setAgents(next);
+              try { localStorage.setItem('ew-agents', JSON.stringify(next)); } catch {}
+            }}
           />
         )}
         {page === 'dashboard' && (

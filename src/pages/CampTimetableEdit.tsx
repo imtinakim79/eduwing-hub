@@ -482,6 +482,20 @@ function CampTimetableEdit({ campId, classId, startDate: initStart, endDate: ini
   const isMultiSel  = selectedKeys.size > 1;
   const panelMode   = selectedKeys.size === 0 ? 'slots' : isSingleSel ? 'editCell' : 'mergeCell';
 
+  const selectedMerge = isSingleSel
+    ? merges.find(mg => mg.master === Array.from(selectedKeys)[0])
+    : undefined;
+
+  function handleSplit() {
+    if (!selectedMerge) return;
+    const newData = { ...data };
+    selectedMerge.keys.forEach(k => { if (k !== selectedMerge.master) delete newData[k]; });
+    const newMerges = merges.filter(mg => mg.master !== selectedMerge.master);
+    setData(newData);
+    setMerges(newMerges);
+    if (effectiveId) persistStored(effectiveId, { data: newData, merges: newMerges });
+  }
+
   const slotInputStyle: React.CSSProperties = {
     width: '100%', boxSizing: 'border-box', border: '1px solid #D1D5DB',
     borderRadius: 4, padding: '4px 8px', fontSize: 12, fontFamily: 'var(--font-en)', outline: 'none',
@@ -616,6 +630,9 @@ function CampTimetableEdit({ campId, classId, startDate: initStart, endDate: ini
                 <button className="ew-btn ew-btn--primary ew-btn--sm" onClick={handleMerge} style={{ flex: 1 }}>칸합치기</button>
               )}
             </div>
+            {selectedMerge && (
+              <button className="ew-btn ew-btn--ghost ew-btn--sm" onClick={handleSplit} style={{ width: '100%' }}>셀 분할</button>
+            )}
 
             <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-text-primary)', fontFamily: 'var(--font-ko)' }}>
               {isMultiSel ? `셀 ${selectedKeys.size}개 선택` : '일정 추가'}
