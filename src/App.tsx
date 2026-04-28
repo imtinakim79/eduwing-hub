@@ -194,6 +194,7 @@ export default function App() {
           <StudentBoardPage
             students={students}
             agents={agents}
+            camps={camps}
             onAdd={() => navigate('addStudent', { editId: '' })}
             onStudentSelect={id => navigate('studentDetail', { studentId: id })}
             onStudentsImport={imported => {

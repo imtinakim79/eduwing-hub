@@ -1,13 +1,10 @@
 // 캠프별 학생 리스트 페이지 — 학생명단 탭
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import Pagination from '../components/Pagination';
 import { avatarColor, initials, isoToDisplay, CalendarCell } from '../components/board/cells';
-import { FilterPill } from '../components/FilterPill';
 import type { Student } from './StudentBoardPage';
 import { loadClasses, saveClasses } from './CampClassTab';
 import type { ClassLevel } from './CampClassTab';
-
-interface Camp { id: string; name: string; staff: string[]; }
 
 
 const TAG_COLORS = [
@@ -44,44 +41,63 @@ function SearchIcon() {
   );
 }
 
-function TH({ children, width, minWidth }: { children: React.ReactNode; width?: number; minWidth?: number }) {
+function TH({ children, colKey, onResizeStart }: {
+  children: React.ReactNode;
+  colKey?: string;
+  onResizeStart?: (key: string, e: React.MouseEvent) => void;
+}) {
   return (
-    <th style={{ padding: 0, width: width, minWidth: minWidth }}>
+    <th style={{ padding: 0, position: 'relative' }}>
       <div className="ew-cell--headline">{children}</div>
+      {colKey && onResizeStart && (
+        <div
+          style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 5, cursor: 'col-resize', zIndex: 1, userSelect: 'none' }}
+          onMouseDown={e => { e.preventDefault(); e.stopPropagation(); onResizeStart(colKey, e); }}
+        />
+      )}
     </th>
   );
 }
 
-function FlightRow({ label, flightNo, date, time }: { label: string; flightNo: string; date: string; time: string }) {
-  if (!flightNo && !date) return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-      <span style={{ fontSize: 13, color: 'var(--color-text-primary)', whiteSpace: 'nowrap' }}>{label}</span>
-      <span style={{ fontSize: 12, color: '#D1D5DB' }}>-</span>
-    </div>
-  );
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-      <span style={{ fontSize: 13, color: 'var(--color-text-primary)', whiteSpace: 'nowrap' }}>{label}</span>
-      <span style={{ fontSize: 12, color: 'var(--color-text-sub)', whiteSpace: 'nowrap' }}>{flightNo}</span>
-      {date && <><img src="/icon/Calendar.svg" alt="" style={{ width: 14, height: 14, flexShrink: 0 }} />
-      <span style={{ fontSize: 13, color: 'var(--color-text-sub)', whiteSpace: 'nowrap' }}>{isoToDisplay(date)}</span></>}
-      {time && <><div style={{ width: 1, height: 14, background: 'var(--color-border-table)', flexShrink: 0 }} />
-      <img src="/icon/Clock.svg" alt="" style={{ width: 14, height: 14, flexShrink: 0 }} />
-      <span style={{ fontSize: 13, color: 'var(--color-text-sub)', whiteSpace: 'nowrap' }}>{time}</span></>}
-    </div>
-  );
-}
+const BOARD_COLS = [
+  { key: 'student',  defaultW: 172 },
+  { key: 'adult',    defaultW: 140 },
+  { key: 'agent',    defaultW: 107 },
+  { key: 'family',   defaultW: 110 },
+  { key: 'class',    defaultW: 94  },
+  { key: 'hotel',    defaultW: 131 },
+  { key: 'flight',   defaultW: 320 },
+  { key: 'payment',  defaultW: 112 },
+];
+const LS_KEY = 'ew-col-widths-campboard';
 
-function PickupRow({ label, status, place }: { label: string; status: string; place?: string }) {
-  const hasPickup = status && status !== '없음';
+function FlightPickupRow({ flightLabel, pickupLabel, flightNo, date, time, pickStatus, pickPlace }: {
+  flightLabel: string; pickupLabel: string;
+  flightNo: string; date: string; time: string;
+  pickStatus: string; pickPlace?: string;
+}) {
+  const hasFlight = flightNo || date;
+  const hasPickup = pickStatus && pickStatus !== '없음';
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-      <span style={{ fontSize: 13, color: 'var(--color-text-primary)', whiteSpace: 'nowrap' }}>{label}</span>
-      <div style={{ width: 1, height: 14, background: 'var(--color-border-table)', flexShrink: 0 }} />
-      {hasPickup && place
-        ? <span style={{ fontSize: 12, color: 'var(--color-text-muted)', whiteSpace: 'nowrap' }}>{place}</span>
-        : <span style={{ fontSize: 12, color: 'var(--color-text-muted)', whiteSpace: 'nowrap' }}>-</span>
-      }
+    <div style={{ display: 'flex', alignItems: 'center', gap: 5, minWidth: 0 }}>
+      <span style={{ fontSize: 13, color: 'var(--color-text-primary)', whiteSpace: 'nowrap', minWidth: 28 }}>{flightLabel}</span>
+      {hasFlight ? (
+        <>
+          <span style={{ fontSize: 12, color: 'var(--color-text-sub)', whiteSpace: 'nowrap' }}>{flightNo}</span>
+          {date && <><img src="/icon/Calendar.svg" alt="" style={{ width: 14, height: 14, flexShrink: 0 }} />
+          <span style={{ fontSize: 12, color: 'var(--color-text-sub)', whiteSpace: 'nowrap' }}>{isoToDisplay(date)}</span></>}
+          {time && <><div style={{ width: 1, height: 14, background: 'var(--color-border-table)', flexShrink: 0 }} />
+          <img src="/icon/Clock.svg" alt="" style={{ width: 14, height: 14, flexShrink: 0 }} />
+          <span style={{ fontSize: 12, color: 'var(--color-text-sub)', whiteSpace: 'nowrap' }}>{time}</span></>}
+        </>
+      ) : (
+        <span style={{ fontSize: 12, color: '#D1D5DB' }}>-</span>
+      )}
+      <div style={{ width: 1, height: 14, background: 'var(--color-border-table)', flexShrink: 0, marginLeft: 2 }} />
+      <span style={{ fontSize: 12, color: 'var(--color-text-sub)', whiteSpace: 'nowrap' }}>{pickupLabel}</span>
+      <span style={{ fontSize: 12, color: 'var(--color-text-muted)', whiteSpace: 'nowrap' }}>
+        {hasPickup && pickPlace ? pickPlace : '-'}
+      </span>
     </div>
   );
 }
@@ -158,7 +174,7 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
   agents?: { id: string; name: string }[];
 }) {
   const agentIdToName = useMemo(() => Object.fromEntries(agents.map(a => [a.id, a.name])), [agents]);
-  const [campId,     setCampId]    = useState(propCampId ?? allCamps[0]?.id ?? '');
+  const [campId] = useState(propCampId ?? '');
   const [query,      setQuery]     = useState('');
   const [selected,   setSelected]  = useState<Set<string>>(new Set());
   const [page,       setPage]      = useState(1);
@@ -168,7 +184,31 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
   const [localEdits, setLocalEdits]= useState<Record<string, Record<string, string>>>({});
   const [showPicker, setShowPicker]= useState(false);
 
-  const allStudentsSource = propStudents ?? rawStudentsArr;
+  const allStudentsSource = propStudents ?? [];
+
+  // ── Column resize ─────────────────────────────────────────────────────────
+  const colWidthsRef = useRef<Record<string, number>>({});
+  const [colWidths, setColWidths] = useState<Record<string, number>>(() => {
+    try { const s = JSON.parse(localStorage.getItem(LS_KEY) ?? '{}'); colWidthsRef.current = s; return s; } catch { return {}; }
+  });
+  function colW(key: string) { return colWidths[key] ?? BOARD_COLS.find(c => c.key === key)?.defaultW ?? 120; }
+  function startResize(colKey: string, e: React.MouseEvent) {
+    const startX = e.clientX;
+    const startW = colWidthsRef.current[colKey] ?? BOARD_COLS.find(c => c.key === colKey)?.defaultW ?? 120;
+    function onMove(ev: MouseEvent) {
+      const newW = Math.max(60, startW + ev.clientX - startX);
+      colWidthsRef.current = { ...colWidthsRef.current, [colKey]: newW };
+      setColWidths({ ...colWidthsRef.current });
+    }
+    function onUp() {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      try { localStorage.setItem(LS_KEY, JSON.stringify(colWidthsRef.current)); } catch {}
+    }
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  }
+  // ──────────────────────────────────────────────────────────────────────────
 
   function getEdit(id: string, field: string, fallback: string) { return localEdits[id]?.[field] ?? fallback; }
   function setEdit(id: string, field: string, val: string) {
@@ -239,14 +279,6 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
         <StudentPickerModal campId={campId} allStudents={allStudentsSource} onAdd={handlePickerAdd} onClose={() => setShowPicker(false)} />
       )}
       <div className="ew-filter-bar">
-        {!propCampId && (
-          <div style={{ fontFamily: 'var(--font-ko)', fontWeight: 500, fontSize: 20, letterSpacing: '-0.8px', color: 'var(--color-text-medium)', width: 174, flexShrink: 0, textAlign: 'center' }}>캠프 학생</div>
-        )}
-        {!propCampId && (
-          <FilterPill label="캠프 선택" values={campId ? [campId] : []} options={allCamps.map(c => c.id)}
-            getLabel={id => allCamps.find(c => c.id === id)?.name ?? id}
-            onChange={vs => { if (vs[0]) { setCampId(vs[0]); setPage(1); setSelected(new Set()); } }} width={220} />
-        )}
         <div className="ew-filter-input-wrap" style={{ width: 220 }}>
           <span className="search-icon"><SearchIcon /></span>
           <input type="text" placeholder="학생 이름 검색" value={query} onChange={e => { setQuery(e.target.value); setPage(1); }} />
@@ -261,18 +293,10 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
       </div>
       <div className="ew-board" style={{ borderRadius: 0, border: 'none', borderTop: '1px solid var(--color-border-table)' }}>
         <div style={{ overflowX: 'auto' }}>
-          <table className="ew-table" style={{ minWidth: 1360 }}>
+          <table className="ew-table" style={{ minWidth: 39 + BOARD_COLS.reduce((s, c) => s + colW(c.key), 0) }}>
             <colgroup>
               <col style={{ width: 39 }} />
-              <col style={{ width: 172 }} />
-              <col style={{ width: 140 }} />
-              <col style={{ width: 107 }} />
-              <col style={{ width: 110 }} />
-              <col style={{ width: 94 }} />
-              <col style={{ width: 131 }} />
-              <col style={{ width: 242 }} />
-              <col style={{ width: 110 }} />
-              <col style={{ width: 112 }} />
+              {BOARD_COLS.map(c => <col key={c.key} style={{ width: colW(c.key) }} />)}
             </colgroup>
             <thead>
               <tr>
@@ -281,9 +305,9 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
                     <input type="checkbox" className="ew-checkbox" checked={allChecked} onChange={e => toggleAll(e.target.checked)} />
                   </div>
                 </th>
-                <TH>Student</TH><TH>Adult</TH><TH>Agent</TH>
-                <TH>Family info</TH><TH>Class</TH><TH>Hotel info</TH>
-                <TH>Flight Info</TH><TH>Pick up&amp;Drop</TH><TH>Payment Deadline</TH>
+                {['Student','Adult','Agent','Family info','Class','Hotel info','Flight Info & Pick up·Drop','Payment Deadline'].map((label, i) => (
+                  <TH key={label} colKey={BOARD_COLS[i].key} onResizeStart={startResize}>{label}</TH>
+                ))}
               </tr>
             </thead>
             <tbody>
@@ -365,16 +389,18 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
                         }
                       </div>
                     </td>
-                    <td style={TD_STYLE}>
+                    <td style={{ ...TD_STYLE, overflow: 'hidden' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                        <FlightRow label="출국" flightNo={dep.flightNo ?? ''} date={dep.dateEntry ?? ''} time={dep.timeEntry ?? ''} />
-                        <FlightRow label="귀국" flightNo={ret.flightNo ?? ''} date={ret.dateReturn ?? ret.dateEntry ?? ''} time={ret.timeReturn ?? ret.timeEntry ?? ''} />
-                      </div>
-                    </td>
-                    <td style={TD_STYLE}>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                        <PickupRow label="Pick up" status={dep.pickDrop ?? ''} place={dep.pickDropPlace ?? ''} />
-                        <PickupRow label="Drop"    status={ret.pickDrop ?? ''} place={ret.pickDropPlace ?? ''} />
+                        <FlightPickupRow
+                          flightLabel="출국" pickupLabel="Pick up"
+                          flightNo={dep.flightNo ?? ''} date={dep.dateEntry ?? ''} time={dep.timeEntry ?? ''}
+                          pickStatus={dep.pickDrop ?? ''} pickPlace={dep.pickDropPlace ?? ''}
+                        />
+                        <FlightPickupRow
+                          flightLabel="귀국" pickupLabel="Drop"
+                          flightNo={ret.flightNo ?? ''} date={ret.dateReturn ?? ret.dateEntry ?? ''} time={ret.timeReturn ?? ret.timeEntry ?? ''}
+                          pickStatus={ret.pickDrop ?? ''} pickPlace={ret.pickDropPlace ?? ''}
+                        />
                       </div>
                     </td>
                     <td className={tdCls(s.id, 'pay', 'ew-cell--interactive')} style={{ ...TD_STYLE, padding: '0 12px' }}>

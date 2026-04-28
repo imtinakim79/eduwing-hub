@@ -40,7 +40,7 @@ export interface Student {
   history: { joined_date: string; agent_id: string; current_camp_id: string };
   camp_records: CampRecord[];
 }
-interface Camp { id: string; name: string; start_date?: string; end_date?: string; }
+interface Camp { id: string; name: string; status?: string; start_date?: string; end_date?: string; }
 
 export const defaultStudents = rawStudents as Student[];
 const allCamps = rawCamps as Camp[];
@@ -191,6 +191,7 @@ function rowsToStudents(rows: Record<string, string>[]): Student[] {
 export default function StudentBoardPage({
   students = defaultStudents,
   agents = [],
+  camps: campsProp = [],
   onAdd,
   onStudentSelect,
   onStudentsImport,
@@ -199,6 +200,7 @@ export default function StudentBoardPage({
 }: {
   students?: Student[];
   agents?: Agent[];
+  camps?: Camp[];
   onAdd?: () => void;
   onStudentSelect?: (id: string) => void;
   onStudentsImport?: (imported: Student[]) => void;
@@ -259,19 +261,46 @@ export default function StudentBoardPage({
   const agentNameToId = useMemo(() => Object.fromEntries(agents.map(a => [a.name, a.id])), [agents]);
   const agentIdToName = useMemo(() => Object.fromEntries(agents.map(a => [a.id, a.name])), [agents]);
 
-  const columns = useMemo(() => studentColumns.map(col =>
-    col.key === 'agent_id'
-      ? {
-          ...col,
-          options: agentOpts,
-          getValue: (r: Student, e: Record<string, string>) => {
-            const id = e['agent_id'] ?? r.history.agent_id;
-            return agentIdToName[id] ?? id;
-          },
-          setValue: (_: Student, v: string) => ({ field: 'agent_id', value: agentNameToId[v] ?? v }),
+  const liveCampMap = useMemo(() =>
+    Object.fromEntries([...allCamps, ...campsProp].map(c => [c.id, c])),
+  [campsProp]);
+
+  const CAMP_BADGE: Record<string, { bg: string; color: string }> = {
+    '진행중': { bg: 'var(--color-success-light)', color: 'var(--color-success)' },
+    '준비중': { bg: '#EEF3FD', color: '#2F6FED' },
+  };
+
+  const columns = useMemo(() => studentColumns.map(col => {
+    if (col.key === 'agent_id') return {
+      ...col,
+      options: agentOpts,
+      getValue: (r: Student, e: Record<string, string>) => {
+        const id = e['agent_id'] ?? r.history.agent_id;
+        return agentIdToName[id] ?? id;
+      },
+      setValue: (_: Student, v: string) => ({ field: 'agent_id', value: agentNameToId[v] ?? v }),
+    };
+    if (col.key === 'current_camp_id') return {
+      ...col,
+      type: 'custom' as const,
+      getValue: (r: Student, e: Record<string, string>) => e['current_camp_id'] ?? r.history.current_camp_id,
+      render: ({ row, value }: { row: Student; value: string }) => {
+        const campId = value || row.history.current_camp_id;
+        const camp = liveCampMap[campId];
+        const badge = camp?.status ? CAMP_BADGE[camp.status] : undefined;
+        if (!camp || !badge) {
+          return <span style={{ fontSize: 12, color: '#9CA3AF', background: '#F3F4F6', borderRadius: 10, padding: '2px 8px' }}>미배정</span>;
         }
-      : col
-  ), [agentOpts, agentIdToName, agentNameToId]);
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            <span style={{ fontSize: 13, color: 'var(--color-text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 140 }}>{camp.name}</span>
+            <span style={{ fontSize: 11, ...badge, borderRadius: 10, padding: '1px 7px', alignSelf: 'flex-start' }}>{camp.status}</span>
+          </div>
+        );
+      },
+    };
+    return col;
+  }), [agentOpts, agentIdToName, agentNameToId, liveCampMap]);
   const campOpts = useMemo(() => [...new Set<string>(students.map(s => s.history.current_camp_id))], [students]);
 
   const filtered = useMemo(() => {
