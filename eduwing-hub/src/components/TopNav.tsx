@@ -10,7 +10,6 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Agent',     key: 'agent' },
   { label: '게시판',    key: 'board' },
   { label: '계정관리',  key: 'account' },
-  { label: '🎨 Gallery', key: 'gallery' },
 ];
 
 interface TopNavProps {
@@ -22,11 +21,16 @@ export default function TopNav({ activePage, onNavigate }: TopNavProps) {
   return (
     <nav className="ew-nav" style={{ justifyContent: 'space-between', minWidth: 1440 }}>
       {/* Logo */}
-      <div style={{ flexShrink: 0, width: 180 }}>
+      <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
         <img
           src="/image/EDUWING WORLD_LOGO 34 3-1.png"
-          alt="EduWing World"
+          alt=""
           style={{ height: 38, objectFit: 'contain' }}
+        />
+        <img
+          src="/image/EDUWING WORLD_LOGO 34 4.png"
+          alt="EduWing World"
+          style={{ height: 20, objectFit: 'contain' }}
         />
       </div>
 
@@ -46,7 +50,7 @@ export default function TopNav({ activePage, onNavigate }: TopNavProps) {
 
       {/* Right: settings, notifications, user */}
       <div style={{ display: 'flex', gap: 20, alignItems: 'center', flexShrink: 0, width: 280, justifyContent: 'flex-end' }}>
-        <button style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
+        <button style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }} onClick={() => onNavigate('account')}>
           <img src="/icon/settings.svg" alt="Settings" style={{ width: 32, height: 32 }} />
         </button>
         <button style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>

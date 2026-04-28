@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import type { ColumnDef } from './types';
 import {
   HeadlineCell, TextCell, CalendarCell, DropdownCell,
@@ -10,22 +10,18 @@ interface BoardTableProps<T extends { id: string }> {
   data: T[];
   columns: ColumnDef<T>[];
   allData?: T[];
-  /** 행 선택 관련 */
   selected: Set<string>;
   onSelectedChange: (s: Set<string>) => void;
-  /** 정렬 */
   sortKey: string | null;
   sortDir: 'asc' | 'desc';
   onSort: (key: string) => void;
-  /** 로컬 편집 상태 */
   localEdits: Record<string, Record<string, string>>;
   onEdit: (rowId: string, field: string, value: string) => void;
-  /** 행 높이 (기본 48px) */
   rowHeight?: number;
-  /** 빈 결과 메시지 */
   emptyMessage?: string;
-  /** 썸네일 셀 클릭 시 호출 */
   onRowClick?: (rowId: string) => void;
+  /** localStorage 저장 키 접두사. 미지정 시 너비 저장 안 함 */
+  tableId?: string;
 }
 
 export default function BoardTable<T extends { id: string }>({
@@ -42,9 +38,50 @@ export default function BoardTable<T extends { id: string }>({
   rowHeight,
   emptyMessage = '검색 결과가 없습니다.',
   onRowClick,
+  tableId,
 }: BoardTableProps<T>) {
   const [openCell,   setOpenCell]   = useState<string | null>(null);
   const [activeCell, setActiveCell] = useState<string | null>(null);
+
+  // ── Column resize ──────────────────────────────────────────────────────────
+  const colWidthsRef = useRef<Record<string, number>>({});
+  const [colWidths, setColWidths] = useState<Record<string, number>>(() => {
+    if (!tableId) return {};
+    try {
+      const saved = JSON.parse(localStorage.getItem(`ew-col-widths-${tableId}`) ?? '{}') as Record<string, number>;
+      colWidthsRef.current = saved;
+      return saved;
+    } catch { return {}; }
+  });
+
+  function resolvedWidth(col: ColumnDef<T>): number {
+    return colWidths[col.key] ?? col.width ?? col.minWidth ?? 100;
+  }
+
+  function startResize(colKey: string, baseWidth: number, e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    const startX = e.clientX;
+    const startW = colWidthsRef.current[colKey] ?? baseWidth;
+
+    function onMove(ev: MouseEvent) {
+      const newW = Math.max(40, startW + ev.clientX - startX);
+      colWidthsRef.current = { ...colWidthsRef.current, [colKey]: newW };
+      setColWidths({ ...colWidthsRef.current });
+    }
+
+    function onUp() {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      if (tableId) {
+        try { localStorage.setItem(`ew-col-widths-${tableId}`, JSON.stringify(colWidthsRef.current)); } catch {}
+      }
+    }
+
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  }
+  // ──────────────────────────────────────────────────────────────────────────
 
   const rows = allData ?? data;
 
@@ -75,16 +112,18 @@ export default function BoardTable<T extends { id: string }>({
     [localEdits],
   );
 
+  const totalWidth = columns.reduce((s, c) => s + resolvedWidth(c), 39);
+
   return (
     <div
       style={{ overflowX: 'auto' }}
       onClick={() => { setOpenCell(null); setActiveCell(null); }}
     >
-      <table className="ew-table" style={{ minWidth: columns.reduce((s, c) => s + (c.width ?? c.minWidth ?? 100), 39) }}>
+      <table className="ew-table" style={{ tableLayout: 'fixed', width: '100%', minWidth: totalWidth }}>
         <colgroup>
           <col style={{ width: 39 }} />
           {columns.map(col => (
-            <col key={col.key} style={col.width ? { width: col.width } : { minWidth: col.minWidth ?? 100 }} />
+            <col key={col.key} style={{ width: resolvedWidth(col) }} />
           ))}
         </colgroup>
 
@@ -102,13 +141,21 @@ export default function BoardTable<T extends { id: string }>({
               </div>
             </th>
             {columns.map(col => (
-              <th key={col.key} style={{ padding: 0 }}>
+              <th key={col.key} style={{ padding: 0, position: 'relative' }}>
                 <HeadlineCell
                   label={col.label}
                   sortKey={col.sortKey}
                   activeSortKey={sortKey}
                   sortDir={sortDir}
                   onSort={onSort}
+                />
+                {/* Resize handle */}
+                <div
+                  style={{
+                    position: 'absolute', right: 0, top: 0, bottom: 0, width: 5,
+                    cursor: 'col-resize', zIndex: 1, userSelect: 'none',
+                  }}
+                  onMouseDown={e => startResize(col.key, col.width ?? col.minWidth ?? 100, e)}
                 />
               </th>
             ))}
@@ -153,7 +200,6 @@ export default function BoardTable<T extends { id: string }>({
                       setActiveCell(null);
                     }
 
-                    // resolve options
                     const options: string[] = col.options
                       ? (typeof col.options === 'function' ? col.options(rows as T[]) : col.options)
                       : [];
@@ -161,7 +207,7 @@ export default function BoardTable<T extends { id: string }>({
                     switch (col.type) {
                       case 'custom':
                         return (
-                          <td key={col.key} className={tdCls(row.id, col.key)} style={{ padding: '0 12px', ...col.tdStyle }}>
+                          <td key={col.key} className={tdCls(row.id, col.key)} style={{ padding: '0 12px', overflow: 'hidden', ...col.tdStyle }}>
                             {col.render?.({
                               row, value, cellId,
                               isActive: isAct,
@@ -176,7 +222,7 @@ export default function BoardTable<T extends { id: string }>({
                         return (
                           <td
                             key={col.key} className="ew-cell--thumbnail"
-                            style={{ padding: '0 12px', cursor: onRowClick ? 'pointer' : 'default' }}
+                            style={{ padding: '0 12px', cursor: onRowClick ? 'pointer' : 'default', overflow: 'hidden' }}
                             onClick={onRowClick ? e => { e.stopPropagation(); onRowClick(row.id); } : undefined}
                           >
                             <ThumbnailCell nameKo={(row as any).name_ko} nameEn={(row as any).name_en} profileImgUrl={(row as any).profile_img_url} />
@@ -226,7 +272,7 @@ export default function BoardTable<T extends { id: string }>({
                       case 'tags':
                         return (
                           <td key={col.key}
-                            style={{ padding: '8px 12px', whiteSpace: 'normal', verticalAlign: 'middle', height: 'auto' }}
+                            style={{ padding: '8px 12px', whiteSpace: 'normal', verticalAlign: 'middle', height: 'auto', overflow: 'hidden' }}
                             onClick={e => e.stopPropagation()}
                           >
                             <TagsCell values={value ? value.split(',').filter(Boolean) : []} />
@@ -262,7 +308,7 @@ export default function BoardTable<T extends { id: string }>({
 
                       case 'readonly':
                         return (
-                          <td key={col.key} style={{ padding: '0 12px' }}>
+                          <td key={col.key} style={{ padding: '0 12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={value || undefined}>
                             {value || <span style={{ color: 'var(--color-text-muted)' }}>-</span>}
                           </td>
                         );

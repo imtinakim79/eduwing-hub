@@ -4,6 +4,7 @@ import { avatarColor, initials, isoToDisplay, CalendarCell, CalendarTimeCell, Dr
 import type { Student, CampRecord } from './StudentBoardPage';
 import type { Camp } from '../App';
 import { loadHotels } from './CampAccommodationTab';
+import { loadClasses } from './CampClassTab';
 
 interface FamilyMember { id: string; name: string; relation: string; relationCustom?: string; }
 interface RoomEntry { id: string; roomType: string; extraBed: string; }
@@ -122,10 +123,10 @@ function calcStayDays(checkIn: string, checkOut: string): number {
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 export default function StudentDetailPage({
-  student, camps, onBack, onEdit, onStudentUpdate,
+  student, camps, onBack, onEdit, onStudentUpdate, initialCampId,
 }: {
   student: Student; camps: Camp[]; onBack: () => void; onEdit?: () => void;
-  onStudentUpdate?: (updated: Student) => void;
+  onStudentUpdate?: (updated: Student) => void; initialCampId?: string;
 }) {
   const campMap = Object.fromEntries(camps.map(c => [c.id, c]));
 
@@ -136,7 +137,7 @@ export default function StudentDetailPage({
   const campIds = currentId
     ? (recordCampIds.includes(currentId) ? [currentId, ...otherIds] : [currentId, ...recordCampIds.slice().reverse()])
     : otherIds;
-  const [activeTab, setActiveTab] = useState(student.history.current_camp_id || campIds[0] || '');
+  const [activeTab, setActiveTab] = useState(initialCampId || student.history.current_camp_id || campIds[0] || '');
   const [openCell,  setOpenCell]  = useState<string | null>(null);
   const [ftOpenCell, setFtOpenCell] = useState<string | null>(null);
 
@@ -379,10 +380,13 @@ export default function StudentDetailPage({
                   </div>
                 </div>
                 <div style={{ flex: 1, padding: '16px 16px 0 0', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <span style={{ fontSize: 12, color: '#73808F', fontFamily: 'var(--font-ko)' }}>강사</span>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-                    {camp.teachers?.map(t => <Pill key={t} label={t} />) ?? <span style={{ fontSize: 14, color: '#21262E' }}>-</span>}
-                  </div>
+                  <span style={{ fontSize: 12, color: '#73808F', fontFamily: 'var(--font-ko)' }}>소속 클래스</span>
+                  {(() => {
+                    const cls = loadClasses(activeTab).find(c => c.studentIds.includes(student.id));
+                    return cls
+                      ? <span style={{ display: 'inline-flex', alignItems: 'center', padding: '3px 10px', borderRadius: 100, background: '#EEF3FD', color: '#2F6FED', fontSize: 12, fontFamily: 'var(--font-ko)', alignSelf: 'flex-start' }}>{cls.name}</span>
+                      : <span style={{ fontSize: 14, color: '#21262E' }}>-</span>;
+                  })()}
                 </div>
                 <div style={{ flex: 1, padding: '16px 16px 0 0', display: 'flex', flexDirection: 'column', gap: 6 }}>
                   <span style={{ fontSize: 12, color: '#73808F', fontFamily: 'var(--font-ko)' }}>정원</span>
@@ -616,7 +620,7 @@ export default function StudentDetailPage({
                         style={{ border: 'none', outline: 'none', background: 'transparent', fontSize: 12, fontFamily: 'var(--font-ko)', color: row.pickDrop ? '#1A1D23' : '#B7BECA', cursor: 'pointer', flexShrink: 0 }}
                       >
                         <option value="" disabled>선택</option>
-                        {['픽업', '드랍', '없음'].map(o => <option key={o} value={o}>{o}</option>)}
+                        {(rowKey === 'dep' ? ['픽업', '없음'] : ['드랍', '없음']).map(o => <option key={o} value={o}>{o}</option>)}
                       </select>
                       {row.pickDrop && row.pickDrop !== '없음' && (
                         <>

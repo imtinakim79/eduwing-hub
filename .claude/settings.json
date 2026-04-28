@@ -20,11 +20,20 @@
       "Bash(node -e ' *)",
       "Read(//d/d/2026_Eduwing_Project/eduwing-hub/src/pages/**)",
       "Read(//d/d/2026_Eduwing_Project/eduwing-hub/src/**)",
-      "Read(//d/d/2026_Eduwing_Project/eduwing-hub/**)"
+      "Read(//d/d/2026_Eduwing_Project/eduwing-hub/**)",
+      "Bash(python3 -c \"import sys,json; lines=sys.stdin.read\\(\\).strip\\(\\).split\\('\\\\n'\\); [print\\(json.loads\\(l\\).get\\('content',''\\)[:500] if isinstance\\(json.loads\\(l\\).get\\('content',''\\),str\\) else ''\\) for l in lines[-20:] if l]\")",
+      "Read(//c/Users/user/.claude/projects/d--2026-Eduwing-Project/**)",
+      "Bash(cmd /c \"dir \\\\\"d:\\\\Obsidian Vault\\\\3-스터디\\\\콘텐츠 공유용\\\\\"\")",
+      "Read(//d/Obsidian Vault/3-���͵�/**)",
+      "Read(//d/Obsidian Vault/**)",
+      "Bash(cmd /c \"dir /b \\\\\"d:\\\\\\\\Obsidian Vault\\\\\"\")",
+      "Bash(cmd /c \"dir \\\\\"d:\\\\\\\\Obsidian Vault\\\\\"\")",
+      "Bash(xargs grep *)"
     ],
     "additionalDirectories": [
       "c:\\Users\\user\\Documents\\Obsidian Vault",
-      "d:\\Obsidian Vault\\3-스터디\\콘텐츠 공유용"
+      "d:\\Obsidian Vault\\3-스터디\\콘텐츠 공유용",
+      "d:\\Obsidian Vault\\3-���͵�"
     ]
   }
 }

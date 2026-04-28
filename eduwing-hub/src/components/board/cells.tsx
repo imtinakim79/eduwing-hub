@@ -716,12 +716,12 @@ export function StatusCell({ value, options, cellId, openCell, setOpenCell, onCh
   );
 }
 
-// ── TagList (세로 나열) ────────────────────────────────────────────────────────
+// ── TagList ───────────────────────────────────────────────────────────────────
 export function TagList({ items, color }: { items: string[]; color: string }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, alignContent: 'center' }}>
       {items.map(item => (
-        <span key={item} className="ew-tag ew-tag--blue" style={{ display: 'inline-flex', background: 'var(--color-primary-light)', color }}>
+        <span key={item} className="ew-tag ew-tag--blue" style={{ background: 'var(--color-primary-light)', color }}>
           {item}
         </span>
       ))}

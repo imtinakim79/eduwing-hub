@@ -1,11 +1,13 @@
 // 캠프 등록/수정 페이지 — Figma 488:2855
-import { useState } from 'react';
-import TabCard from '../components/TabCard';
+import { useState, useRef } from 'react';
 import type { CampTab, Camp } from '../App';
 import CampTimetableEdit from './CampTimetableEdit';
-import CampAccommodationTab, { HotelCompletedView, loadHotels } from './CampAccommodationTab';
-import CampStaffTab, { StaffCompletedView } from './CampStaffTab';
-import CampUserBoardPage, { CampUserBoardCompleted } from './CampUserBoardPage';
+import type { TimetableEditHandle } from './CampTimetableEdit';
+import CampAccommodationTab, { loadHotels } from './CampAccommodationTab';
+import CampStaffTab from './CampStaffTab';
+import CampClassTab, { loadClasses } from './CampClassTab';
+import type { ClassLevel } from './CampClassTab';
+import CampUserBoardPage from './CampUserBoardPage';
 import type { Student } from './StudentBoardPage';
 
 const LOCATIONS = ['나트랑', '다낭', '세부', '발리', '방콕', '싱가포르', '코타키나발루'];
@@ -13,13 +15,13 @@ const STATUSES  = ['진행중', '준비중', '종료'];
 
 interface CampForm {
   name: string; code: string; location: string; accommodation: string;
-  capacity: string; staff: string; teachers: string; status: string;
+  capacity: string; staff: string; status: string;
   start_date: string; end_date: string;
 }
 
 const EMPTY_FORM: CampForm = {
   name: '', code: '', location: '', accommodation: '',
-  capacity: '', staff: '', teachers: '', status: '',
+  capacity: '', staff: '', status: '',
   start_date: '', end_date: '',
 };
 
@@ -65,31 +67,7 @@ function SelectInput({ value, onChange, placeholder, options }: { value: string;
   );
 }
 
-// ── 탭 이탈 경고 모달 ─────────────────────────────────────────────────────────
-function LeaveModal({ onConfirm, onCancel }: { onConfirm: () => void; onCancel: () => void }) {
-  return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.35)' }}>
-      <div style={{ background: '#fff', borderRadius: 12, padding: '28px 32px', width: 360, boxShadow: '0 8px 32px rgba(0,0,0,0.18)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <circle cx="10" cy="10" r="9" stroke="#F59E0B" strokeWidth="1.5"/>
-            <path d="M10 6v5M10 13.5v.5" stroke="#F59E0B" strokeWidth="1.5" strokeLinecap="round"/>
-          </svg>
-          <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--color-text-primary)', fontFamily: 'var(--font-ko)' }}>저장되지 않은 변경사항</span>
-        </div>
-        <p style={{ fontSize: 13, color: 'var(--color-text-sub)', fontFamily: 'var(--font-ko)', lineHeight: 1.8, margin: '0 0 24px' }}>
-          현재 수정 중인 내용이 저장되지 않습니다.<br />탭을 이동하시겠습니까?
-        </p>
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-          <button className="ew-btn ew-btn--ghost ew-btn--sm" onClick={onCancel}>취소</button>
-          <button className="ew-btn ew-btn--primary ew-btn--sm" onClick={onConfirm}>이동</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-const TABS: CampTab[] = ['학생명단', '시간표', '숙박정보', '스탭&강사'];
+const TABS: CampTab[] = ['Students', 'Accommodation', 'Staff', 'Class', 'Timetable'];
 
 // ── Main ─────────────────────────────────────────────────────────────────────
 interface Props {
@@ -101,73 +79,20 @@ interface Props {
   onTabChange: (tab: CampTab) => void;
   onBack: () => void;
   onSave: (camp: Camp) => void;
+  agents?: { id: string; name: string }[];
 }
 
-export default function CampCreatePage({ camps, editCampId, allStudents = [], onStudentUpdate, activeTab, onTabChange, onBack, onSave }: Props) {
+export default function CampCreatePage({ camps, editCampId, allStudents = [], onStudentUpdate, activeTab, onTabChange, onBack, onSave, agents = [] }: Props) {
   const existingCamp = editCampId ? camps.find(c => c.id === editCampId) ?? null : null;
 
-  // draftId: 신규 캠프는 마운트 시 생성, 수정 캠프는 editCampId 사용
   const [draftId] = useState<string>(() => editCampId ?? `CAMP-${Date.now()}`);
 
-  const [resetKeys, setResetKeys] = useState<Record<CampTab, number>>({
-    '학생명단': 0, '시간표': 0, '숙박정보': 0, '스탭&강사': 0,
+  const [classes,                setClasses]                = useState<ClassLevel[]>(() => loadClasses(editCampId ?? ''));
+  const [activeTimetableClassId, setActiveTimetableClassId] = useState<string | null>(() => {
+    const cls = loadClasses(editCampId ?? '');
+    return cls.length > 0 ? cls[0].id : null;
   });
-  const [tabEditing, setTabEditing] = useState<Record<CampTab, boolean>>({
-    '학생명단': false, '시간표': false, '숙박정보': false, '스탭&강사': false,
-  });
-  // 신규 캠프: 각 탭이 한 번 이상 저장되었는지 추적
-  const [tabDone, setTabDone] = useState<Record<CampTab, boolean>>({
-    '학생명단': !!editCampId, '시간표': !!editCampId, '숙박정보': !!editCampId, '스탭&강사': !!editCampId,
-  });
-  const [pendingTab,    setPendingTab]    = useState<CampTab | null>(null);
-  const [dataSnapshots, setDataSnapshots] = useState<Partial<Record<CampTab, string | null>>>({});
-
-  const DATA_KEY: Partial<Record<CampTab, string>> = {
-    '숙박정보':  `ew-hotels-${draftId}`,
-    '스탭&강사': `ew-campstaff-${draftId}`,
-    '시간표':    `ew-timetable-${draftId}`,
-  };
-
-  function handleTabEditingChange(tab: CampTab, editing: boolean) {
-    setTabEditing(prev => ({ ...prev, [tab]: editing }));
-    if (editing) {
-      const key = DATA_KEY[tab];
-      try { setDataSnapshots(prev => ({ ...prev, [tab]: key ? localStorage.getItem(key) : null })); } catch {}
-    } else {
-      setTabDone(prev => ({ ...prev, [tab]: true }));
-      setDataSnapshots(prev => ({ ...prev, [tab]: undefined }));
-    }
-  }
-
-  function handleTabSwitch(tab: CampTab) {
-    if (tab === activeTab) return;
-    if (tabEditing[activeTab]) { setPendingTab(tab); return; }
-    onTabChange(tab);
-  }
-
-  function confirmLeave() {
-    if (!pendingTab) return;
-    const key = DATA_KEY[activeTab];
-    const snap = dataSnapshots[activeTab];
-    if (key) {
-      try {
-        if (snap === undefined || snap === null) localStorage.removeItem(key);
-        else localStorage.setItem(key, snap);
-      } catch {}
-    }
-    setResetKeys(prev => ({ ...prev, [activeTab]: prev[activeTab] + 1 }));
-    setTabEditing(prev => ({ ...prev, [activeTab]: false }));
-    setDataSnapshots(prev => ({ ...prev, [activeTab]: undefined }));
-    onTabChange(pendingTab);
-    setPendingTab(null);
-  }
-
-  function handleReset(tab: CampTab) {
-    if (tab === '시간표')    try { localStorage.removeItem(`ew-timetable-${draftId}`); } catch {}
-    if (tab === '숙박정보')  try { localStorage.removeItem(`ew-hotels-${draftId}`); } catch {}
-    if (tab === '스탭&강사') try { localStorage.removeItem(`ew-campstaff-${draftId}`); } catch {}
-    setResetKeys(prev => ({ ...prev, [tab]: prev[tab] + 1 }));
-  }
+  const timetableEditRef = useRef<TimetableEditHandle>(null);
 
   const [form, setForm] = useState<CampForm>(() => existingCamp ? {
     name:          existingCamp.name          ?? '',
@@ -176,7 +101,6 @@ export default function CampCreatePage({ camps, editCampId, allStudents = [], on
     accommodation: existingCamp.accommodation ?? '',
     capacity:      String(existingCamp.capacity ?? ''),
     staff:         (existingCamp.staff ?? []).join(', '),
-    teachers:      (existingCamp.teachers ?? []).join(', '),
     status:        existingCamp.status        ?? '',
     start_date:    existingCamp.start_date    ?? '',
     end_date:      existingCamp.end_date      ?? '',
@@ -186,18 +110,10 @@ export default function CampCreatePage({ camps, editCampId, allStudents = [], on
     return (v: string) => setForm(prev => ({ ...prev, [field]: v }));
   }
 
-  const doneCount = Object.values(tabDone).filter(Boolean).length;
-  const allTabsDone = doneCount === TABS.length;
-  const isNew = !editCampId;
-
   function handleSave() {
     if (!form.name.trim()) { alert('캠프명을 입력해주세요.'); return; }
     if (!form.location)    { alert('지역을 선택해주세요.'); return; }
     if (!form.status)      { alert('상태를 선택해주세요.'); return; }
-    if (isNew && !allTabsDone) {
-      alert(`모든 탭을 저장한 후 최종 저장해주세요.\n현재 ${doneCount}/4 탭 완료`);
-      return;
-    }
     const hotels = loadHotels(draftId);
     const primaryHotel = hotels.find(h => h.name.trim())?.name ?? form.accommodation;
     const camp: Camp = {
@@ -210,15 +126,13 @@ export default function CampCreatePage({ camps, editCampId, allStudents = [], on
       status:        form.status,
       start_date:    form.start_date || existingCamp?.start_date || '',
       end_date:      form.end_date   || existingCamp?.end_date   || '',
-      staff:         form.staff.split(',').map(s => s.trim()).filter(Boolean),
-      teachers:      form.teachers.split(',').map(s => s.trim()).filter(Boolean),
+      staff:         form.staff.split(',').map((s: string) => s.trim()).filter(Boolean),
     };
     onSave(camp);
   }
 
   return (
     <div style={{ minWidth: 1440, overflowX: 'auto' }}>
-      {pendingTab && <LeaveModal onConfirm={confirmLeave} onCancel={() => setPendingTab(null)} />}
 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 30px', borderBottom: '1px solid var(--color-border-table)', background: '#fff' }}>
@@ -231,19 +145,8 @@ export default function CampCreatePage({ camps, editCampId, allStudents = [], on
         <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--color-text-primary)', fontFamily: 'var(--font-ko)', flex: 1 }}>
           {editCampId ? '캠프 수정' : '캠프 등록'}
         </span>
-        {isNew && (
-          <span style={{ fontSize: 12, color: allTabsDone ? 'var(--color-success)' : 'var(--color-text-muted)', fontFamily: 'var(--font-ko)' }}>
-            {doneCount}/4 탭 완료
-          </span>
-        )}
         <button className="ew-btn ew-btn--ghost ew-btn--sm" onClick={onBack}>취소</button>
-        <button
-          className="ew-btn ew-btn--primary ew-btn--sm"
-          onClick={handleSave}
-          style={{ opacity: isNew && !allTabsDone ? 0.5 : 1 }}
-        >
-          저장
-        </button>
+        <button className="ew-btn ew-btn--primary ew-btn--sm" onClick={handleSave}>저장</button>
       </div>
 
       <div style={{ padding: '24px 30px', display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -284,9 +187,6 @@ export default function CampCreatePage({ camps, editCampId, allStudents = [], on
             <Field label="스탭">
               <DisabledInput value={form.staff} placeholder="스탭&강사 탭에서 자동 입력" />
             </Field>
-            <Field label="강사">
-              <DisabledInput value={form.teachers} placeholder="스탭&강사 탭에서 자동 입력" />
-            </Field>
             <Field label="상태" required>
               <SelectInput value={form.status} onChange={set('status')} placeholder="현재 상태를 선택해주세요." options={STATUSES} />
             </Field>
@@ -297,74 +197,95 @@ export default function CampCreatePage({ camps, editCampId, allStudents = [], on
         {/* 탭 */}
         <div style={{ background: '#fff', border: '1px solid var(--color-border-table)', borderRadius: 8 }}>
           <div style={{ display: 'flex', borderBottom: '1px solid var(--color-border-table)' }}>
-            {TABS.map(tab => (
-              <button key={tab} onClick={() => handleTabSwitch(tab)} style={{
-                padding: '12px 20px', fontSize: 14, fontFamily: 'var(--font-ko)',
-                fontWeight: activeTab === tab ? 600 : 400,
-                color: activeTab === tab ? 'var(--color-primary)' : 'var(--color-text-sub)',
-                background: 'none', border: 'none',
-                borderBottom: activeTab === tab ? '2px solid var(--color-primary)' : '2px solid transparent',
-                cursor: 'pointer', marginBottom: -1,
-              }}>
-                {tab}
-                {isNew && tabDone[tab] && (
-                  <span style={{ marginLeft: 6, display: 'inline-block', width: 7, height: 7, borderRadius: '50%', background: 'var(--color-success)', verticalAlign: 'middle' }} />
-                )}
-              </button>
-            ))}
+            {TABS.map(tab => {
+              const disabled = tab === 'Timetable' && classes.length === 0;
+              return (
+                <button key={tab}
+                  onClick={() => !disabled && onTabChange(tab)}
+                  disabled={disabled}
+                  title={disabled ? '클래스를 먼저 추가해주세요' : undefined}
+                  style={{
+                    padding: '12px 20px', fontSize: 14, fontFamily: 'var(--font-ko)',
+                    fontWeight: activeTab === tab ? 600 : 400,
+                    color: disabled ? '#C8D0D8' : activeTab === tab ? 'var(--color-primary)' : 'var(--color-text-sub)',
+                    background: 'none', border: 'none',
+                    borderBottom: activeTab === tab ? '2px solid var(--color-primary)' : '2px solid transparent',
+                    cursor: disabled ? 'not-allowed' : 'pointer', marginBottom: -1,
+                  }}>
+                  {tab}
+                </button>
+              );
+            })}
           </div>
 
           <div>
-            {activeTab === '학생명단' && (
-              <TabCard tab="학생명단" campId={draftId} onReset={() => handleReset('학생명단')}
-                completedView={<CampUserBoardCompleted campId={draftId} students={allStudents} />}
-                onEditingChange={e => handleTabEditingChange('학생명단', e)}
-              >
-                <CampUserBoardPage key={resetKeys['학생명단']} campId={draftId} students={allStudents} onStudentUpdate={onStudentUpdate} />
-              </TabCard>
+            {activeTab === 'Students' && (
+              <CampUserBoardPage campId={draftId} students={allStudents} onStudentUpdate={onStudentUpdate} agents={agents} />
             )}
 
-            {activeTab === '시간표' && (
-              <TabCard tab="시간표" campId={draftId} onReset={() => handleReset('시간표')}
-                onEditingChange={e => handleTabEditingChange('시간표', e)}
-              >
-                <CampTimetableEdit key={resetKeys['시간표']} campId={draftId}
-                  startDate={existingCamp?.start_date} endDate={existingCamp?.end_date}
-                  onDateRangeChange={(s, e) => setForm(prev => ({ ...prev, start_date: s, end_date: e }))} />
-              </TabCard>
+            {activeTab === 'Accommodation' && (
+              <CampAccommodationTab
+                campId={draftId}
+                onHotelsChange={hotels => {
+                  const primary = hotels.find(h => h.name.trim())?.name ?? '';
+                  if (primary) setForm(prev => ({ ...prev, accommodation: primary }));
+                }}
+              />
             )}
 
-            {activeTab === '숙박정보' && (
-              <TabCard tab="숙박정보" campId={draftId} onReset={() => handleReset('숙박정보')}
-                completedView={<HotelCompletedView campId={draftId} />}
-                onEditingChange={e => handleTabEditingChange('숙박정보', e)}
-              >
-                <CampAccommodationTab
-                  key={resetKeys['숙박정보']}
+            {activeTab === 'Staff' && (
+              <CampStaffTab
+                campId={draftId}
+                onStaffChange={staffNames => setForm(prev => ({ ...prev, staff: staffNames.join(', ') }))}
+              />
+            )}
+
+            {activeTab === 'Class' && (
+              <CampClassTab campId={draftId} students={allStudents}
+                onClassesChange={updated => {
+                  setClasses(updated);
+                  if (updated.length > 0 && !updated.find(c => c.id === activeTimetableClassId)) {
+                    setActiveTimetableClassId(updated[0].id);
+                  }
+                }}
+              />
+            )}
+
+            {activeTab === 'Timetable' && (
+              <div>
+                {/* Class subtabs */}
+                <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--color-border-table)', background: '#FAFBFF', padding: '0 16px' }}>
+                  {classes.map(cls => (
+                    <button
+                      key={cls.id}
+                      onClick={() => {
+                        timetableEditRef.current?.flush();
+                        setActiveTimetableClassId(cls.id);
+                      }}
+                      style={{
+                        padding: '8px 16px', fontSize: 13, fontFamily: 'var(--font-ko)',
+                        fontWeight: cls.id === activeTimetableClassId ? 600 : 400,
+                        color: cls.id === activeTimetableClassId ? 'var(--color-primary)' : 'var(--color-text-sub)',
+                        background: 'none', border: 'none',
+                        borderBottom: cls.id === activeTimetableClassId ? '2px solid var(--color-primary)' : '2px solid transparent',
+                        cursor: 'pointer', marginBottom: -1,
+                      }}
+                    >
+                      {cls.name || '(미입력)'}
+                      {cls.teacher && <span style={{ fontSize: 11, color: 'var(--color-text-muted)', marginLeft: 6 }}>{cls.teacher}</span>}
+                    </button>
+                  ))}
+                </div>
+                <CampTimetableEdit
+                  ref={timetableEditRef}
+                  key={activeTimetableClassId}
                   campId={draftId}
-                  onHotelsChange={hotels => {
-                    const primary = hotels.find(h => h.name.trim())?.name ?? '';
-                    if (primary) setForm(prev => ({ ...prev, accommodation: primary }));
-                  }}
+                  classId={activeTimetableClassId ?? undefined}
+                  startDate={existingCamp?.start_date}
+                  endDate={existingCamp?.end_date}
+                  onDateRangeChange={(s, e) => setForm(prev => ({ ...prev, start_date: s, end_date: e }))}
                 />
-              </TabCard>
-            )}
-
-            {activeTab === '스탭&강사' && (
-              <TabCard tab="스탭&강사" campId={draftId} onReset={() => handleReset('스탭&강사')}
-                completedView={<StaffCompletedView campId={draftId} />}
-                onEditingChange={e => handleTabEditingChange('스탭&강사', e)}
-              >
-                <CampStaffTab key={resetKeys['스탭&강사']} campId={draftId}
-                  onStaffChange={(staffNames, teacherNames) => {
-                    setForm(prev => ({
-                      ...prev,
-                      staff:    staffNames.join(', '),
-                      teachers: teacherNames.join(', '),
-                    }));
-                  }}
-                />
-              </TabCard>
+              </div>
             )}
           </div>
         </div>

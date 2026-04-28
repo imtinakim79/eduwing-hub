@@ -3,16 +3,16 @@ import { useState, useMemo } from 'react';
 import rawStudents from '../data/students.json';
 import rawCamps from '../data/camps.json';
 import Pagination from '../components/Pagination';
-import { avatarColor, initials, isoToDisplay, CalendarCell, DropdownCell } from '../components/board/cells';
+import { avatarColor, initials, isoToDisplay, CalendarCell } from '../components/board/cells';
 import { FilterPill } from '../components/FilterPill';
 import type { Student } from './StudentBoardPage';
+import { loadClasses, saveClasses } from './CampClassTab';
+import type { ClassLevel } from './CampClassTab';
 
 interface Camp { id: string; name: string; staff: string[]; }
 
 const rawStudentsArr = rawStudents as unknown as Student[];
 const allCamps = rawCamps as Camp[];
-
-const CLASSES = ['Class 1', 'Class 2', 'Class 3', 'Class 4'];
 
 const TAG_COLORS = [
   { bg: '#E0E9FE', color: '#3B82F6' },
@@ -22,7 +22,10 @@ const TAG_COLORS = [
 ];
 
 function relLabel(r: string) {
-  return r === 'Father' ? '아빠' : r === 'Mother' ? '엄마' : r || '기타';
+  if (r === 'Father' || r === '아빠') return '아빠';
+  if (r === 'Mother' || r === '엄마') return '엄마';
+  if (r === 'Etc'   || r === '기타') return '기타';
+  return r || '기타';
 }
 
 // ── 학생 데이터 헬퍼 ──────────────────────────────────────────────────────────
@@ -73,19 +76,26 @@ function FlightRow({ label, flightNo, date, time }: { label: string; flightNo: s
   );
 }
 
-function PickupRow({ label, status }: { label: string; status: string }) {
+function PickupRow({ label, status, place }: { label: string; status: string; place?: string }) {
+  const hasPickup = status && status !== '없음';
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
       <span style={{ fontSize: 13, color: 'var(--color-text-primary)', whiteSpace: 'nowrap' }}>{label}</span>
       <div style={{ width: 1, height: 14, background: 'var(--color-border-table)', flexShrink: 0 }} />
-      <span style={{ fontSize: 12, color: 'var(--color-text-sub)', whiteSpace: 'nowrap' }}>{status || '-'}</span>
+      {hasPickup && place
+        ? <span style={{ fontSize: 12, color: 'var(--color-text-muted)', whiteSpace: 'nowrap' }}>{place}</span>
+        : <span style={{ fontSize: 12, color: 'var(--color-text-muted)', whiteSpace: 'nowrap' }}>-</span>
+      }
     </div>
   );
 }
 
 // ── Completed read-only board ─────────────────────────────────────────────────
-export function CampUserBoardCompleted({ campId, students }: { campId: string; students: Student[] }) {
+export function CampUserBoardCompleted({ campId, students, agents = [] }: { campId: string; students: Student[]; agents?: { id: string; name: string }[] }) {
+  const agentIdToName = Object.fromEntries(agents.map(a => [a.id, a.name]));
   const [query, setQuery] = useState('');
+  const classes: ClassLevel[] = useMemo(() => loadClasses(campId), [campId]);
+  function getStudentClass(studentId: string) { return classes.find(c => c.studentIds.includes(studentId)); }
   const allCampStudents = students.filter(s => s.history.current_camp_id === campId);
   const campStudents = query
     ? allCampStudents.filter(s => s.name_ko.includes(query) || s.name_en.toLowerCase().includes(query.toLowerCase()))
@@ -173,20 +183,24 @@ export function CampUserBoardCompleted({ campId, students }: { campId: string; s
                         <span style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>{s.guardian.email}</span>
                       </div>
                     </td>
-                    <td style={TD}><span style={{ fontSize: 13, fontFamily: 'var(--font-en)' }}>{s.history.agent_id}</span></td>
+                    <td style={TD}><span style={{ fontSize: 13, fontFamily: 'var(--font-en)' }}>{agentIdToName[s.history.agent_id] ?? s.history.agent_id}</span></td>
                     <td style={TD}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                         {familyMembers.length > 0
                           ? familyMembers.map((f, i) => (
                               <span key={i} className="ew-tag" style={{ background: TAG_COLORS[i % TAG_COLORS.length].bg, color: TAG_COLORS[i % TAG_COLORS.length].color }}>
-                                {f.name}({f.relation})
+                                {f.name}({f.relation === '기타' ? ((f as any).relationCustom || '기타') : f.relation})
                               </span>
                             ))
                           : <span style={{ fontSize: 12, color: '#D1D5DB' }}>-</span>
                         }
                       </div>
                     </td>
-                    <td style={TD}><span style={{ fontSize: 13 }}>-</span></td>
+                    <td style={TD}>
+                      {(() => { const cls = getStudentClass(s.id); return cls
+                        ? <span className="ew-tag" style={{ background: '#EEF3FD', color: '#2F6FED' }}>{cls.name}</span>
+                        : <span style={{ fontSize: 12, color: '#D1D5DB' }}>-</span>; })()}
+                    </td>
                     <td style={TD}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                         {rooms.length > 0
@@ -208,8 +222,8 @@ export function CampUserBoardCompleted({ campId, students }: { campId: string; s
                     </td>
                     <td style={TD}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                        <PickupRow label="Pick up" status={dep.pickDrop ?? ''} />
-                        <PickupRow label="Drop"    status={ret.pickDrop ?? ''} />
+                        <PickupRow label="Pick up" status={dep.pickDrop ?? ''} place={dep.pickDropPlace ?? ''} />
+                        <PickupRow label="Drop"    status={ret.pickDrop ?? ''} place={ret.pickDropPlace ?? ''} />
                       </div>
                     </td>
                     <td style={TD}><span style={{ fontSize: 12, color: '#D1D5DB' }}>-</span></td>
@@ -290,9 +304,12 @@ function StudentPickerModal({ campId, allStudents, onAdd, onClose }: {
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
-export default function CampUserBoardPage({ campId: propCampId, students: propStudents, onStudentUpdate }: {
+export default function CampUserBoardPage({ campId: propCampId, students: propStudents, onStudentUpdate, onStudentClick, agents = [] }: {
   campId?: string; students?: Student[]; onStudentUpdate?: (s: Student) => void;
+  onStudentClick?: (studentId: string) => void;
+  agents?: { id: string; name: string }[];
 }) {
+  const agentIdToName = useMemo(() => Object.fromEntries(agents.map(a => [a.id, a.name])), [agents]);
   const [campId,     setCampId]    = useState(propCampId ?? allCamps[0]?.id ?? '');
   const [query,      setQuery]     = useState('');
   const [selected,   setSelected]  = useState<Set<string>>(new Set());
@@ -314,6 +331,9 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
     return [sel, extra].filter(Boolean).join(' ') || undefined;
   }
 
+  const classes: ClassLevel[] = useMemo(() => loadClasses(campId), [campId]);
+  function getStudentClass(studentId: string) { return classes.find(c => c.studentIds.includes(studentId)); }
+
   const campStudents = useMemo(() => {
     let list = allStudentsSource.filter(s => s.history.current_camp_id === campId);
     if (query) { const q = query.toLowerCase(); list = list.filter(s => s.name_ko.includes(q) || s.name_en.toLowerCase().includes(q)); }
@@ -322,13 +342,41 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
 
   const pageData   = campStudents.slice((page - 1) * perPage, page * perPage);
   const allChecked = pageData.length > 0 && pageData.every(s => selected.has(s.id));
-  const agentOpts  = useMemo(() => [...new Set(allStudentsSource.map(s => s.history.agent_id))], [allStudentsSource]);
 
   function handlePickerAdd(picked: Student[]) {
     if (!onStudentUpdate) return;
     picked.forEach(s => onStudentUpdate({ ...s, history: { ...s.history, current_camp_id: campId } }));
     setShowPicker(false);
   }
+
+  function handleRemoveStudents() {
+    if (!onStudentUpdate || selected.size === 0) return;
+    const targets = campStudents.filter(s => selected.has(s.id));
+    const names = targets.map(s => s.name_ko).join(', ');
+    const ok = window.confirm(
+      `[${names}] 총 ${targets.length}명을 캠프에서 제거합니다.\n\n항공편, 숙소, 클래스 배정, 동반 가족 정보가 모두 삭제됩니다.\n계속하시겠습니까?`
+    );
+    if (!ok) return;
+
+    // 클래스 배정에서 제거
+    const updatedClasses = loadClasses(campId).map(c => ({
+      ...c,
+      studentIds: c.studentIds.filter(id => !selected.has(id)),
+    }));
+    saveClasses(campId, updatedClasses);
+
+    // 각 학생 데이터 정리
+    targets.forEach(s => {
+      try { localStorage.removeItem(`ew-family-${s.id}`); } catch {}
+      const updatedRecords = (s.camp_records ?? []).filter(r => r.camp_id !== campId);
+      const updatedHistory = s.history.current_camp_id === campId
+        ? { ...s.history, current_camp_id: '' }
+        : s.history;
+      onStudentUpdate({ ...s, camp_records: updatedRecords, history: updatedHistory });
+    });
+    setSelected(new Set());
+  }
+
   function toggleAll(checked: boolean) { setSelected(checked ? new Set(pageData.map(s => s.id)) : new Set()); }
   function toggleRow(id: string) { const n = new Set(selected); n.has(id) ? n.delete(id) : n.add(id); setSelected(n); }
 
@@ -359,7 +407,7 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '8px 30px', border: '1px solid #E5E7EB', background: '#fff', justifyContent: 'flex-end', minWidth: 1440 }}>
         <span style={{ flex: 1, fontSize: 12, color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)', lineHeight: '26px' }}>{selected.size > 0 ? `${selected.size}명 선택됨` : ''}</span>
         {onStudentUpdate && <button className="ew-btn ew-btn--primary ew-btn--xsm" onClick={() => setShowPicker(true)}>학생 추가</button>}
-        {selected.size > 0 && <button className="ew-btn ew-btn--danger ew-btn--xsm" onClick={() => setSelected(new Set())}>삭제</button>}
+        {selected.size > 0 && onStudentUpdate && <button className="ew-btn ew-btn--danger ew-btn--xsm" onClick={handleRemoveStudents}>캠프에서 제거</button>}
         <button className="ew-btn ew-btn--secondary ew-btn--xsm">엑셀 업로드</button>
         <button className="ew-btn ew-btn--secondary ew-btn--xsm">엑셀 다운로드</button>
       </div>
@@ -397,9 +445,9 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
                 </td></tr>
               ) : pageData.map(s => {
                 const isRowSel = selected.has(s.id);
-                const agentVal = getEdit(s.id, 'agent', s.history.agent_id);
-                const classVal = getEdit(s.id, 'class', '');
+                const agentVal = agentIdToName[getEdit(s.id, 'agent', s.history.agent_id)] ?? getEdit(s.id, 'agent', s.history.agent_id);
                 const payVal   = getEdit(s.id, 'pay',   '');
+                const studentClass = getStudentClass(s.id);
 
                 const rec = getCampRecord(s, campId);
                 const familyRaw = loadStudentFamily(s.id);
@@ -414,12 +462,13 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
                     <td style={{ ...TD_STYLE, textAlign: 'center', padding: '0 12px' }} onClick={e => e.stopPropagation()}>
                       <input type="checkbox" className="ew-checkbox" checked={isRowSel} onChange={() => toggleRow(s.id)} />
                     </td>
-                    <td style={{ ...TD_STYLE, padding: '0 16px' }}>
+                    <td style={{ ...TD_STYLE, padding: '0 16px', cursor: onStudentClick ? 'pointer' : 'default' }}
+                        onClick={onStudentClick ? () => onStudentClick(s.id) : undefined}>
                       <div className="ew-camp-thumbnail-card">
                         <div className="ew-avatar" style={{ background: avatarColor(s.name_en), width: 32, height: 32, fontSize: 12 }}>{initials(s.name_en)}</div>
                         <div className="ew-camp-thumbnail-info">
                           <div className="ew-camp-thumbnail-name-row">
-                            <span className="ew-camp-thumbnail-name-en">{s.name_en}</span>
+                            <span className="ew-camp-thumbnail-name-en" style={{ color: onStudentClick ? 'var(--color-primary)' : undefined }}>{s.name_en}</span>
                             <span className="ew-camp-thumbnail-name-ko">{s.name_ko}</span>
                           </div>
                           <div className="ew-camp-thumbnail-meta-row">
@@ -435,29 +484,25 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
                         <span style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>{s.guardian.email}</span>
                       </div>
                     </td>
-                    <td className={tdCls(s.id, 'agent', 'ew-cell--interactive')} style={{ ...TD_STYLE, padding: '0 12px' }}>
-                      <DropdownCell value={agentVal} options={agentOpts} cellId={`${s.id}:agent`}
-                        openCell={openCell} setOpenCell={setOpenCell}
-                        onChange={v => setEdit(s.id, 'agent', v)}
-                        onCellClick={() => setActiveCell(`${s.id}:agent`)} onEditDone={() => setActiveCell(null)} />
+                    <td style={TD_STYLE}>
+                      <span style={{ fontSize: 13, fontFamily: 'var(--font-en)' }}>{agentVal}</span>
                     </td>
                     <td style={TD_STYLE}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                         {familyMembers.length > 0
                           ? familyMembers.map((f, i) => (
                               <span key={i} className="ew-tag" style={{ background: TAG_COLORS[i % TAG_COLORS.length].bg, color: TAG_COLORS[i % TAG_COLORS.length].color }}>
-                                {f.name}({f.relation})
+                                {f.name}({f.relation === '기타' ? ((f as any).relationCustom || '기타') : f.relation})
                               </span>
                             ))
                           : <span style={{ fontSize: 12, color: '#D1D5DB' }}>-</span>
                         }
                       </div>
                     </td>
-                    <td className={tdCls(s.id, 'class', 'ew-cell--interactive')} style={{ ...TD_STYLE, padding: '0 12px' }}>
-                      <DropdownCell value={classVal} options={CLASSES} cellId={`${s.id}:class`}
-                        openCell={openCell} setOpenCell={setOpenCell}
-                        onChange={v => setEdit(s.id, 'class', v)}
-                        onCellClick={() => setActiveCell(`${s.id}:class`)} onEditDone={() => setActiveCell(null)} />
+                    <td style={TD_STYLE}>
+                      {studentClass
+                        ? <span className="ew-tag" style={{ background: '#EEF3FD', color: '#2F6FED' }}>{studentClass.name}</span>
+                        : <span style={{ fontSize: 12, color: '#D1D5DB' }}>-</span>}
                     </td>
                     <td style={TD_STYLE}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -480,8 +525,8 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
                     </td>
                     <td style={TD_STYLE}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                        <PickupRow label="Pick up" status={dep.pickDrop ?? ''} />
-                        <PickupRow label="Drop"    status={ret.pickDrop ?? ''} />
+                        <PickupRow label="Pick up" status={dep.pickDrop ?? ''} place={dep.pickDropPlace ?? ''} />
+                        <PickupRow label="Drop"    status={ret.pickDrop ?? ''} place={ret.pickDropPlace ?? ''} />
                       </div>
                     </td>
                     <td className={tdCls(s.id, 'pay', 'ew-cell--interactive')} style={{ ...TD_STYLE, padding: '0 12px' }}>

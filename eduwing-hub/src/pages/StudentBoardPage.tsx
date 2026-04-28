@@ -4,6 +4,7 @@ import { useState, useMemo, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import rawStudents from '../data/students.json';
 import rawCamps from '../data/camps.json';
+import type { Agent } from './AgentBoardPage';
 import Pagination from '../components/Pagination';
 import BoardTable from '../components/board/BoardTable';
 import { FilterPill } from '../components/FilterPill';
@@ -48,6 +49,7 @@ const campMap  = Object.fromEntries(allCamps.map(c => [c.id, c]));
 function relLabel(r: string) {
   if (r === 'Father' || r === '아빠') return '아빠';
   if (r === 'Mother' || r === '엄마') return '엄마';
+  if (r === 'Etc'   || r === '기타') return '기타';
   return r || '기타';
 }
 
@@ -74,19 +76,16 @@ const studentColumns: ColumnDef<Student>[] = [
     setValue: (_, v) => ({ field: 'birth_date', value: v }),
   },
   {
-    key: 'guardian', label: '보호자', width: 120, type: 'text',
-    getValue: (r, e) => e['guardian'] ?? `${r.guardian.name}(${relLabel(r.guardian.relation)})`,
-    setValue: (_, v) => ({ field: 'guardian', value: v }),
+    key: 'guardian', label: '보호자', width: 120, type: 'readonly',
+    getValue: (r) => `${r.guardian.name}(${relLabel(r.guardian.relation)})`,
   },
   {
-    key: 'contact', label: '연락처', width: 135, type: 'text',
-    getValue: (r, e) => e['contact'] ?? r.guardian.contact,
-    setValue: (_, v) => ({ field: 'contact', value: v }),
+    key: 'contact', label: '연락처', width: 135, type: 'readonly',
+    getValue: (r) => r.guardian.contact,
   },
   {
-    key: 'email', label: 'Email', width: 160, type: 'text',
-    getValue: (r, e) => e['email'] ?? r.guardian.email,
-    setValue: (_, v) => ({ field: 'email', value: v }),
+    key: 'email', label: 'Email', width: 160, type: 'readonly',
+    getValue: (r) => r.guardian.email,
   },
   {
     key: 'joined_date', label: '가입일', width: 109, sortKey: 'joined', type: 'calendar',
@@ -95,20 +94,15 @@ const studentColumns: ColumnDef<Student>[] = [
   },
   {
     key: 'agent_id', label: 'Agent', width: 130, type: 'dropdown',
-    options: (all) => [...new Set(all.map(s => s.history.agent_id))],
+    options: [],
     getValue: (r, e) => e['agent_id'] ?? r.history.agent_id,
     setValue: (_, v) => ({ field: 'agent_id', value: v }),
   },
   {
-    key: 'current_camp_id', label: '참여중인 캠프', width: 155, type: 'dropdown',
-    options: allCamps.map(c => c.name),
+    key: 'current_camp_id', label: '참여중인 캠프', width: 155, type: 'readonly',
     getValue: (r, e) => {
       const id = e['current_camp_id'] ?? r.history.current_camp_id;
       return campMap[id]?.name ?? id;
-    },
-    setValue: (_, v) => {
-      const camp = allCamps.find(c => c.name === v);
-      return { field: 'current_camp_id', value: camp?.id ?? v };
     },
   },
   {
@@ -196,16 +190,20 @@ function rowsToStudents(rows: Record<string, string>[]): Student[] {
 // ── Main ──────────────────────────────────────────────────────────────────────
 export default function StudentBoardPage({
   students = defaultStudents,
+  agents = [],
   onAdd,
   onStudentSelect,
   onStudentsImport,
   onStudentUpdate,
+  onStudentDelete,
 }: {
   students?: Student[];
+  agents?: Agent[];
   onAdd?: () => void;
   onStudentSelect?: (id: string) => void;
   onStudentsImport?: (imported: Student[]) => void;
   onStudentUpdate?: (updated: Student) => void;
+  onStudentDelete?: (ids: string[]) => void;
 }) {
   const [query,       setQuery]       = useState('');
   const [agentFilter, setAgentFilter] = useState('');
@@ -257,7 +255,23 @@ export default function StudentBoardPage({
     else { setSortKey(k); setSortDir('asc'); }
   }
 
-  const agents   = useMemo(() => [...new Set<string>(students.map(s => s.history.agent_id))],   [students]);
+  const agentOpts     = useMemo(() => agents.map(a => a.name), [agents]);
+  const agentNameToId = useMemo(() => Object.fromEntries(agents.map(a => [a.name, a.id])), [agents]);
+  const agentIdToName = useMemo(() => Object.fromEntries(agents.map(a => [a.id, a.name])), [agents]);
+
+  const columns = useMemo(() => studentColumns.map(col =>
+    col.key === 'agent_id'
+      ? {
+          ...col,
+          options: agentOpts,
+          getValue: (r: Student, e: Record<string, string>) => {
+            const id = e['agent_id'] ?? r.history.agent_id;
+            return agentIdToName[id] ?? id;
+          },
+          setValue: (_: Student, v: string) => ({ field: 'agent_id', value: agentNameToId[v] ?? v }),
+        }
+      : col
+  ), [agentOpts, agentIdToName, agentNameToId]);
   const campOpts = useMemo(() => [...new Set<string>(students.map(s => s.history.current_camp_id))], [students]);
 
   const filtered = useMemo(() => {
@@ -300,9 +314,9 @@ export default function StudentBoardPage({
         <FilterPill
           label="Agent"
           values={agentFilter ? [agentFilter] : []}
-          options={agents}
+          options={agentOpts}
           withCheckbox
-          onChange={vs => { setAgentFilter(vs[0] ?? ''); setPage(1); }}
+          onChange={vs => { setAgentFilter(agentNameToId[vs[0]] ?? vs[0] ?? ''); setPage(1); }}
         />
         <FilterPill
           label="Camp"
@@ -322,8 +336,18 @@ export default function StudentBoardPage({
           {selected.size > 0 ? `${selected.size}명 선택됨` : ''}
         </span>
         <button className="ew-btn ew-btn--primary ew-btn--xsm" onClick={onAdd}>학생 추가</button>
-        {selected.size > 0 && (
-          <button className="ew-btn ew-btn--danger ew-btn--xsm" onClick={() => setSelected(new Set())}>삭제</button>
+        {selected.size > 0 && onStudentDelete && (
+          <button className="ew-btn ew-btn--danger ew-btn--xsm" onClick={() => {
+            const targets = students.filter(s => selected.has(s.id));
+            const campNames = [...new Set(
+              targets.flatMap(s => s.camp_records?.map(r => campMap[r.camp_id]?.name ?? r.camp_id) ?? [])
+            )].filter(Boolean);
+            const campLine = campNames.length > 0 ? `\n\n참여 캠프: ${campNames.join(', ')}\n위 캠프에서도 자동으로 제외됩니다.` : '';
+            if (window.confirm(`학생 ${targets.length}명을 삭제합니다.${campLine}\n\n계속하시겠습니까?`)) {
+              onStudentDelete(Array.from(selected));
+              setSelected(new Set());
+            }
+          }}>삭제</button>
         )}
         <button className="ew-btn ew-btn--secondary ew-btn--xsm" onClick={() => uploadRef.current?.click()}>엑셀 업로드</button>
         <button className="ew-btn ew-btn--secondary ew-btn--xsm" onClick={handleDownload}>엑셀 다운로드</button>
@@ -335,7 +359,7 @@ export default function StudentBoardPage({
         <BoardTable
           data={pageData}
           allData={students as Student[]}
-          columns={studentColumns}
+          columns={columns}
           selected={selected}
           onSelectedChange={setSelected}
           sortKey={sortKey}
@@ -344,6 +368,7 @@ export default function StudentBoardPage({
           localEdits={localEdits}
           onEdit={handleEdit}
           onRowClick={onStudentSelect}
+          tableId="students"
         />
         <Pagination
           total={filtered.length}
