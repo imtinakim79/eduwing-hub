@@ -6,7 +6,7 @@ import Pagination from '../components/Pagination';
 import { avatarColor, initials, isoToDisplay, CalendarCell } from '../components/board/cells';
 import { FilterPill } from '../components/FilterPill';
 import type { Student } from './StudentBoardPage';
-import { loadClasses } from './CampClassTab';
+import { loadClasses, saveClasses } from './CampClassTab';
 import type { ClassLevel } from './CampClassTab';
 
 interface Camp { id: string; name: string; staff: string[]; }
@@ -347,6 +347,35 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
     picked.forEach(s => onStudentUpdate({ ...s, history: { ...s.history, current_camp_id: campId } }));
     setShowPicker(false);
   }
+
+  function handleRemoveStudents() {
+    if (!onStudentUpdate || selected.size === 0) return;
+    const targets = campStudents.filter(s => selected.has(s.id));
+    const names = targets.map(s => s.name_ko).join(', ');
+    const ok = window.confirm(
+      `[${names}] 총 ${targets.length}명을 캠프에서 제거합니다.\n\n항공편, 숙소, 클래스 배정, 동반 가족 정보가 모두 삭제됩니다.\n계속하시겠습니까?`
+    );
+    if (!ok) return;
+
+    // 클래스 배정에서 제거
+    const updatedClasses = loadClasses(campId).map(c => ({
+      ...c,
+      studentIds: c.studentIds.filter(id => !selected.has(id)),
+    }));
+    saveClasses(campId, updatedClasses);
+
+    // 각 학생 데이터 정리
+    targets.forEach(s => {
+      try { localStorage.removeItem(`ew-family-${s.id}`); } catch {}
+      const updatedRecords = (s.camp_records ?? []).filter(r => r.camp_id !== campId);
+      const updatedHistory = s.history.current_camp_id === campId
+        ? { ...s.history, current_camp_id: '' }
+        : s.history;
+      onStudentUpdate({ ...s, camp_records: updatedRecords, history: updatedHistory });
+    });
+    setSelected(new Set());
+  }
+
   function toggleAll(checked: boolean) { setSelected(checked ? new Set(pageData.map(s => s.id)) : new Set()); }
   function toggleRow(id: string) { const n = new Set(selected); n.has(id) ? n.delete(id) : n.add(id); setSelected(n); }
 
@@ -377,7 +406,7 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '8px 30px', border: '1px solid #E5E7EB', background: '#fff', justifyContent: 'flex-end', minWidth: 1440 }}>
         <span style={{ flex: 1, fontSize: 12, color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)', lineHeight: '26px' }}>{selected.size > 0 ? `${selected.size}명 선택됨` : ''}</span>
         {onStudentUpdate && <button className="ew-btn ew-btn--primary ew-btn--xsm" onClick={() => setShowPicker(true)}>학생 추가</button>}
-        {selected.size > 0 && <button className="ew-btn ew-btn--danger ew-btn--xsm" onClick={() => setSelected(new Set())}>삭제</button>}
+        {selected.size > 0 && onStudentUpdate && <button className="ew-btn ew-btn--danger ew-btn--xsm" onClick={handleRemoveStudents}>캠프에서 제거</button>}
         <button className="ew-btn ew-btn--secondary ew-btn--xsm">엑셀 업로드</button>
         <button className="ew-btn ew-btn--secondary ew-btn--xsm">엑셀 다운로드</button>
       </div>

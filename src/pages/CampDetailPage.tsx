@@ -45,7 +45,7 @@ function InfoItem({ label, children }: { label: string; children: React.ReactNod
 const TABS: CampTab[] = ['Students', 'Accommodation', 'Staff', 'Class', 'Timetable'];
 
 export default function CampDetailPage({
-  camps, campId, activeTab, onTabChange, onBack, onEdit, students, onStudentUpdate, onCampUpdate, onStudentClick, agents = [],
+  camps, campId, activeTab, onTabChange, onBack, onEdit, students, onStudentUpdate, onCampUpdate, onCampDelete, onStudentClick, agents = [],
 }: {
   camps: Camp[];
   campId: string;
@@ -56,6 +56,7 @@ export default function CampDetailPage({
   students?: Student[];
   onStudentUpdate?: (s: Student) => void;
   onCampUpdate?: (camp: Camp) => void;
+  onCampDelete?: (campId: string) => void;
   onStudentClick?: (studentId: string) => void;
   agents?: { id: string; name: string }[];
 }) {
@@ -106,7 +107,17 @@ export default function CampDetailPage({
         {onEdit && (
           <button className="ew-btn ew-btn--ghost ew-btn--sm" onClick={onEdit}>정보수정</button>
         )}
-        <button className="ew-btn ew-btn--danger ew-btn--sm">정보삭제</button>
+        <button className="ew-btn ew-btn--danger ew-btn--sm" onClick={() => {
+          if (!onCampDelete) return;
+          const enrolledCount = (students ?? []).filter(s => s.history.current_camp_id === campId).length;
+          if (enrolledCount > 0) {
+            alert(`등록된 학생 ${enrolledCount}명이 있습니다.\n학생을 모두 제거한 후 삭제할 수 있습니다.`);
+            return;
+          }
+          if (window.confirm(`'${camp?.name}' 캠프를 삭제합니다.\n시간표, 숙소, 스탭 등 모든 데이터가 삭제됩니다.\n계속하시겠습니까?`)) {
+            onCampDelete(campId);
+          }
+        }}>정보삭제</button>
       </div>
 
       <div style={{ padding: '24px 30px', display: 'flex', flexDirection: 'column', gap: 20 }}>

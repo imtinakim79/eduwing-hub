@@ -145,7 +145,7 @@ export default function App() {
   const enrichedCamps = useMemo(() =>
     camps.map(c => ({
       ...c,
-      enrolledCount: students.filter(s => s.camp_records.some(r => r.camp_id === c.id)).length,
+      enrolledCount: students.filter(s => s.history.current_camp_id === c.id).length,
     })),
   [camps, students]);
 
@@ -193,6 +193,26 @@ export default function App() {
               saveStudents(next);
             }}
             onStudentUpdate={updated => saveStudents(students.map(s => s.id === updated.id ? updated : s))}
+            onStudentDelete={(ids: string[]) => {
+              ids.forEach(id => {
+                try { localStorage.removeItem(`ew-family-${id}`); } catch {}
+              });
+              // 각 캠프 클래스에서 제거
+              const affectedCampIds = new Set(
+                students.filter(s => ids.includes(s.id)).flatMap(s => s.camp_records?.map(r => r.camp_id) ?? [])
+              );
+              affectedCampIds.forEach(campId => {
+                try {
+                  const key = `ew-classes-${campId}`;
+                  const raw = localStorage.getItem(key);
+                  if (!raw) return;
+                  const classes = JSON.parse(raw);
+                  const updated = classes.map((c: { studentIds: string[] }) => ({ ...c, studentIds: c.studentIds.filter((sid: string) => !ids.includes(sid)) }));
+                  localStorage.setItem(key, JSON.stringify(updated));
+                } catch {}
+              });
+              saveStudents(students.filter(s => !ids.includes(s.id)));
+            }}
           />
         )}
         {page === 'addStudent' && (
@@ -250,6 +270,26 @@ export default function App() {
               setCamps(next);
               try { localStorage.setItem('ew-camps', JSON.stringify(next)); } catch {}
             }}
+            onCampDelete={(campId: string) => {
+              const next = camps.filter(c => c.id !== campId);
+              setCamps(next);
+              try { localStorage.setItem('ew-camps', JSON.stringify(next)); } catch {}
+              // 관련 localStorage 키 정리
+              const prefixes = [
+                `ew-classes-${campId}`,
+                `ew-campstaff-${campId}`,
+                `ew-hotels-${campId}`,
+                `ew-timetable-slots-${campId}`,
+              ];
+              prefixes.forEach(k => { try { localStorage.removeItem(k); } catch {} });
+              // 클래스별 timetable 키 정리
+              try {
+                Object.keys(localStorage)
+                  .filter(k => k.startsWith(`ew-timetable-${campId}`))
+                  .forEach(k => localStorage.removeItem(k));
+              } catch {}
+              navigate('camps');
+            }}
           />
         )}
         {page === 'campCreate' && (
@@ -279,6 +319,14 @@ export default function App() {
               try { localStorage.setItem('ew-agents', JSON.stringify(next)); } catch {}
             }}
             onAgentDelete={ids => {
+              const blocked = ids.filter(id =>
+                students.some(s => s.history?.agent_id === id)
+              );
+              if (blocked.length > 0) {
+                const names = blocked.map(id => agents.find(a => a.id === id)?.name ?? id).join(', ');
+                alert(`[${names}] 에이전시에 소속된 학생이 있습니다.\n학생의 에이전시를 먼저 변경하거나 학생을 삭제한 후 진행할 수 있습니다.`);
+                return;
+              }
               const next = agents.filter(a => !ids.includes(a.id));
               setAgents(next);
               try { localStorage.setItem('ew-agents', JSON.stringify(next)); } catch {}

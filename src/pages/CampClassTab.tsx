@@ -17,7 +17,7 @@ export function loadClasses(campId: string): ClassLevel[] {
   catch { return []; }
 }
 
-function saveClasses(campId: string, classes: ClassLevel[]) {
+export function saveClasses(campId: string, classes: ClassLevel[]) {
   try { localStorage.setItem(`ew-classes-${campId}`, JSON.stringify(classes)); } catch {}
 }
 

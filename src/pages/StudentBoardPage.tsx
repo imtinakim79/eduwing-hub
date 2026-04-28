@@ -195,6 +195,7 @@ export default function StudentBoardPage({
   onStudentSelect,
   onStudentsImport,
   onStudentUpdate,
+  onStudentDelete,
 }: {
   students?: Student[];
   agents?: Agent[];
@@ -202,6 +203,7 @@ export default function StudentBoardPage({
   onStudentSelect?: (id: string) => void;
   onStudentsImport?: (imported: Student[]) => void;
   onStudentUpdate?: (updated: Student) => void;
+  onStudentDelete?: (ids: string[]) => void;
 }) {
   const [query,       setQuery]       = useState('');
   const [agentFilter, setAgentFilter] = useState('');
@@ -334,8 +336,18 @@ export default function StudentBoardPage({
           {selected.size > 0 ? `${selected.size}명 선택됨` : ''}
         </span>
         <button className="ew-btn ew-btn--primary ew-btn--xsm" onClick={onAdd}>학생 추가</button>
-        {selected.size > 0 && (
-          <button className="ew-btn ew-btn--danger ew-btn--xsm" onClick={() => setSelected(new Set())}>삭제</button>
+        {selected.size > 0 && onStudentDelete && (
+          <button className="ew-btn ew-btn--danger ew-btn--xsm" onClick={() => {
+            const targets = students.filter(s => selected.has(s.id));
+            const campNames = [...new Set(
+              targets.flatMap(s => s.camp_records?.map(r => campMap[r.camp_id]?.name ?? r.camp_id) ?? [])
+            )].filter(Boolean);
+            const campLine = campNames.length > 0 ? `\n\n참여 캠프: ${campNames.join(', ')}\n위 캠프에서도 자동으로 제외됩니다.` : '';
+            if (window.confirm(`학생 ${targets.length}명을 삭제합니다.${campLine}\n\n계속하시겠습니까?`)) {
+              onStudentDelete(Array.from(selected));
+              setSelected(new Set());
+            }
+          }}>삭제</button>
         )}
         <button className="ew-btn ew-btn--secondary ew-btn--xsm" onClick={() => uploadRef.current?.click()}>엑셀 업로드</button>
         <button className="ew-btn ew-btn--secondary ew-btn--xsm" onClick={handleDownload}>엑셀 다운로드</button>
