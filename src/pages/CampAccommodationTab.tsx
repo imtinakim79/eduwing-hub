@@ -3,6 +3,7 @@
 // StudentDetailPage Hotel Info에서 이 데이터를 읽어 룸타입 옵션으로 사용
 import { useEffect } from 'react';
 import { useDirtyForm } from '../hooks/useDirtyForm';
+import { useDirtyGuard } from '../hooks/useDirtyGuard';
 
 export interface RoomType {
   id: string;
@@ -110,10 +111,13 @@ export default function CampAccommodationTab({ campId, onHotelsChange }: { campI
     form.sync({ hotels: campId ? loadHotels(campId) : [] });
   }, [campId]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const clearGuard = useDirtyGuard('CampAccommodationTab', form.isDirty);
+
   function handleSave() {
     if (campId) saveHotels(campId, hotels);
     onHotelsChange?.(hotels);
     form.sync({ hotels });
+    clearGuard();
   }
   function handleReset() {
     form.setDraft({ hotels: [] });

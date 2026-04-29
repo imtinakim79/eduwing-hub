@@ -7,6 +7,7 @@ import type { Student } from './StudentBoardPage';
 import type { Agent } from './AgentBoardPage';
 import { useDirtyForm } from '../hooks/useDirtyForm';
 import StickySaveBar from '../components/StickySaveBar';
+import { useDirtyGuard } from '../hooks/useDirtyGuard';
 
 const GENDER_OPTIONS   = ['Male', 'Female', 'Other', 'Prefer not to say'];
 const RELATION_OPTIONS = ['아빠', '엄마', '기타'];
@@ -151,6 +152,9 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
     profile_img_url: editStudent?.profile_img_url ?? null as string | null,
   });
 
+  // 수정 모드에서 dirty 상태 가드 등록 — 페이지 이탈/네비 시 confirm
+  const clearGuard = useDirtyGuard('AddStudentPage:edit', isEdit && isDirty);
+
   function set<K extends keyof typeof form>(field: K, value: typeof form[K]) {
     setField(field, value);
   }
@@ -195,6 +199,7 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
       camp_records: editStudent?.camp_records ?? [],
     };
     sync(form);
+    clearGuard();
     onSave(student);
   }
 

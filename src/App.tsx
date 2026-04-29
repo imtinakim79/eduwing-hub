@@ -12,6 +12,7 @@ import SettingsPage from './pages/SettingsPage';
 import rawCamps from './data/camps.json';
 import rawAgents from './data/agents.json';
 import { UndoToastProvider } from './hooks/useUndoToast';
+import { confirmIfDirty, useBeforeUnloadGuard } from './hooks/useDirtyGuard';
 import './index.css';
 
 type Page = 'students' | 'addStudent' | 'studentDetail' | 'camps' | 'campDetail' | 'campCreate' | 'dashboard' | 'agent' | 'board' | 'account';
@@ -124,11 +125,14 @@ export default function App() {
     return () => window.removeEventListener('popstate', handlePop);
   }, []);
 
+  useBeforeUnloadGuard();
+
   function navigate(
     newPage: Page,
     opts: { campId?: string; studentId?: string; editId?: string; tab?: CampTab } = {},
     snap?: { activeCampId: string; activeStudentId: string; editStudentId: string; activeCampTab: CampTab }
   ) {
+    if (!confirmIfDirty()) return;
     const base = snap ?? { activeCampId, activeStudentId, editStudentId, activeCampTab };
     const newState: NavState = {
       page:            newPage,

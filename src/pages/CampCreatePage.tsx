@@ -11,6 +11,7 @@ import CampUserBoardPage from './CampUserBoardPage';
 import type { Student } from './StudentBoardPage';
 import { useDirtyForm } from '../hooks/useDirtyForm';
 import StickySaveBar from '../components/StickySaveBar';
+import { useDirtyGuard } from '../hooks/useDirtyGuard';
 
 const LOCATIONS = ['나트랑', '다낭', '세부', '발리', '방콕', '싱가포르', '코타키나발루'];
 const STATUSES  = ['진행중', '준비중', '종료'];
@@ -123,6 +124,9 @@ export default function CampCreatePage({ camps, editCampId, allStudents = [], on
   // 합본 — 화면 표시·저장에 사용
   const form = { ...userForm, ...autoForm };
 
+  // 수정 모드에서 dirty 상태 가드 등록
+  const clearGuard = useDirtyGuard('CampCreatePage:edit', isEdit && isDirty);
+
   function set(field: keyof UserForm | keyof AutoForm) {
     return (v: string) => {
       if (field in userForm) setUserField(field as keyof UserForm, v);
@@ -149,6 +153,7 @@ export default function CampCreatePage({ camps, editCampId, allStudents = [], on
       staff:         autoForm.staff.split(',').map((s: string) => s.trim()).filter(Boolean),
     };
     sync(userForm);
+    clearGuard();
     onSave(camp);
   }
 

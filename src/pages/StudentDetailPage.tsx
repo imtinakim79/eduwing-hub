@@ -6,6 +6,7 @@ import type { Camp } from '../App';
 import { loadHotels } from './CampAccommodationTab';
 import { loadClasses } from './CampClassTab';
 import { useDirtyForm } from '../hooks/useDirtyForm';
+import { useDirtyGuard } from '../hooks/useDirtyGuard';
 
 interface FamilyMember { id: string; name: string; relation: string; relationCustom?: string; }
 interface RoomEntry { id: string; roomType: string; extraBed: string; }
@@ -250,6 +251,7 @@ export default function StudentDetailPage({
     const draft = hotelForm.draft;
     onStudentUpdate?.(updateCampRecord(activeTab, { stay: { checkIn: draft.checkIn, checkOut: draft.checkOut, invoiceName: draft.invoiceName, rooms: draft.rooms } }));
     hotelForm.sync(draft);
+    clearHotelGuard();
   }
   function resetHotel() {
     hotelForm.setDraft({ checkIn: '', checkOut: '', invoiceName: '', rooms: defaultRooms });
@@ -281,6 +283,7 @@ export default function StudentDetailPage({
     const draft = flightForm.draft;
     onStudentUpdate?.(updateCampRecord(activeTab, { flight: draft }));
     flightForm.sync(draft);
+    clearFlightGuard();
   }
   function resetFlight() {
     flightForm.setDraft({ passportNo: '', passportName: '', departure: emptyFlight, return: emptyFlight });
@@ -296,10 +299,16 @@ export default function StudentDetailPage({
     }));
   };
 
+  // 3개 섹션 dirty 가드 등록
+  const clearHotelGuard  = useDirtyGuard('StudentDetailPage:hotel',  hotelForm.isDirty);
+  const clearFlightGuard = useDirtyGuard('StudentDetailPage:flight', flightForm.isDirty);
+  const clearFamilyGuard = useDirtyGuard('StudentDetailPage:family', familyForm.isDirty);
+
   function saveFamily() {
     const draft = familyForm.draft;
     localStorage.setItem(familyKey, JSON.stringify(draft.members));
     familyForm.sync(draft);
+    clearFamilyGuard();
   }
   function resetFamily() {
     familyForm.setDraft({ members: defaultFamily });

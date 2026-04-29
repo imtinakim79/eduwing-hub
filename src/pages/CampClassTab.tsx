@@ -2,6 +2,7 @@
 // 저장: localStorage ew-classes-{campId}
 import { useEffect, useState } from 'react';
 import { useDirtyForm } from '../hooks/useDirtyForm';
+import { useDirtyGuard } from '../hooks/useDirtyGuard';
 import type { Student } from './StudentBoardPage';
 
 export interface ClassLevel {
@@ -122,10 +123,13 @@ export default function CampClassTab({
     setSelectedId(loaded.length > 0 ? loaded[0].id : null);
   }, [campId]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const clearGuard = useDirtyGuard('CampClassTab', form.isDirty);
+
   function handleSave() {
     saveClasses(campId, classes);
     onClassesChange?.(classes);
     form.sync({ classes });
+    clearGuard();
   }
   function handleReset() {
     form.setDraft({ classes: [] });

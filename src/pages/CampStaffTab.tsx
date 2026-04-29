@@ -3,6 +3,7 @@
 // 캠프별 배정: localStorage ew-campstaff-{campId} — 명시적 저장 (dirty 추적)
 import { useState, useRef, useEffect } from 'react';
 import { useDirtyForm } from '../hooks/useDirtyForm';
+import { useDirtyGuard } from '../hooks/useDirtyGuard';
 
 export interface Member { id: string; name: string; }
 
@@ -249,6 +250,8 @@ export default function CampStaffTab({ campId, onStaffChange }: {
     });
   }, [campId]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const clearGuard = useDirtyGuard('CampStaffTab', form.isDirty);
+
   function handleSave() {
     saveMaster(MASTER_STAFF_KEY, staffMaster);
     if (campId) saveCampStaff(campId, { staffIds: assignment.staffIds });
@@ -256,6 +259,7 @@ export default function CampStaffTab({ campId, onStaffChange }: {
     onStaffChange?.(names);
     initialMasterRef.current = staffMaster;
     form.sync({ master: staffMaster, staffIds: assignment.staffIds });
+    clearGuard();
   }
   function handleReset() {
     // 캠프 배정만 비움. 전체 명단은 그대로 유지.
