@@ -263,7 +263,7 @@ export default function App() {
           <CampBoardPage
             camps={enrichedCamps}
             onCampSelect={campId => navigate('campDetail', { campId, tab: 'Students' })}
-            onCampCreate={() => navigate('campCreate', { tab: 'Students' })}
+            onCampCreate={() => navigate('campCreate', { campId: '', tab: 'Students' })}
             onTimetableEdit={campId => navigate('campCreate', { campId, tab: 'Timetable' })}
             onCampImport={imported => {
               const next = (() => {
