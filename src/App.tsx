@@ -288,6 +288,12 @@ export default function App() {
               try { localStorage.setItem('ew-camps', JSON.stringify(next)); } catch {}
             }}
             onCampDelete={(campId: string) => {
+              const enrolled = students.filter(s => s.history?.current_camp_id === campId);
+              if (enrolled.length > 0) {
+                const camp = camps.find(c => c.id === campId);
+                alert(`[${camp?.name ?? campId}] 캠프에 배정된 학생이 ${enrolled.length}명 있습니다.\n학생의 캠프를 먼저 변경하거나 학생을 삭제한 후 진행할 수 있습니다.`);
+                return;
+              }
               const next = camps.filter(c => c.id !== campId);
               setCamps(next);
               try { localStorage.setItem('ew-camps', JSON.stringify(next)); } catch {}
