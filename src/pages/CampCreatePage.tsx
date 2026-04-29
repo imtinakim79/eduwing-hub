@@ -9,35 +9,28 @@ import CampClassTab, { loadClasses } from './CampClassTab';
 import type { ClassLevel } from './CampClassTab';
 import CampUserBoardPage from './CampUserBoardPage';
 import type { Student } from './StudentBoardPage';
-import { useDirtyForm } from '../hooks/useDirtyForm';
-import StickySaveBar from '../components/StickySaveBar';
 
 const LOCATIONS = ['나트랑', '다낭', '세부', '발리', '방콕', '싱가포르', '코타키나발루'];
 const STATUSES  = ['진행중', '준비중', '종료'];
 
-// 사용자가 직접 편집하는 기본정보 필드
-interface UserForm {
-  name: string; code: string; location: string;
-  capacity: string; status: string;
-}
-
-// 탭에서 자동 업데이트되는 필드 (DisabledInput으로 표시되는 영역) — 즉시 저장
-interface AutoForm {
-  accommodation: string; staff: string;
+interface CampForm {
+  name: string; code: string; location: string; accommodation: string;
+  capacity: string; staff: string; status: string;
   start_date: string; end_date: string;
 }
 
-const EMPTY_USER: UserForm = {
-  name: '', code: '', location: '', capacity: '', status: '',
+const EMPTY_FORM: CampForm = {
+  name: '', code: '', location: '', accommodation: '',
+  capacity: '', staff: '', status: '',
+  start_date: '', end_date: '',
 };
 
 
 // ── Field wrapper ─────────────────────────────────────────────────────────────
-function Field({ label, required, dirty, children }: { label: string; required?: boolean; dirty?: boolean; children: React.ReactNode }) {
+function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: 1, minWidth: 0 }}>
-      <label style={{ fontSize: 12, fontWeight: 500, color: 'var(--color-text-sub)', fontFamily: 'var(--font-ko)', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-        {dirty && <span aria-hidden style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-warning)', display: 'inline-block', flexShrink: 0 }} />}
+      <label style={{ fontSize: 12, fontWeight: 500, color: 'var(--color-text-sub)', fontFamily: 'var(--font-ko)' }}>
         {label}{required && <span style={{ color: '#EF4444', marginLeft: 2 }}>*</span>}
       </label>
       {children}
@@ -101,53 +94,40 @@ export default function CampCreatePage({ camps, editCampId, allStudents = [], on
   });
   const timetableEditRef = useRef<TimetableEditHandle>(null);
 
-  const { draft: userForm, setField: setUserField, isDirty, count, isFieldDirty, reset, sync } = useDirtyForm<UserForm>(
-    existingCamp ? {
-      name:     existingCamp.name     ?? '',
-      code:     existingCamp.id       ?? '',
-      location: existingCamp.location ?? '',
-      capacity: String(existingCamp.capacity ?? ''),
-      status:   existingCamp.status   ?? '',
-    } : EMPTY_USER
-  );
+  const [form, setForm] = useState<CampForm>(() => existingCamp ? {
+    name:          existingCamp.name          ?? '',
+    code:          existingCamp.id            ?? '',
+    location:      existingCamp.location      ?? '',
+    accommodation: existingCamp.accommodation ?? '',
+    capacity:      String(existingCamp.capacity ?? ''),
+    staff:         (existingCamp.staff ?? []).join(', '),
+    status:        existingCamp.status        ?? '',
+    start_date:    existingCamp.start_date    ?? '',
+    end_date:      existingCamp.end_date      ?? '',
+  } : EMPTY_FORM);
 
-  // 탭에서 즉시 저장으로 들어오는 필드 — dirty 추적 대상 아님
-  const [autoForm, setAutoForm] = useState<AutoForm>({
-    accommodation: existingCamp?.accommodation     ?? '',
-    staff:         (existingCamp?.staff ?? []).join(', '),
-    start_date:    existingCamp?.start_date        ?? '',
-    end_date:      existingCamp?.end_date          ?? '',
-  });
-
-  // 합본 — 화면 표시·저장에 사용
-  const form = { ...userForm, ...autoForm };
-
-  function set(field: keyof UserForm | keyof AutoForm) {
-    return (v: string) => {
-      if (field in userForm) setUserField(field as keyof UserForm, v);
-      else setAutoForm(prev => ({ ...prev, [field as keyof AutoForm]: v }));
-    };
+  function set(field: keyof CampForm) {
+    return (v: string) => setForm(prev => ({ ...prev, [field]: v }));
   }
 
   function handleSave() {
-    if (!userForm.name.trim()) { alert('캠프명을 입력해주세요.'); return; }
-    if (!userForm.location)    { alert('지역을 선택해주세요.'); return; }
-    if (!userForm.status)      { alert('상태를 선택해주세요.'); return; }
+    if (!form.name.trim()) { alert('캠프명을 입력해주세요.'); return; }
+    if (!form.location)    { alert('지역을 선택해주세요.'); return; }
+    if (!form.status)      { alert('상태를 선택해주세요.'); return; }
     const hotels = loadHotels(draftId);
-    const primaryHotel = hotels.find(h => h.name.trim())?.name ?? autoForm.accommodation;
+    const primaryHotel = hotels.find(h => h.name.trim())?.name ?? form.accommodation;
     const camp: Camp = {
-      id:            userForm.code.trim() || draftId,
-      name:          userForm.name.trim(),
-      location:      userForm.location,
+      id:            form.code.trim() || draftId,
+      name:          form.name.trim(),
+      location:      form.location,
       country:       '',
       accommodation: primaryHotel,
-      capacity:      Number(userForm.capacity) || 0,
-      status:        userForm.status,
-      start_date:    autoForm.start_date || existingCamp?.start_date || '',
-      end_date:      autoForm.end_date   || existingCamp?.end_date   || '',
-      staff:         autoForm.staff.split(',').map((s: string) => s.trim()).filter(Boolean),
+      capacity:      Number(form.capacity) || 0,
+      status:        form.status,
+      start_date:    form.start_date || existingCamp?.start_date || '',
+      end_date:      form.end_date   || existingCamp?.end_date   || '',
+      staff:         form.staff.split(',').map((s: string) => s.trim()).filter(Boolean),
     };
-    sync(userForm);
     onSave(camp);
   }
 
@@ -165,6 +145,8 @@ export default function CampCreatePage({ camps, editCampId, allStudents = [], on
         <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--color-text-primary)', fontFamily: 'var(--font-ko)', flex: 1 }}>
           {editCampId ? '캠프 수정' : '캠프 등록'}
         </span>
+        <button className="ew-btn ew-btn--ghost ew-btn--sm" onClick={onBack}>취소</button>
+        <button className="ew-btn ew-btn--primary ew-btn--sm" onClick={handleSave}>저장</button>
       </div>
 
       <div style={{ padding: '24px 30px', display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -173,13 +155,13 @@ export default function CampCreatePage({ camps, editCampId, allStudents = [], on
         <div style={{ background: '#fff', border: '1px solid var(--color-border-table)', borderRadius: 8, padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-text-primary)', fontFamily: 'var(--font-ko)', marginBottom: 4 }}>기본 정보</div>
           <div style={{ display: 'flex', gap: 16 }}>
-            <Field label="캠프명" required dirty={isFieldDirty('name')}>
+            <Field label="캠프명" required>
               <TextInput value={form.name} onChange={set('name')} placeholder="공식 캠프명을 입력하세요." />
             </Field>
-            <Field label="캠프코드" dirty={isFieldDirty('code')}>
+            <Field label="캠프코드">
               <TextInput value={form.code} onChange={set('code')} placeholder="캠프를 구분할 코드를 입력하세요. (ex. N26S)" />
             </Field>
-            <Field label="지역" required dirty={isFieldDirty('location')}>
+            <Field label="지역" required>
               <SelectInput value={form.location} onChange={set('location')} placeholder="캠프지역을 선택해주세요." options={LOCATIONS} />
             </Field>
             <Field label="기간">
@@ -193,7 +175,7 @@ export default function CampCreatePage({ camps, editCampId, allStudents = [], on
             <Field label="숙소">
               <DisabledInput value={form.accommodation} placeholder="숙박정보 탭에서 자동 입력" />
             </Field>
-            <Field label="정원" dirty={isFieldDirty('capacity')}>
+            <Field label="정원">
               <div style={{ position: 'relative' }}>
                 <input style={{ ...inputStyle, paddingRight: 32 }} value={form.capacity}
                   onChange={e => set('capacity')(e.target.value.replace(/[^0-9]/g, ''))} placeholder="00" />
@@ -205,7 +187,7 @@ export default function CampCreatePage({ camps, editCampId, allStudents = [], on
             <Field label="스탭">
               <DisabledInput value={form.staff} placeholder="스탭&강사 탭에서 자동 입력" />
             </Field>
-            <Field label="상태" required dirty={isFieldDirty('status')}>
+            <Field label="상태" required>
               <SelectInput value={form.status} onChange={set('status')} placeholder="현재 상태를 선택해주세요." options={STATUSES} />
             </Field>
             <div style={{ flex: 2 }} />
@@ -246,7 +228,7 @@ export default function CampCreatePage({ camps, editCampId, allStudents = [], on
                 campId={draftId}
                 onHotelsChange={hotels => {
                   const primary = hotels.find(h => h.name.trim())?.name ?? '';
-                  if (primary) setAutoForm(prev => ({ ...prev, accommodation: primary }));
+                  if (primary) setForm(prev => ({ ...prev, accommodation: primary }));
                 }}
               />
             )}
@@ -254,7 +236,7 @@ export default function CampCreatePage({ camps, editCampId, allStudents = [], on
             {activeTab === 'Staff' && (
               <CampStaffTab
                 campId={draftId}
-                onStaffChange={staffNames => setAutoForm(prev => ({ ...prev, staff: staffNames.join(', ') }))}
+                onStaffChange={staffNames => setForm(prev => ({ ...prev, staff: staffNames.join(', ') }))}
               />
             )}
 
@@ -301,15 +283,13 @@ export default function CampCreatePage({ camps, editCampId, allStudents = [], on
                   classId={activeTimetableClassId ?? undefined}
                   startDate={existingCamp?.start_date}
                   endDate={existingCamp?.end_date}
-                  onDateRangeChange={(s, e) => setAutoForm(prev => ({ ...prev, start_date: s, end_date: e }))}
+                  onDateRangeChange={(s, e) => setForm(prev => ({ ...prev, start_date: s, end_date: e }))}
                 />
               </div>
             )}
           </div>
         </div>
-        <div style={{ height: 80 }} />
       </div>
-      <StickySaveBar visible={isDirty} count={count} onCancel={reset} onSave={handleSave} />
     </div>
   );
 }
