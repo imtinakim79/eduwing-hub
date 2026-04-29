@@ -157,6 +157,7 @@ agents                    students ───────────────
 | **camp_records[].camp_id, status** | **CampDetailPage Students 탭** | CampUserBoardPage, StudentDetailPage, StudentBoardPage |
 | camp_records[].stay (roomtype, check_in/out) | StudentDetailPage 캠프탭 호텔정보 | StudentDetailPage |
 | camp_records[].flight (편명, 여권, pickDrop, pickDropPlace) | StudentDetailPage 캠프탭 항공정보 | StudentDetailPage, CampUserBoardPage (pickDrop·pickDropPlace 표시) |
+| camp_records[].payment_deadline | CampUserBoardPage (Payment Deadline 인라인) | CampUserBoardPage (Payment Deadline 컬럼) |
 
 > `camp_records[]`는 `Student` 객체에 embedded 저장. 별도 localStorage 키 없음.
 > 같은 학생이라도 캠프마다 룸타입·항공편이 다를 수 있다 — `camp_id`로 구분되는 독립 레코드.
@@ -241,7 +242,7 @@ camp_classes  (id PK, camp_id FK→camps.id, name, teacher, student_ids text[])
 student_camps (id PK, student_id FK→students.id, camp_id FK→camps.id,
                selected_room_type text, hotel_check_in date, hotel_check_out date,
                flight_outbound jsonb, flight_return jsonb,
-               passport_no text, passport_name text, status text)
+               passport_no text, passport_name text, payment_deadline date, status text)
 
 -- 특정 캠프 학생 목록 + 클래스 정보
 SELECT s.*, sc.*, cc.name AS class_name

@@ -31,6 +31,7 @@ export interface CampRecord {
     departure: { flightNo: string; dateEntry: string; timeEntry: string; dateReturn: string; timeReturn: string; pickDrop: string; pickDropPlace: string };
     return: { flightNo: string; dateEntry: string; timeEntry: string; dateReturn: string; timeReturn: string; pickDrop: string; pickDropPlace: string };
   };
+  payment_deadline?: string;  // ISO yyyy-mm-dd
 }
 
 export interface Student {

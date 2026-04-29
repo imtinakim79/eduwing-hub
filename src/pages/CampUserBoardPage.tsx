@@ -1,10 +1,11 @@
 // 캠프별 학생 리스트 페이지 — 학생명단 탭
 import { useState, useMemo, useRef } from 'react';
 import Pagination from '../components/Pagination';
-import { avatarColor, initials, isoToDisplay } from '../components/board/cells';
+import { avatarColor, initials, isoToDisplay, CalendarCell } from '../components/board/cells';
 import type { Student } from './StudentBoardPage';
 import { loadClasses, saveClasses } from './CampClassTab';
 import type { ClassLevel } from './CampClassTab';
+import { useUndoToast } from '../hooks/useUndoToast';
 
 
 const TAG_COLORS = [
@@ -173,14 +174,35 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
   onStudentClick?: (studentId: string) => void;
   agents?: { id: string; name: string }[];
 }) {
+  const { showUndo } = useUndoToast();
   const agentIdToName = useMemo(() => Object.fromEntries(agents.map(a => [a.id, a.name])), [agents]);
   const [campId] = useState(propCampId ?? '');
   const [query,      setQuery]     = useState('');
   const [selected,   setSelected]  = useState<Set<string>>(new Set());
   const [page,       setPage]      = useState(1);
   const [perPage,    setPerPage]   = useState(10);
+  const [openCell,   setOpenCell]  = useState<string | null>(null);
   const [activeCell, setActiveCell]= useState<string | null>(null);
   const [showPicker, setShowPicker]= useState(false);
+
+  // payment_deadline 인라인 편집 — Student.camp_records[campId].payment_deadline 영속화
+  function setPaymentDeadline(student: Student, iso: string) {
+    if (!onStudentUpdate) return;
+    const prevStudent = student;
+    const records = student.camp_records ?? [];
+    const existing = records.find(r => r.camp_id === campId);
+    const newRecord = { ...(existing ?? { camp_id: campId }), payment_deadline: iso };
+    const newRecords = existing
+      ? records.map(r => r.camp_id === campId ? newRecord : r)
+      : [...records, newRecord];
+    onStudentUpdate({ ...student, camp_records: newRecords });
+
+    const displayName = student.name_ko || student.name_en || '학생';
+    showUndo({
+      message: `'${displayName}' Payment Deadline 변경됨`,
+      onUndo: () => onStudentUpdate(prevStudent),
+    });
+  }
 
   const allStudentsSource = propStudents ?? [];
 
@@ -270,7 +292,7 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
   };
 
   return (
-    <div style={{ minWidth: 1440, overflowX: 'auto' }} onClick={() => { setActiveCell(null); }}>
+    <div style={{ minWidth: 1440, overflowX: 'auto' }} onClick={() => { setOpenCell(null); setActiveCell(null); }}>
       {showPicker && onStudentUpdate && (
         <StudentPickerModal campId={campId} allStudents={allStudentsSource} onAdd={handlePickerAdd} onClose={() => setShowPicker(false)} />
       )}
@@ -314,7 +336,7 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
               ) : pageData.map(s => {
                 const isRowSel = selected.has(s.id);
                 const agentVal = agentIdToName[s.history.agent_id] ?? s.history.agent_id;
-                const payVal   = '';  // Payment Deadline: 데이터 모델 미정으로 readonly
+                const payVal   = s.camp_records?.find(r => r.camp_id === campId)?.payment_deadline ?? '';
                 const studentClass = getStudentClass(s.id);
 
                 const rec = getCampRecord(s, campId);
@@ -399,11 +421,11 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
                         />
                       </div>
                     </td>
-                    <td className={tdCls(s.id, 'pay')} style={{ ...TD_STYLE, padding: '0 12px' }}>
-                      {/* Payment Deadline 컬럼: 데이터 소유권 맵에 정의된 영속화 경로가 없어 readonly로 표시. 영속화하려면 Student.camp_records[].payment 필드 추가 + 문서 업데이트 필요. */}
-                      <span style={{ color: 'var(--color-text-muted)', fontSize: 13, fontFamily: 'var(--font-en)' }}>
-                        {payVal ? isoToDisplay(payVal) : '-'}
-                      </span>
+                    <td className={tdCls(s.id, 'pay', 'ew-cell--interactive')} style={{ ...TD_STYLE, padding: '0 12px' }}>
+                      <CalendarCell dateISO={payVal} displayDate={payVal ? isoToDisplay(payVal) : ''}
+                        cellId={`${s.id}:pay`} openCell={openCell} setOpenCell={setOpenCell}
+                        onDateChange={iso => setPaymentDeadline(s, iso)}
+                        onCellClick={() => setActiveCell(`${s.id}:pay`)} onEditDone={() => setActiveCell(null)} />
                     </td>
                   </tr>
                 );
