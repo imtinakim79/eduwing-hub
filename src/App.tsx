@@ -11,6 +11,7 @@ import DashboardPage from './pages/DashboardPage';
 import SettingsPage from './pages/SettingsPage';
 import rawCamps from './data/camps.json';
 import rawAgents from './data/agents.json';
+import { UndoToastProvider } from './hooks/useUndoToast';
 import './index.css';
 
 type Page = 'students' | 'addStudent' | 'studentDetail' | 'camps' | 'campDetail' | 'campCreate' | 'dashboard' | 'agent' | 'board' | 'account';
@@ -186,6 +187,7 @@ export default function App() {
   }
 
   return (
+    <UndoToastProvider>
     <div style={{ minHeight: '100vh', background: '#fff', overflowX: 'auto' }}>
       <TopNav activePage={page} onNavigate={(key) => navigate(key as Page, { editId: '', campId: '', studentId: '', tab: 'Students' })} />
 
@@ -389,5 +391,6 @@ export default function App() {
         )}
       </main>
     </div>
+    </UndoToastProvider>
   );
 }
