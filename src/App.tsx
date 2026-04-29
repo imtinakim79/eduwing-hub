@@ -270,6 +270,11 @@ export default function App() {
               setCamps(next);
               try { localStorage.setItem('ew-camps', JSON.stringify(next)); } catch {}
             }}
+            onCampUpdate={(updated: Camp) => {
+              const next = camps.map(c => c.id === updated.id ? updated : c);
+              setCamps(next);
+              try { localStorage.setItem('ew-camps', JSON.stringify(next)); } catch {}
+            }}
           />
         )}
         {page === 'campDetail' && (

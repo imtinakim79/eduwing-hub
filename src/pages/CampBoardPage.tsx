@@ -6,6 +6,7 @@ import * as XLSX from 'xlsx';
 import Pagination from '../components/Pagination';
 import BoardTable from '../components/board/BoardTable';
 import { StatusCell, TagList } from '../components/board/cells';
+import { useUndoToast } from '../hooks/useUndoToast';
 import { FilterPill } from '../components/FilterPill';
 import CampTimetableView from './CampTimetableView';
 import { loadClasses } from './CampClassTab';
@@ -173,8 +174,7 @@ function makeCampColumns(
   {
     key: 'name', label: '캠프명', width: 200, sortKey: 'name', type: 'custom',
     tdStyle: { padding: '0 12px' },
-    getValue: (r, e) => e['name'] ?? r.name,
-    setValue: (_, v) => ({ field: 'name', value: v }),
+    getValue: (r) => r.name,
     render: ({ value, row }) => (
       <span
         title={value}
@@ -196,10 +196,8 @@ function makeCampColumns(
     },
   },
   {
-    key: 'location', label: '지역', width: 150, sortKey: 'location', type: 'dropdown',
-    options: (all) => [...new Set(all.map(c => c.location))],
-    getValue: (r, e) => e['location'] ?? r.location,
-    setValue: (_, v) => ({ field: 'location', value: v }),
+    key: 'location', label: '지역', width: 150, sortKey: 'location', type: 'readonly',
+    getValue: (r) => r.location,
   },
   {
     key: 'accommodation', label: '숙소', width: 150, type: 'readonly',
@@ -257,14 +255,16 @@ function makeCampColumns(
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 export default function CampBoardPage({
-  camps, onCampSelect, onCampCreate, onTimetableEdit, onCampImport,
+  camps, onCampSelect, onCampCreate, onTimetableEdit, onCampImport, onCampUpdate,
 }: {
   camps: Camp[];
   onCampSelect?: (campId: string) => void;
   onCampCreate?: () => void;
   onTimetableEdit?: (campId: string) => void;
   onCampImport?: (camps: Camp[]) => void;
+  onCampUpdate?: (camp: Camp) => void;
 }) {
+  const { showUndo } = useUndoToast();
   const [query,               setQuery]              = useState('');
   const [locationFilter,      setLocationFilter]     = useState('');
   const [statusFilter,        setStatusFilter]       = useState('');
@@ -279,7 +279,26 @@ export default function CampBoardPage({
   const uploadRef = useRef<HTMLInputElement>(null);
 
   function handleEdit(rowId: string, field: string, value: string) {
+    const prevCamp = camps.find(c => c.id === rowId);
+    const prevEdits = localEdits[rowId];
     setLocalEdits(p => ({ ...p, [rowId]: { ...(p[rowId] ?? {}), [field]: value } }));
+
+    // status 필드만 영속화 — 데이터 소유권 맵에 따라 CampBoardPage의 인라인 쓰기 주체는 status뿐
+    if (field !== 'status' || !prevCamp || !onCampUpdate) return;
+
+    onCampUpdate({ ...prevCamp, status: value });
+    showUndo({
+      message: `'${prevCamp.name}' 상태 변경됨`,
+      onUndo: () => {
+        onCampUpdate(prevCamp);
+        setLocalEdits(p => {
+          const next = { ...p };
+          if (prevEdits) next[rowId] = prevEdits;
+          else delete next[rowId];
+          return next;
+        });
+      },
+    });
   }
 
   function getEdit(id: string, field: string, fallback: string) {

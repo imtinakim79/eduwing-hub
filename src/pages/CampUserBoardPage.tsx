@@ -1,7 +1,7 @@
 // 캠프별 학생 리스트 페이지 — 학생명단 탭
 import { useState, useMemo, useRef } from 'react';
 import Pagination from '../components/Pagination';
-import { avatarColor, initials, isoToDisplay, CalendarCell } from '../components/board/cells';
+import { avatarColor, initials, isoToDisplay } from '../components/board/cells';
 import type { Student } from './StudentBoardPage';
 import { loadClasses, saveClasses } from './CampClassTab';
 import type { ClassLevel } from './CampClassTab';
@@ -179,9 +179,7 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
   const [selected,   setSelected]  = useState<Set<string>>(new Set());
   const [page,       setPage]      = useState(1);
   const [perPage,    setPerPage]   = useState(10);
-  const [openCell,   setOpenCell]  = useState<string | null>(null);
   const [activeCell, setActiveCell]= useState<string | null>(null);
-  const [localEdits, setLocalEdits]= useState<Record<string, Record<string, string>>>({});
   const [showPicker, setShowPicker]= useState(false);
 
   const allStudentsSource = propStudents ?? [];
@@ -210,10 +208,8 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
   }
   // ──────────────────────────────────────────────────────────────────────────
 
-  function getEdit(id: string, field: string, fallback: string) { return localEdits[id]?.[field] ?? fallback; }
-  function setEdit(id: string, field: string, val: string) {
-    setLocalEdits(p => ({ ...p, [id]: { ...(p[id] ?? {}), [field]: val } }));
-  }
+  // localEdits/getEdit/setEdit 제거됨: 'pay' 셀만 사용했으나 영속화 경로가 없어 readonly로 변경됨.
+  // 'agent' 컬럼은 fallback으로 직접 student.history.agent_id 참조.
   function tdCls(id: string, key: string, extra?: string) {
     const sel = activeCell === `${id}:${key}` ? 'ew-cell--selected' : '';
     return [sel, extra].filter(Boolean).join(' ') || undefined;
@@ -274,7 +270,7 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
   };
 
   return (
-    <div style={{ minWidth: 1440, overflowX: 'auto' }} onClick={() => { setOpenCell(null); setActiveCell(null); }}>
+    <div style={{ minWidth: 1440, overflowX: 'auto' }} onClick={() => { setActiveCell(null); }}>
       {showPicker && onStudentUpdate && (
         <StudentPickerModal campId={campId} allStudents={allStudentsSource} onAdd={handlePickerAdd} onClose={() => setShowPicker(false)} />
       )}
@@ -317,8 +313,8 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
                 </td></tr>
               ) : pageData.map(s => {
                 const isRowSel = selected.has(s.id);
-                const agentVal = agentIdToName[getEdit(s.id, 'agent', s.history.agent_id)] ?? getEdit(s.id, 'agent', s.history.agent_id);
-                const payVal   = getEdit(s.id, 'pay',   '');
+                const agentVal = agentIdToName[s.history.agent_id] ?? s.history.agent_id;
+                const payVal   = '';  // Payment Deadline: 데이터 모델 미정으로 readonly
                 const studentClass = getStudentClass(s.id);
 
                 const rec = getCampRecord(s, campId);
@@ -403,11 +399,11 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
                         />
                       </div>
                     </td>
-                    <td className={tdCls(s.id, 'pay', 'ew-cell--interactive')} style={{ ...TD_STYLE, padding: '0 12px' }}>
-                      <CalendarCell dateISO={payVal} displayDate={payVal ? isoToDisplay(payVal) : ''}
-                        cellId={`${s.id}:pay`} openCell={openCell} setOpenCell={setOpenCell}
-                        onDateChange={iso => setEdit(s.id, 'pay', iso)}
-                        onCellClick={() => setActiveCell(`${s.id}:pay`)} onEditDone={() => setActiveCell(null)} />
+                    <td className={tdCls(s.id, 'pay')} style={{ ...TD_STYLE, padding: '0 12px' }}>
+                      {/* Payment Deadline 컬럼: 데이터 소유권 맵에 정의된 영속화 경로가 없어 readonly로 표시. 영속화하려면 Student.camp_records[].payment 필드 추가 + 문서 업데이트 필요. */}
+                      <span style={{ color: 'var(--color-text-muted)', fontSize: 13, fontFamily: 'var(--font-en)' }}>
+                        {payVal ? isoToDisplay(payVal) : '-'}
+                      </span>
                     </td>
                   </tr>
                 );
