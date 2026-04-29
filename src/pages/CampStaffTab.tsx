@@ -42,11 +42,13 @@ function Chip({ name, onRemove }: { name: string; onRemove: () => void }) {
 function MemberPanel({
   masterList, setMasterList,
   assignedIds, setAssignedIds,
+  isNewlyAdded,
 }: {
   masterList: Member[];
   setMasterList: (list: Member[]) => void;
   assignedIds: string[];
   setAssignedIds: (ids: string[]) => void;
+  isNewlyAdded: (id: string) => boolean;
 }) {
   const [open,    setOpen]    = useState(false);
   const [newName, setNewName] = useState('');
@@ -71,6 +73,10 @@ function MemberPanel({
 
   function unassign(id: string) {
     setAssignedIds(assignedIds.filter(x => x !== id));
+    // 이번 세션에 새로 추가한 멤버라면 전체 명단에서도 함께 제거
+    if (isNewlyAdded(id)) {
+      setMasterList(masterList.filter(m => m.id !== id));
+    }
   }
 
   function addToMaster() {
@@ -79,7 +85,6 @@ function MemberPanel({
     const m: Member = { id: uid(), name };
     const updated = [...masterList, m];
     setMasterList(updated);
-    saveMaster(MASTER_STAFF_KEY, updated);
     setAssignedIds([...assignedIds, m.id]);
     setNewName('');
     setOpen(false);
@@ -88,7 +93,6 @@ function MemberPanel({
   function deleteFromMaster(id: string) {
     const updated = masterList.filter(m => m.id !== id);
     setMasterList(updated);
-    saveMaster(MASTER_STAFF_KEY, updated);
     setAssignedIds(assignedIds.filter(x => x !== id));
   }
 
@@ -220,36 +224,46 @@ export default function CampStaffTab({ campId, onStaffChange }: {
   campId?: string;
   onStaffChange?: (staffNames: string[]) => void;
 }) {
-  const [staffMaster, setStaffMaster] = useState<Member[]>(() => loadMaster(MASTER_STAFF_KEY));
+  // master(전체 명단)와 캠프별 배정 둘 다 dirty 추적 — [저장] 시점에만 영속화
+  type StaffForm = { master: Member[]; staffIds: string[] };
 
-  // 캠프별 배정만 dirty 추적
-  type AssignmentForm = { staffIds: string[] };
-  const form = useDirtyForm<AssignmentForm>({ staffIds: campId ? loadCampStaff(campId).staffIds : [] });
-  const assignment = form.draft;
-  const setStaffIds = (ids: string[]) => form.setDraft({ staffIds: ids });
+  // 진입 시 master 스냅샷 (이번 세션에 추가한 멤버 식별용)
+  const initialMasterRef = useRef<Member[]>(loadMaster(MASTER_STAFF_KEY));
 
-  // campId 변경 시 sync
+  const form = useDirtyForm<StaffForm>({
+    master: initialMasterRef.current,
+    staffIds: campId ? loadCampStaff(campId).staffIds : [],
+  });
+  const staffMaster = form.draft.master;
+  const setStaffMaster = (list: Member[]) => form.setDraft(prev => ({ ...prev, master: list }));
+  const assignment = { staffIds: form.draft.staffIds };
+  const setStaffIds = (ids: string[]) => form.setDraft(prev => ({ ...prev, staffIds: ids }));
+
+  // campId 변경 시 sync — master는 fresh load (다른 캠프에서 master 변경됐을 수 있음)
   useEffect(() => {
-    form.sync({ staffIds: campId ? loadCampStaff(campId).staffIds : [] });
+    const masterNow = loadMaster(MASTER_STAFF_KEY);
+    initialMasterRef.current = masterNow;
+    form.sync({
+      master: masterNow,
+      staffIds: campId ? loadCampStaff(campId).staffIds : [],
+    });
   }, [campId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // master 변경 시(즉시 저장) 부모에 이름 변동 알림 — 배정된 멤버 이름이 바뀔 수 있음
-  const mounted = useRef(false);
-  useEffect(() => {
-    if (!mounted.current) { mounted.current = true; return; }
-    const names = staffMaster.filter(m => assignment.staffIds.includes(m.id)).map(m => m.name);
-    onStaffChange?.(names);
-  }, [staffMaster]); // eslint-disable-line react-hooks/exhaustive-deps
-
   function handleSave() {
+    saveMaster(MASTER_STAFF_KEY, staffMaster);
     if (campId) saveCampStaff(campId, { staffIds: assignment.staffIds });
     const names = staffMaster.filter(m => assignment.staffIds.includes(m.id)).map(m => m.name);
     onStaffChange?.(names);
-    form.sync({ staffIds: assignment.staffIds });
+    initialMasterRef.current = staffMaster;
+    form.sync({ master: staffMaster, staffIds: assignment.staffIds });
   }
   function handleReset() {
-    form.setDraft({ staffIds: [] });
+    // 캠프 배정만 비움. 전체 명단은 그대로 유지.
+    form.setDraft(prev => ({ ...prev, staffIds: [] }));
   }
+
+  // 이번 세션에 새로 추가된 멤버인지 (chip X 누를 때 master에서도 제거할지 판단)
+  const isNewlyAdded = (id: string) => !initialMasterRef.current.some(m => m.id === id);
 
   return (
     <div style={{ padding: '20px 24px' }}>
@@ -283,6 +297,7 @@ export default function CampStaffTab({ campId, onStaffChange }: {
       <MemberPanel
         masterList={staffMaster} setMasterList={setStaffMaster}
         assignedIds={assignment.staffIds} setAssignedIds={setStaffIds}
+        isNewlyAdded={isNewlyAdded}
       />
     </div>
   );

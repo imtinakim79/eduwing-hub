@@ -166,7 +166,9 @@ export default function CampCreatePage({ camps, editCampId, allStudents = [], on
         <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--color-text-primary)', fontFamily: 'var(--font-ko)', flex: 1 }}>
           {editCampId ? '캠프 수정' : '캠프 등록'}
         </span>
-        {!isEdit && (
+        {isEdit ? (
+          <button className="ew-btn ew-btn--primary ew-btn--sm" onClick={handleSave}>완료</button>
+        ) : (
           <>
             <button className="ew-btn ew-btn--ghost ew-btn--sm" onClick={onBack}>취소</button>
             <button className="ew-btn ew-btn--primary ew-btn--sm" onClick={handleSave}>저장</button>
