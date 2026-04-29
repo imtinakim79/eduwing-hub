@@ -9,6 +9,7 @@ import Pagination from '../components/Pagination';
 import BoardTable from '../components/board/BoardTable';
 import { FilterPill } from '../components/FilterPill';
 import type { ColumnDef } from '../components/board/types';
+import { useUndoToast } from '../hooks/useUndoToast';
 
 function SearchIcon() {
   return (
@@ -207,6 +208,7 @@ export default function StudentBoardPage({
   onStudentUpdate?: (updated: Student) => void;
   onStudentDelete?: (ids: string[]) => void;
 }) {
+  const { showUndo } = useUndoToast();
   const [query,       setQuery]       = useState('');
   const [agentFilter, setAgentFilter] = useState('');
   const [campFilter,  setCampFilter]  = useState<string[]>([]);
@@ -242,13 +244,26 @@ export default function StudentBoardPage({
   }
 
   function handleEdit(rowId: string, field: string, value: string) {
+    const prevStudent = students.find(s => s.id === rowId);
+    const prevEdits = localEdits[rowId];
     setLocalEdits(p => ({ ...p, [rowId]: { ...(p[rowId] ?? {}), [field]: value } }));
-    if (onStudentUpdate) {
-      const student = students.find(s => s.id === rowId);
-      if (student) {
-        const mergedEdits = { ...(localEdits[rowId] ?? {}), [field]: value };
-        onStudentUpdate(applyEditsToStudent(student, mergedEdits));
-      }
+    if (onStudentUpdate && prevStudent) {
+      const mergedEdits = { ...(localEdits[rowId] ?? {}), [field]: value };
+      onStudentUpdate(applyEditsToStudent(prevStudent, mergedEdits));
+
+      const displayName = prevStudent.name_ko || prevStudent.name_en || '학생';
+      showUndo({
+        message: `'${displayName}' 변경됨`,
+        onUndo: () => {
+          onStudentUpdate(prevStudent);
+          setLocalEdits(p => {
+            const next = { ...p };
+            if (prevEdits) next[rowId] = prevEdits;
+            else delete next[rowId];
+            return next;
+          });
+        },
+      });
     }
   }
 

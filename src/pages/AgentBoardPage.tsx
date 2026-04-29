@@ -3,6 +3,7 @@ import * as XLSX from 'xlsx';
 import BoardTable from '../components/board/BoardTable';
 import Pagination from '../components/Pagination';
 import type { ColumnDef } from '../components/board/types';
+import { useUndoToast } from '../hooks/useUndoToast';
 
 function SearchIcon() {
   return (
@@ -93,6 +94,7 @@ export default function AgentBoardPage({
   onAgentDelete?: (ids: string[]) => void;
   onAgentsImport?: (imported: Agent[]) => void;
 }) {
+  const { showUndo } = useUndoToast();
   const [query,      setQuery]      = useState('');
   const [selected,   setSelected]   = useState<Set<string>>(new Set());
   const [page,       setPage]       = useState(1);
@@ -142,10 +144,25 @@ export default function AgentBoardPage({
   }
 
   function handleEdit(rowId: string, field: string, value: string) {
+    const prevAgent = agents.find(a => a.id === rowId);
+    const prevEdits = localEdits[rowId];
     const merged = { ...(localEdits[rowId] ?? {}), [field]: value };
     setLocalEdits(p => ({ ...p, [rowId]: merged }));
-    const agent = agents.find(a => a.id === rowId);
-    if (agent) onAgentUpdate?.(applyEditsToAgent(agent, merged));
+    if (prevAgent) {
+      onAgentUpdate?.(applyEditsToAgent(prevAgent, merged));
+      showUndo({
+        message: `'${prevAgent.name || '에이전트'}' 변경됨`,
+        onUndo: () => {
+          onAgentUpdate?.(prevAgent);
+          setLocalEdits(p => {
+            const next = { ...p };
+            if (prevEdits) next[rowId] = prevEdits;
+            else delete next[rowId];
+            return next;
+          });
+        },
+      });
+    }
   }
 
   function toggleSort(k: string) {
