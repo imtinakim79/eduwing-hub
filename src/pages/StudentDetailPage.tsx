@@ -5,6 +5,7 @@ import type { Student, CampRecord } from './StudentBoardPage';
 import type { Camp } from '../App';
 import { loadHotels } from './CampAccommodationTab';
 import { loadClasses } from './CampClassTab';
+import { useDirtyForm } from '../hooks/useDirtyForm';
 
 interface FamilyMember { id: string; name: string; relation: string; relationCustom?: string; }
 interface RoomEntry { id: string; roomType: string; extraBed: string; }
@@ -78,9 +79,10 @@ function TextFieldCell({ placeholder, value, onChange, disabled }: {
   );
 }
 
-function SectionCard({ title, children, onSave, onReset }: {
+function SectionCard({ title, children, onSave, onReset, onCancel, dirty = false }: {
   title: string; children: React.ReactNode;
-  onSave?: () => void; onReset?: () => void;
+  onSave?: () => void; onReset?: () => void; onCancel?: () => void;
+  dirty?: boolean;
 }) {
   return (
     <div style={{
@@ -88,14 +90,31 @@ function SectionCard({ title, children, onSave, onReset }: {
       padding: '20px 20px 24px', display: 'flex', flexDirection: 'column', gap: 16,
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontSize: 14, fontWeight: 600, color: '#1A1D23', fontFamily: 'var(--font-en)' }}>{title}</span>
-        {(onSave || onReset) && (
+        <span style={{ fontSize: 14, fontWeight: 600, color: '#1A1D23', fontFamily: 'var(--font-en)', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+          {dirty && <span aria-hidden style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-warning)', display: 'inline-block', flexShrink: 0 }} />}
+          {title}
+        </span>
+        {(onSave || onReset || onCancel) && (
           <div style={{ display: 'flex', gap: 8 }}>
             {onReset && (
               <button onClick={onReset} style={{ height: 34, padding: '0 14px', border: '1px solid #E2E5EA', borderRadius: 6, background: '#fff', fontSize: 13, fontWeight: 500, color: '#6B7280', cursor: 'pointer', fontFamily: 'var(--font-ko)' }}>초기화</button>
             )}
+            {dirty && onCancel && (
+              <button onClick={onCancel} style={{ height: 34, padding: '0 14px', border: '1px solid #E2E5EA', borderRadius: 6, background: '#fff', fontSize: 13, fontWeight: 500, color: '#6B7280', cursor: 'pointer', fontFamily: 'var(--font-ko)' }}>취소</button>
+            )}
             {onSave && (
-              <button onClick={onSave} style={{ height: 34, padding: '0 14px', border: 'none', borderRadius: 6, background: '#3C82F5', fontSize: 13, fontWeight: 500, color: '#fff', cursor: 'pointer', fontFamily: 'var(--font-ko)' }}>저장</button>
+              <button
+                onClick={onSave}
+                disabled={!dirty}
+                style={{
+                  height: 34, padding: '0 14px', border: 'none', borderRadius: 6,
+                  background: dirty ? '#3C82F5' : '#E5E7EB',
+                  fontSize: 13, fontWeight: 500,
+                  color: dirty ? '#fff' : '#9CA3AF',
+                  cursor: dirty ? 'pointer' : 'not-allowed',
+                  fontFamily: 'var(--font-ko)',
+                }}
+              >저장</button>
             )}
           </div>
         )}
@@ -180,31 +199,60 @@ export default function StudentDetailPage({
 
   // ── Stay Info ──────────────────────────────────────────────────────────────
   const initRec = student.camp_records.find(r => r.camp_id === activeTab);
-  const [stayShared, setStayShared] = useState<{ checkIn: string; checkOut: string; invoiceName: string }>(
-    initRec?.stay ? { checkIn: initRec.stay.checkIn, checkOut: initRec.stay.checkOut, invoiceName: initRec.stay.invoiceName }
-                  : { checkIn: '', checkOut: '', invoiceName: '' }
+  type HotelForm = { checkIn: string; checkOut: string; invoiceName: string; rooms: RoomEntry[] };
+  const hotelForm = useDirtyForm<HotelForm>(
+    initRec?.stay
+      ? { checkIn: initRec.stay.checkIn, checkOut: initRec.stay.checkOut, invoiceName: initRec.stay.invoiceName, rooms: initRec.stay.rooms ?? defaultRooms }
+      : { checkIn: '', checkOut: '', invoiceName: '', rooms: defaultRooms }
   );
-  const [rooms, setRooms] = useState<RoomEntry[]>(initRec?.stay?.rooms ?? defaultRooms);
+  // 기존 호출부 호환을 위한 alias
+  const stayShared = { checkIn: hotelForm.draft.checkIn, checkOut: hotelForm.draft.checkOut, invoiceName: hotelForm.draft.invoiceName };
+  const setStayShared = (action: React.SetStateAction<typeof stayShared>) => {
+    hotelForm.setDraft(prev => {
+      const part = { checkIn: prev.checkIn, checkOut: prev.checkOut, invoiceName: prev.invoiceName };
+      const next = typeof action === 'function' ? (action as (p: typeof part) => typeof part)(part) : action;
+      return { ...prev, ...next };
+    });
+  };
+  const rooms = hotelForm.draft.rooms;
+  const setRooms = (action: React.SetStateAction<RoomEntry[]>) => {
+    hotelForm.setDraft(prev => ({
+      ...prev,
+      rooms: typeof action === 'function' ? (action as (p: RoomEntry[]) => RoomEntry[])(prev.rooms) : action,
+    }));
+  };
   const invoiceRef = useRef<HTMLInputElement>(null);
   const stayDays   = calcStayDays(stayShared.checkIn, stayShared.checkOut);
   const checkOutErr = !!(stayShared.checkOut && stayShared.checkIn && stayShared.checkOut <= stayShared.checkIn);
 
-  // Reload hotel/flight when tab changes
+  // ── Flight Info ────────────────────────────────────────────────────────────
+  type FlightInfo = { passportNo: string; passportName: string; departure: FlightRow; return: FlightRow };
+  const flightForm = useDirtyForm<FlightInfo>(
+    initRec?.flight ?? { passportNo: '', passportName: '', departure: emptyFlight, return: emptyFlight }
+  );
+  const flightInfo = flightForm.draft;
+  const setFlightInfo = (action: React.SetStateAction<FlightInfo>) => {
+    flightForm.setDraft(prev => typeof action === 'function' ? (action as (p: FlightInfo) => FlightInfo)(prev) : action);
+  };
+
+  // 캠프 탭 변경 시 — 새 캠프 데이터로 sync (dirty 초기화)
   useEffect(() => {
     const rec = student.camp_records.find(r => r.camp_id === activeTab);
-    setStayShared(rec?.stay ? { checkIn: rec.stay.checkIn, checkOut: rec.stay.checkOut, invoiceName: rec.stay.invoiceName }
-                            : { checkIn: '', checkOut: '', invoiceName: '' });
-    setRooms(rec?.stay?.rooms ?? defaultRooms);
-    setFlightInfo(rec?.flight ?? { passportNo: '', passportName: '', departure: emptyFlight, return: emptyFlight });
+    hotelForm.sync(
+      rec?.stay
+        ? { checkIn: rec.stay.checkIn, checkOut: rec.stay.checkOut, invoiceName: rec.stay.invoiceName, rooms: rec.stay.rooms ?? defaultRooms }
+        : { checkIn: '', checkOut: '', invoiceName: '', rooms: defaultRooms }
+    );
+    flightForm.sync(rec?.flight ?? { passportNo: '', passportName: '', departure: emptyFlight, return: emptyFlight });
   }, [activeTab]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function saveHotel() {
-    onStudentUpdate?.(updateCampRecord(activeTab, { stay: { checkIn: stayShared.checkIn, checkOut: stayShared.checkOut, invoiceName: stayShared.invoiceName, rooms } }));
+    const draft = hotelForm.draft;
+    onStudentUpdate?.(updateCampRecord(activeTab, { stay: { checkIn: draft.checkIn, checkOut: draft.checkOut, invoiceName: draft.invoiceName, rooms: draft.rooms } }));
+    hotelForm.sync(draft);
   }
   function resetHotel() {
-    onStudentUpdate?.(updateCampRecord(activeTab, { stay: undefined }));
-    setStayShared({ checkIn: '', checkOut: '', invoiceName: '' });
-    setRooms(defaultRooms);
+    hotelForm.setDraft({ checkIn: '', checkOut: '', invoiceName: '', rooms: defaultRooms });
   }
 
   function updateRoom(id: string, field: keyof RoomEntry, val: string) {
@@ -229,29 +277,32 @@ export default function StudentDetailPage({
     e.target.value = '';
   }
 
-  // ── Flight Info ────────────────────────────────────────────────────────────
-  const [flightInfo, setFlightInfo] = useState(
-    initRec?.flight ?? { passportNo: '', passportName: '', departure: emptyFlight, return: emptyFlight }
-  );
-
   function saveFlight() {
-    onStudentUpdate?.(updateCampRecord(activeTab, { flight: flightInfo }));
+    const draft = flightForm.draft;
+    onStudentUpdate?.(updateCampRecord(activeTab, { flight: draft }));
+    flightForm.sync(draft);
   }
   function resetFlight() {
-    onStudentUpdate?.(updateCampRecord(activeTab, { flight: undefined }));
-    setFlightInfo({ passportNo: '', passportName: '', departure: emptyFlight, return: emptyFlight });
+    flightForm.setDraft({ passportNo: '', passportName: '', departure: emptyFlight, return: emptyFlight });
   }
 
   // ── Family Info ────────────────────────────────────────────────────────────
-  const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>(loadFamily() ?? defaultFamily);
+  type FamilyForm = { members: FamilyMember[] };
+  const familyForm = useDirtyForm<FamilyForm>({ members: loadFamily() ?? defaultFamily });
+  const familyMembers = familyForm.draft.members;
+  const setFamilyMembers = (action: React.SetStateAction<FamilyMember[]>) => {
+    familyForm.setDraft(prev => ({
+      members: typeof action === 'function' ? (action as (p: FamilyMember[]) => FamilyMember[])(prev.members) : action,
+    }));
+  };
 
   function saveFamily() {
-    localStorage.setItem(familyKey, JSON.stringify(familyMembers));
-    alert('Family Info. 저장되었습니다.');
+    const draft = familyForm.draft;
+    localStorage.setItem(familyKey, JSON.stringify(draft.members));
+    familyForm.sync(draft);
   }
   function resetFamily() {
-    localStorage.removeItem(familyKey);
-    setFamilyMembers(defaultFamily);
+    familyForm.setDraft({ members: defaultFamily });
   }
   function updateFamily(id: string, field: 'name' | 'relation' | 'relationCustom', val: string) {
     setFamilyMembers(p => p.map(m => m.id === id ? { ...m, [field]: val } : m));
@@ -409,6 +460,8 @@ export default function StudentDetailPage({
             title="Hotel Info."
             onSave={saveHotel}
             onReset={resetHotel}
+            onCancel={hotelForm.reset}
+            dirty={hotelForm.isDirty}
           >
             <input ref={invoiceRef} type="file" accept=".pdf,.jpg,.png,.xlsx" style={{ display: 'none' }} onChange={handleInvoiceFile} />
 
@@ -550,6 +603,8 @@ export default function StudentDetailPage({
             title="Flight Info."
             onSave={saveFlight}
             onReset={resetFlight}
+            onCancel={flightForm.reset}
+            dirty={flightForm.isDirty}
           >
             <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
               {/* Passport fields */}
@@ -645,6 +700,8 @@ export default function StudentDetailPage({
             title="Family Info."
             onSave={saveFamily}
             onReset={resetFamily}
+            onCancel={familyForm.reset}
+            dirty={familyForm.isDirty}
           >
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center', paddingBottom: 4 }}>
