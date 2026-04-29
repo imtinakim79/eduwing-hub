@@ -5,6 +5,8 @@ import {
 } from '../components/board/cells';
 import type { Student } from './StudentBoardPage';
 import type { Agent } from './AgentBoardPage';
+import { useDirtyForm } from '../hooks/useDirtyForm';
+import StickySaveBar from '../components/StickySaveBar';
 
 const GENDER_OPTIONS   = ['Male', 'Female', 'Other', 'Prefer not to say'];
 const RELATION_OPTIONS = ['아빠', '엄마', '기타'];
@@ -39,11 +41,14 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   );
 }
 
-function FieldRow({ label, height = FIELD_H, children }: {
-  label: React.ReactNode; height?: number; children: React.ReactNode;
+function FieldRow({ label, height = FIELD_H, dirty = false, children }: {
+  label: React.ReactNode; height?: number; dirty?: boolean; children: React.ReactNode;
 }) {
   return (
-    <div style={{ display: 'flex', minHeight: height, alignItems: 'stretch' }}>
+    <div
+      className={dirty ? 'ew-field--dirty' : undefined}
+      style={{ display: 'flex', minHeight: height, alignItems: 'stretch' }}
+    >
       <div style={{ width: LABEL_W, flexShrink: 0, display: 'flex', alignItems: 'center', paddingRight: 16 }}>
         <span style={{ fontSize: 13, fontWeight: 500, color: '#6B7280', fontFamily: 'var(--font-ko)', whiteSpace: 'nowrap' }}>
           {label}
@@ -119,7 +124,6 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
   const [openCell,    setOpenCell]   = useState<string | null>(null);
   const [nameError,   setNameError]  = useState(false);
   const [nameEnError, setNameEnError] = useState(false);
-  const [profileImg,  setProfileImg] = useState<string | null>(editStudent?.profile_img_url ?? null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const joinedDate = editStudent?.history.joined_date ?? todayISO();
@@ -131,7 +135,8 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
   const initRelationCustom = editStudent && !relLabelToKo(editStudent.guardian.relation)
     ? editStudent.guardian.relation
     : '';
-  const [form, setForm] = useState({
+
+  const { draft: form, setField, isDirty, count, isFieldDirty, reset, sync } = useDirtyForm({
     name_ko:  editStudent?.name_ko  ?? '',
     name_en:  editStudent?.name_en  ?? '',
     gender:   editStudent?.gender   ?? '',
@@ -143,10 +148,11 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
     contact: editStudent?.guardian.contact ?? '',
     email:   editStudent?.guardian.email   ?? '',
     agent_id: editStudent?.history.agent_id ?? '',
+    profile_img_url: editStudent?.profile_img_url ?? null as string | null,
   });
 
-  function set(field: string, value: string) {
-    setForm(p => ({ ...p, [field]: value }));
+  function set<K extends keyof typeof form>(field: K, value: typeof form[K]) {
+    setField(field, value);
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -154,7 +160,7 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
     if (!file) return;
     // Use FileReader so the URL persists even after the input changes
     const reader = new FileReader();
-    reader.onload = ev => setProfileImg(ev.target?.result as string);
+    reader.onload = ev => setField('profile_img_url', ev.target?.result as string);
     reader.readAsDataURL(file);
   }
 
@@ -169,7 +175,7 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
       : form.guardian_relation;
     const student: Student = {
       id:              editStudent?.id ?? `STU-${Date.now()}`,
-      profile_img_url: profileImg,
+      profile_img_url: form.profile_img_url,
       name_ko:         form.name_ko.trim(),
       name_en:         form.name_en,
       gender:          (form.gender as Student['gender']) || 'Male',
@@ -188,6 +194,7 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
       },
       camp_records: editStudent?.camp_records ?? [],
     };
+    sync(form);
     onSave(student);
   }
 
@@ -217,22 +224,24 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
           {isEdit ? '학생 상세로 돌아가기' : '학생 목록으로 돌아가기'}
         </button>
         <div style={{ flex: 1 }} />
-        <div style={{ display: 'flex', gap: 5 }}>
-          <button
-            className="ew-btn ew-btn--secondary ew-btn--sm"
-            style={{ width: 80, height: 32, fontSize: 12 }}
-            onClick={onBack}
-          >
-            취소
-          </button>
-          <button
-            className="ew-btn ew-btn--primary ew-btn--sm"
-            style={{ width: 80, height: 32, fontSize: 12 }}
-            onClick={handleSave}
-          >
-            저장
-          </button>
-        </div>
+        {!isEdit && (
+          <div style={{ display: 'flex', gap: 5 }}>
+            <button
+              className="ew-btn ew-btn--secondary ew-btn--sm"
+              style={{ width: 80, height: 32, fontSize: 12 }}
+              onClick={onBack}
+            >
+              취소
+            </button>
+            <button
+              className="ew-btn ew-btn--primary ew-btn--sm"
+              style={{ width: 80, height: 32, fontSize: 12 }}
+              onClick={handleSave}
+            >
+              저장
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Content */}
@@ -240,14 +249,14 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
         <div style={{ background: '#fff', border: '1px solid #E0E4EB', borderRadius: 8, padding: 28 }}>
 
           {/* ── 프로필 사진 ── */}
-          <FieldRow label="프로필 사진" height={100}>
+          <FieldRow label="프로필 사진" height={100} dirty={isEdit && isFieldDirty('profile_img_url')}>
             <div style={{
               flex: 1, height: 100,
               background: '#F8F9FB', border: '1px solid #E0E4EB', borderRadius: 6,
               display: 'flex', alignItems: 'center', gap: 20, padding: '0 16px',
             }}>
-              {profileImg ? (
-                <img src={profileImg} alt="profile" style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+              {form.profile_img_url ? (
+                <img src={form.profile_img_url} alt="profile" style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
               ) : (
                 <div style={{
                   width: 64, height: 64, borderRadius: '50%',
@@ -287,7 +296,7 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
           {/* ── 기본 정보 ── */}
           <SectionTitle>기본 정보</SectionTitle>
 
-          <FieldRow label={<>이름(한글) <span style={{ color: '#EF4444', marginLeft: 2 }}>*</span></>}>
+          <FieldRow label={<>이름(한글) <span style={{ color: '#EF4444', marginLeft: 2 }}>*</span></>} dirty={isEdit && isFieldDirty('name_ko')}>
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
               <TextFieldCell
                 placeholder="이름을 입력하세요."
@@ -302,7 +311,7 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
               )}
             </div>
           </FieldRow>
-          <FieldRow label={<>이름(영문) <span style={{ color: '#EF4444', marginLeft: 2 }}>*</span></>}>
+          <FieldRow label={<>이름(영문) <span style={{ color: '#EF4444', marginLeft: 2 }}>*</span></>} dirty={isEdit && isFieldDirty('name_en')}>
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
               <TextFieldCell
                 placeholder="이름을 입력하세요."
@@ -319,7 +328,7 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
           </FieldRow>
 
           <div style={{ height: 10 }} />
-          <FieldRow label="성별">
+          <FieldRow label="성별" dirty={isEdit && isFieldDirty('gender')}>
             <CellWrapper>
               <DropdownCell
                 value={form.gender} options={GENDER_OPTIONS}
@@ -331,12 +340,12 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
           </FieldRow>
 
           <div style={{ height: 10 }} />
-          <FieldRow label="나이">
+          <FieldRow label="나이" dirty={isEdit && isFieldDirty('age')}>
             <TextFieldCell placeholder="나이를 입력하세요." value={form.age} onChange={v => set('age', v)} type="number" />
           </FieldRow>
 
           <div style={{ height: 10 }} />
-          <FieldRow label="생일">
+          <FieldRow label="생일" dirty={isEdit && isFieldDirty('birth_date')}>
             <CellWrapper>
               <CalendarCell
                 dateISO={form.birth_date}
@@ -355,10 +364,10 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
           {/* ── 연락처 ── */}
           <SectionTitle>연락처</SectionTitle>
 
-          <FieldRow label="보호자">
+          <FieldRow label="보호자" dirty={isEdit && isFieldDirty('guardian_name')}>
             <TextFieldCell placeholder="보호자 이름을 입력하세요." value={form.guardian_name} onChange={v => set('guardian_name', v)} />
           </FieldRow>
-          <FieldRow label="보호자 관계">
+          <FieldRow label="보호자 관계" dirty={isEdit && (isFieldDirty('guardian_relation') || isFieldDirty('guardian_relation_custom'))}>
             <CellWrapper>
               <DropdownCell
                 value={form.guardian_relation} options={RELATION_OPTIONS}
@@ -385,12 +394,12 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
           </FieldRow>
 
           <div style={{ height: 10 }} />
-          <FieldRow label="연락처">
+          <FieldRow label="연락처" dirty={isEdit && isFieldDirty('contact')}>
             <TextFieldCell placeholder="010-0000-0000" value={form.contact} onChange={v => set('contact', v)} type="tel" />
           </FieldRow>
 
           <div style={{ height: 10 }} />
-          <FieldRow label="Email">
+          <FieldRow label="Email" dirty={isEdit && isFieldDirty('email')}>
             <TextFieldCell placeholder="example@email.com" value={form.email} onChange={v => set('email', v)} type="email" />
           </FieldRow>
 
@@ -406,7 +415,7 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
           </FieldRow>
 
           <div style={{ height: 10 }} />
-          <FieldRow label="Agent">
+          <FieldRow label="Agent" dirty={isEdit && isFieldDirty('agent_id')}>
             <CellWrapper>
               <DropdownCell
                 value={agents.find(a => a.id === form.agent_id)?.name ?? form.agent_id}
@@ -422,7 +431,9 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
           </FieldRow>
 
         </div>
+        <div style={{ height: isEdit ? 80 : 0 }} />
       </div>
+      <StickySaveBar visible={isEdit && isDirty} count={count} onCancel={reset} onSave={handleSave} />
     </div>
   );
 }
