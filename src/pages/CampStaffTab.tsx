@@ -1,7 +1,8 @@
 // 스탭 탭
-// 전체 명단: localStorage ew-master-staff (모든 캠프 공유)
-// 캠프별 배정: localStorage ew-campstaff-{campId}
+// 전체 명단: localStorage ew-master-staff (모든 캠프 공유) — 즉시 저장
+// 캠프별 배정: localStorage ew-campstaff-{campId} — 명시적 저장 (dirty 추적)
 import { useState, useRef, useEffect } from 'react';
+import { useDirtyForm } from '../hooks/useDirtyForm';
 
 export interface Member { id: string; name: string; }
 
@@ -220,26 +221,65 @@ export default function CampStaffTab({ campId, onStaffChange }: {
   onStaffChange?: (staffNames: string[]) => void;
 }) {
   const [staffMaster, setStaffMaster] = useState<Member[]>(() => loadMaster(MASTER_STAFF_KEY));
-  const [assignment,  setAssignment]  = useState<CampStaffData>(() =>
-    campId ? loadCampStaff(campId) : { staffIds: [] }
-  );
 
-  function setStaffIds(ids: string[]) {
-    const next = { staffIds: ids };
-    setAssignment(next);
-    if (campId) saveCampStaff(campId, next);
-  }
+  // 캠프별 배정만 dirty 추적
+  type AssignmentForm = { staffIds: string[] };
+  const form = useDirtyForm<AssignmentForm>({ staffIds: campId ? loadCampStaff(campId).staffIds : [] });
+  const assignment = form.draft;
+  const setStaffIds = (ids: string[]) => form.setDraft({ staffIds: ids });
 
-  // staffMaster 상태 업데이트 이후 최신값으로 onStaffChange 호출
+  // campId 변경 시 sync
+  useEffect(() => {
+    form.sync({ staffIds: campId ? loadCampStaff(campId).staffIds : [] });
+  }, [campId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // master 변경 시(즉시 저장) 부모에 이름 변동 알림 — 배정된 멤버 이름이 바뀔 수 있음
   const mounted = useRef(false);
   useEffect(() => {
     if (!mounted.current) { mounted.current = true; return; }
     const names = staffMaster.filter(m => assignment.staffIds.includes(m.id)).map(m => m.name);
     onStaffChange?.(names);
-  }, [assignment, staffMaster]);
+  }, [staffMaster]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function handleSave() {
+    if (campId) saveCampStaff(campId, { staffIds: assignment.staffIds });
+    const names = staffMaster.filter(m => assignment.staffIds.includes(m.id)).map(m => m.name);
+    onStaffChange?.(names);
+    form.sync({ staffIds: assignment.staffIds });
+  }
+  function handleReset() {
+    form.setDraft({ staffIds: [] });
+  }
 
   return (
     <div style={{ padding: '20px 24px' }}>
+      {/* 헤더: 배정 영역의 dirty/액션만 다룸 */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+        <span style={{ fontSize: 14, fontWeight: 600, color: '#1A1D23', fontFamily: 'var(--font-ko)', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+          {form.isDirty && <span aria-hidden style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-warning)', display: 'inline-block', flexShrink: 0 }} />}
+          스탭 배정
+        </span>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button onClick={handleReset} style={{ height: 34, padding: '0 14px', border: '1px solid #E2E5EA', borderRadius: 6, background: '#fff', fontSize: 13, fontWeight: 500, color: '#6B7280', cursor: 'pointer', fontFamily: 'var(--font-ko)' }}>초기화</button>
+          {form.isDirty && (
+            <button onClick={form.reset} style={{ height: 34, padding: '0 14px', border: '1px solid #E2E5EA', borderRadius: 6, background: '#fff', fontSize: 13, fontWeight: 500, color: '#6B7280', cursor: 'pointer', fontFamily: 'var(--font-ko)' }}>취소</button>
+          )}
+          <button
+            onClick={handleSave}
+            disabled={!form.isDirty}
+            style={{
+              height: 34, padding: '0 14px', border: 'none', borderRadius: 6,
+              background: form.isDirty ? '#3C82F5' : '#E5E7EB',
+              fontSize: 13, fontWeight: 500,
+              color: form.isDirty ? '#fff' : '#9CA3AF',
+              cursor: form.isDirty ? 'pointer' : 'not-allowed',
+              fontFamily: 'var(--font-ko)',
+            }}
+          >저장</button>
+        </div>
+      </div>
+      <div style={{ height: 1, background: '#E2E5EA', marginBottom: 14 }} />
+
       <MemberPanel
         masterList={staffMaster} setMasterList={setStaffMaster}
         assignedIds={assignment.staffIds} setAssignedIds={setStaffIds}

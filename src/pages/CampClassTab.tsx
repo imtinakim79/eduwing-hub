@@ -1,6 +1,7 @@
 // 클래스(등급) 탭 — 캠프별 클래스 관리
 // 저장: localStorage ew-classes-{campId}
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useDirtyForm } from '../hooks/useDirtyForm';
 import type { Student } from './StudentBoardPage';
 
 export interface ClassLevel {
@@ -100,7 +101,11 @@ export default function CampClassTab({
   students?: Student[];
   onClassesChange?: (classes: ClassLevel[]) => void;
 }) {
-  const [classes, setClasses] = useState<ClassLevel[]>(() => loadClasses(campId));
+  type ClassesForm = { classes: ClassLevel[] };
+  const form = useDirtyForm<ClassesForm>({ classes: loadClasses(campId) });
+  const classes = form.draft.classes;
+  const setClasses = (next: ClassLevel[]) => form.setDraft({ classes: next });
+
   const [selectedId, setSelectedId] = useState<string | null>(() => {
     const loaded = loadClasses(campId);
     return loaded.length > 0 ? loaded[0].id : null;
@@ -110,10 +115,25 @@ export default function CampClassTab({
     s.camp_records?.some(r => r.camp_id === campId)
   );
 
+  // campId 변경 시 sync
+  useEffect(() => {
+    const loaded = loadClasses(campId);
+    form.sync({ classes: loaded });
+    setSelectedId(loaded.length > 0 ? loaded[0].id : null);
+  }, [campId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function handleSave() {
+    saveClasses(campId, classes);
+    onClassesChange?.(classes);
+    form.sync({ classes });
+  }
+  function handleReset() {
+    form.setDraft({ classes: [] });
+    setSelectedId(null);
+  }
+
   function update(next: ClassLevel[]) {
     setClasses(next);
-    saveClasses(campId, next);
-    onClassesChange?.(next);
   }
 
   function addClass() {
@@ -137,6 +157,33 @@ export default function CampClassTab({
   const selected = classes.find(c => c.id === selectedId) ?? null;
 
   return (
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
+      {/* 헤더 */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', borderBottom: '1px solid var(--color-border-table)' }}>
+        <span style={{ fontSize: 14, fontWeight: 600, color: '#1A1D23', fontFamily: 'var(--font-ko)', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+          {form.isDirty && <span aria-hidden style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-warning)', display: 'inline-block', flexShrink: 0 }} />}
+          클래스 관리
+        </span>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button onClick={handleReset} style={{ height: 34, padding: '0 14px', border: '1px solid #E2E5EA', borderRadius: 6, background: '#fff', fontSize: 13, fontWeight: 500, color: '#6B7280', cursor: 'pointer', fontFamily: 'var(--font-ko)' }}>초기화</button>
+          {form.isDirty && (
+            <button onClick={form.reset} style={{ height: 34, padding: '0 14px', border: '1px solid #E2E5EA', borderRadius: 6, background: '#fff', fontSize: 13, fontWeight: 500, color: '#6B7280', cursor: 'pointer', fontFamily: 'var(--font-ko)' }}>취소</button>
+          )}
+          <button
+            onClick={handleSave}
+            disabled={!form.isDirty}
+            style={{
+              height: 34, padding: '0 14px', border: 'none', borderRadius: 6,
+              background: form.isDirty ? '#3C82F5' : '#E5E7EB',
+              fontSize: 13, fontWeight: 500,
+              color: form.isDirty ? '#fff' : '#9CA3AF',
+              cursor: form.isDirty ? 'pointer' : 'not-allowed',
+              fontFamily: 'var(--font-ko)',
+            }}
+          >저장</button>
+        </div>
+      </div>
+
     <div style={{ display: 'flex', minHeight: 400 }}>
       {/* Left: class list */}
       <div style={{ width: 220, borderRight: '1px solid var(--color-border-table)', padding: '16px 12px', display: 'flex', flexDirection: 'column', gap: 8, flexShrink: 0 }}>
@@ -238,6 +285,7 @@ export default function CampClassTab({
           왼쪽에서 클래스를 선택하거나 추가하세요
         </div>
       )}
+    </div>
     </div>
   );
 }

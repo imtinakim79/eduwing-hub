@@ -1,7 +1,8 @@
 // 숙박정보 탭 — 캠프 관리자가 호텔/룸타입 설정
 // 저장: localStorage ew-hotels-{campId}
 // StudentDetailPage Hotel Info에서 이 데이터를 읽어 룸타입 옵션으로 사용
-import { useState } from 'react';
+import { useEffect } from 'react';
+import { useDirtyForm } from '../hooks/useDirtyForm';
 
 export interface RoomType {
   id: string;
@@ -94,12 +95,28 @@ export function HotelCompletedView({ campId }: { campId: string }) {
 
 // ── Main ─────────────────────────────────────────────────────────────────────
 export default function CampAccommodationTab({ campId, onHotelsChange }: { campId?: string; onHotelsChange?: (hotels: Hotel[]) => void }) {
-  const [hotels, setHotels] = useState<Hotel[]>(() => campId ? loadHotels(campId) : []);
+  type HotelsForm = { hotels: Hotel[] };
+  const form = useDirtyForm<HotelsForm>({ hotels: campId ? loadHotels(campId) : [] });
+  const hotels = form.draft.hotels;
+  const setHotels = (action: React.SetStateAction<Hotel[]>) => {
+    form.setDraft(prev => ({
+      hotels: typeof action === 'function' ? (action as (p: Hotel[]) => Hotel[])(prev.hotels) : action,
+    }));
+  };
+  const update = (next: Hotel[]) => setHotels(next);
 
-  function update(next: Hotel[]) {
-    setHotels(next);
-    if (campId) saveHotels(campId, next);
-    onHotelsChange?.(next);
+  // campId 변경 시 sync
+  useEffect(() => {
+    form.sync({ hotels: campId ? loadHotels(campId) : [] });
+  }, [campId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function handleSave() {
+    if (campId) saveHotels(campId, hotels);
+    onHotelsChange?.(hotels);
+    form.sync({ hotels });
+  }
+  function handleReset() {
+    form.setDraft({ hotels: [] });
   }
 
   const addHotel = () =>
@@ -130,6 +147,33 @@ export default function CampAccommodationTab({ campId, onHotelsChange }: { campI
 
   return (
     <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+      {/* 헤더: 제목 + 액션 버튼 */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span style={{ fontSize: 14, fontWeight: 600, color: '#1A1D23', fontFamily: 'var(--font-ko)', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+          {form.isDirty && <span aria-hidden style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-warning)', display: 'inline-block', flexShrink: 0 }} />}
+          숙박정보
+        </span>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button onClick={handleReset} style={{ height: 34, padding: '0 14px', border: '1px solid #E2E5EA', borderRadius: 6, background: '#fff', fontSize: 13, fontWeight: 500, color: '#6B7280', cursor: 'pointer', fontFamily: 'var(--font-ko)' }}>초기화</button>
+          {form.isDirty && (
+            <button onClick={form.reset} style={{ height: 34, padding: '0 14px', border: '1px solid #E2E5EA', borderRadius: 6, background: '#fff', fontSize: 13, fontWeight: 500, color: '#6B7280', cursor: 'pointer', fontFamily: 'var(--font-ko)' }}>취소</button>
+          )}
+          <button
+            onClick={handleSave}
+            disabled={!form.isDirty}
+            style={{
+              height: 34, padding: '0 14px', border: 'none', borderRadius: 6,
+              background: form.isDirty ? '#3C82F5' : '#E5E7EB',
+              fontSize: 13, fontWeight: 500,
+              color: form.isDirty ? '#fff' : '#9CA3AF',
+              cursor: form.isDirty ? 'pointer' : 'not-allowed',
+              fontFamily: 'var(--font-ko)',
+            }}
+          >저장</button>
+        </div>
+      </div>
+      <div style={{ height: 1, background: '#E2E5EA' }} />
 
       {hotels.length === 0 && (
         <div style={{ padding: '32px 0', textAlign: 'center', color: 'var(--color-text-muted)', fontSize: 14, fontFamily: 'var(--font-ko)' }}>
