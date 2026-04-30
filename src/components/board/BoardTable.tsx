@@ -117,7 +117,7 @@ export default function BoardTable<T extends { id: string }>({
     [localEdits],
   );
 
-  const totalWidth = columns.reduce((s, c) => s + resolvedWidth(c), 39);
+  const totalWidth = columns.reduce((s, c) => s + resolvedWidth(c), 56);
 
   return (
     <div
@@ -126,7 +126,7 @@ export default function BoardTable<T extends { id: string }>({
     >
       <table className="ew-table" style={{ tableLayout: 'fixed', width: '100%', minWidth: totalWidth }}>
         <colgroup>
-          <col style={{ width: 39 }} />
+          <col style={{ width: 56 }} />
           {columns.map(col => (
             <col key={col.key} style={{ width: resolvedWidth(col) }} />
           ))}

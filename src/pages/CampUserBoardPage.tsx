@@ -311,9 +311,9 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
       </div>
       <div className="ew-board" style={{ borderRadius: 0, border: 'none', boxShadow: 'none' }}>
         <div style={{ overflowX: 'auto' }}>
-          <table className="ew-table" style={{ minWidth: 39 + BOARD_COLS.reduce((s, c) => s + colW(c.key), 0) }}>
+          <table className="ew-table" style={{ minWidth: 56 + BOARD_COLS.reduce((s, c) => s + colW(c.key), 0) }}>
             <colgroup>
-              <col style={{ width: 39 }} />
+              <col style={{ width: 56 }} />
               {BOARD_COLS.map(c => <col key={c.key} style={{ width: colW(c.key) }} />)}
             </colgroup>
             <thead>
