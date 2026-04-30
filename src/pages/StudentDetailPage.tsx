@@ -326,7 +326,7 @@ export default function StudentDetailPage({
           style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-1)' }}
         >
           <img src="/icon/arrow_fill_left.svg" alt="" style={{ width: 14, height: 14 }} />
-          학생 목록
+          {initialCampId ? (campMap[initialCampId]?.name ?? '캠프 상세') : '학생 목록'}
         </button>
         <div style={{ width: 1, height: 20, background: 'var(--color-border-subtle)' }} />
         <span style={{ fontSize: 'var(--text-lg)', fontWeight: 600, color: 'var(--color-ink-strong)', letterSpacing: 'var(--tracking-tight)', flex: 1 }}>학생 상세</span>
