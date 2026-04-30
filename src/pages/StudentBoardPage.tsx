@@ -67,7 +67,7 @@ const studentColumns: ColumnDef<Student>[] = [
     setValue: (_, v) => ({ field: 'gender', value: v }),
   },
   {
-    key: 'age', label: '나이', width: 63, sortKey: 'age', type: 'dropdown',
+    key: 'age', label: '나이', width: 86, sortKey: 'age', type: 'dropdown',
     options: Array.from({ length: 20 }, (_, i) => `${i + 1}세`),
     getValue: (r, e) => e['age'] ?? `${r.age}세`,
     setValue: (_, v) => ({ field: 'age', value: v }),
