@@ -530,9 +530,9 @@ export default function StudentDetailPage({
               <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
                 {/* Column header */}
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center', paddingBottom: 6 }}>
-                  <span style={{ width: 40, fontSize: 'var(--text-2xs)', fontWeight: 500, color: 'var(--color-ink-soft)', fontFamily: 'var(--font-ko)', textAlign: 'center' }}>No.</span>
-                  <span style={{ flex: 1, fontSize: 'var(--text-2xs)', fontWeight: 500, color: 'var(--color-ink-soft)', fontFamily: 'var(--font-ko)' }}>Room Type</span>
-                  <span style={{ flex: 1, fontSize: 'var(--text-2xs)', fontWeight: 500, color: 'var(--color-ink-soft)', fontFamily: 'var(--font-ko)' }}>Extra Bed</span>
+                  <span style={{ width: 40, fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--color-ink-soft)', letterSpacing: 'var(--tracking-wide)', textTransform: 'uppercase', textAlign: 'center' }}>No.</span>
+                  <span style={{ flex: 1, fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--color-ink-soft)', letterSpacing: 'var(--tracking-wide)', textTransform: 'uppercase' }}>Room Type</span>
+                  <span style={{ flex: 1, fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--color-ink-soft)', letterSpacing: 'var(--tracking-wide)', textTransform: 'uppercase' }}>Extra Bed</span>
                   <div style={{ width: 32 }} />
                 </div>
                 <div style={{ height: 1, background: 'var(--color-border-subtle)', marginBottom: 8 }} />
@@ -704,9 +704,9 @@ export default function StudentDetailPage({
           >
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center', paddingBottom: 4 }}>
-                <span style={{ width: 40, fontSize: 'var(--text-2xs)', fontWeight: 500, color: 'var(--color-ink-soft)', fontFamily: 'var(--font-ko)' }}>No.</span>
-                <span style={{ flex: 1, fontSize: 'var(--text-2xs)', fontWeight: 500, color: 'var(--color-ink-soft)', fontFamily: 'var(--font-ko)' }}>이름</span>
-                <span style={{ flex: 1, fontSize: 'var(--text-2xs)', fontWeight: 500, color: 'var(--color-ink-soft)', fontFamily: 'var(--font-ko)' }}>관계</span>
+                <span style={{ width: 40, fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--color-ink-soft)', letterSpacing: 'var(--tracking-wide)', textTransform: 'uppercase' }}>No.</span>
+                <span style={{ flex: 1, fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--color-ink-soft)', letterSpacing: 'var(--tracking-wide)' }}>이름</span>
+                <span style={{ flex: 1, fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--color-ink-soft)', letterSpacing: 'var(--tracking-wide)' }}>관계</span>
                 <div style={{ width: 32 }} />
               </div>
               <div style={{ height: 1, background: 'var(--color-border-subtle)' }} />
