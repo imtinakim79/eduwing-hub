@@ -306,9 +306,10 @@ export default function StudentDetailPage({
   ];
 
   const hdCell: React.CSSProperties = {
-    borderBottom: '1px solid var(--color-border-subtle)', borderRight: '1px solid var(--color-border-subtle)', borderTop: '1px solid var(--color-border-subtle)',
-    height: 40, display: 'flex', alignItems: 'center', padding: '0 8px 0 10px',
-    fontSize: 11, fontWeight: 500, color: 'var(--color-ink-soft)', fontFamily: 'var(--font-ko)', whiteSpace: 'nowrap',
+    borderRight: '1px solid var(--color-border-subtle)',
+    height: 40, display: 'flex', alignItems: 'center', padding: '0 var(--space-3)',
+    fontSize: 'var(--text-xs)', fontWeight: 600, color: 'var(--color-ink-soft)',
+    letterSpacing: 'var(--tracking-wide)', textTransform: 'uppercase', whiteSpace: 'nowrap',
   };
 
   return (
@@ -592,91 +593,103 @@ export default function StudentDetailPage({
             onCancel={flightForm.reset}
             dirty={flightForm.isDirty}
           >
-            <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
-              {/* Passport fields */}
-              <div style={{ width: 400, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--color-ink-soft)', fontFamily: 'var(--font-ko)' }}>Passport No.</span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
+              {/* Passport fields — 같은 행 가로 배치 */}
+              <div style={{ display: 'flex', gap: 'var(--space-4)', flexWrap: 'wrap' }}>
+                <div style={{ flex: '1 1 240px', display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+                  <span style={FIELD_LABEL}>Passport No.</span>
                   <TextFieldCell placeholder="여권 번호를 입력하세요." value={flightInfo.passportNo} onChange={v => setFlightInfo(p => ({ ...p, passportNo: v }))} />
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--color-ink-soft)', fontFamily: 'var(--font-ko)' }}>Passport Name.</span>
+                <div style={{ flex: '1 1 240px', display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+                  <span style={FIELD_LABEL}>Passport Name.</span>
                   <TextFieldCell placeholder="여권 표기된 이름을 입력하세요." value={flightInfo.passportName} onChange={v => setFlightInfo(p => ({ ...p, passportName: v }))} />
                 </div>
               </div>
 
-              {/* Flight table — rows inlined via .map() to avoid nested-component remount */}
-              <div style={{ flex: 1, border: '1px solid var(--color-border-subtle)', borderRadius: 6, overflow: 'hidden' }}>
-                {/* Header */}
-                <div style={{ display: 'flex', background: 'var(--color-bg-subtle)', height: 40 }}>
-                  <div style={{ ...hdCell, width: 80, flexShrink: 0 }}>Type</div>
-                  <div style={{ ...hdCell, width: 171, flexShrink: 0 }}>Flight No.</div>
-                  <div style={{ ...hdCell, flex: 1 }}>Date of Entry</div>
-                  <div style={{ ...hdCell, flex: 1 }}>Date of Return</div>
-                  <div style={{ ...hdCell, flex: 1 }}>Pick&amp;Drop</div>
-                </div>
-                {/* Rows */}
-                {flightRows.map(({ row, onChange, label, labelBg, labelColor, rowKey }) => (
-                  <div key={rowKey} style={{ display: 'flex', height: CELL_H }}>
-                    {/* Type badge */}
-                    <div style={{ width: 80, height: CELL_H, background: labelBg, border: '1px solid var(--color-border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <span style={{ fontSize: 11, fontWeight: 500, color: labelColor, fontFamily: 'var(--font-ko)', whiteSpace: 'pre' }}>✈  {label}</span>
-                    </div>
-                    {/* Flight No */}
-                    <div style={{ width: 171, height: CELL_H, border: '1px solid var(--color-border-default)', borderRadius: 'var(--radius-md)', background: 'var(--color-canvas)', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-                      <input
-                        value={row.flightNo}
-                        onChange={e => onChange({ ...row, flightNo: e.target.value })}
-                        placeholder="KE 124"
-                        style={{ width: '100%', height: '100%', border: 'none', outline: 'none', background: 'transparent', fontSize: 12, fontFamily: 'var(--font-en)', color: row.flightNo ? 'var(--color-ink-strong)' : 'var(--color-ink-faint)', padding: '0 16px' }}
-                      />
-                    </div>
-                    {/* Date of Entry — CalendarTimeCell */}
-                    <div style={{ flex: 1, height: CELL_H, padding: '0 12px', display: 'flex', alignItems: 'center', overflow: 'hidden', border: '1px solid var(--color-border-default)', borderRadius: 'var(--radius-md)', background: 'var(--color-canvas)' }}>
-                      <CalendarTimeCell
-                        dateISO={row.dateEntry} time={row.timeEntry}
-                        cellId={`${rowKey}-entry`}
-                        openCell={ftOpenCell} setOpenCell={setFtOpenCell}
-                        onDateChange={v => onChange({ ...row, dateEntry: v })}
-                        onTimeChange={v => onChange({ ...row, timeEntry: v })}
-                        onCellClick={() => {}}
-                      />
-                    </div>
-                    {/* Date of Return — CalendarTimeCell */}
-                    <div style={{ flex: 1, height: CELL_H, padding: '0 12px', display: 'flex', alignItems: 'center', overflow: 'hidden', border: '1px solid var(--color-border-default)', borderRadius: 'var(--radius-md)', background: 'var(--color-canvas)' }}>
-                      <CalendarTimeCell
-                        dateISO={row.dateReturn} time={row.timeReturn}
-                        cellId={`${rowKey}-return`}
-                        openCell={ftOpenCell} setOpenCell={setFtOpenCell}
-                        onDateChange={v => onChange({ ...row, dateReturn: v })}
-                        onTimeChange={v => onChange({ ...row, timeReturn: v })}
-                        onCellClick={() => {}}
-                      />
-                    </div>
-                    {/* Pick&Drop */}
-                    <div style={{ flex: 1, height: CELL_H, border: '1px solid var(--color-border-default)', borderRadius: 'var(--radius-md)', background: 'var(--color-canvas)', display: 'flex', alignItems: 'center', padding: '0 10px', gap: 6 }}>
-                      <select
-                        value={row.pickDrop}
-                        onChange={e => onChange({ ...row, pickDrop: e.target.value, pickDropPlace: e.target.value === '없음' ? '' : row.pickDropPlace })}
-                        style={{ border: 'none', outline: 'none', background: 'transparent', fontSize: 12, fontFamily: 'var(--font-ko)', color: row.pickDrop ? 'var(--color-ink-strong)' : 'var(--color-ink-faint)', cursor: 'pointer', flexShrink: 0 }}
-                      >
-                        <option value="" disabled>선택</option>
-                        {(rowKey === 'dep' ? ['픽업', '없음'] : ['드랍', '없음']).map(o => <option key={o} value={o}>{o}</option>)}
-                      </select>
-                      {row.pickDrop && row.pickDrop !== '없음' && (
-                        <>
-                          <div style={{ width: 1, height: 14, background: 'var(--color-border-subtle)', flexShrink: 0 }} />
-                          <input
-                            value={row.pickDropPlace}
-                            onChange={e => onChange({ ...row, pickDropPlace: e.target.value })}
-                            placeholder="장소 입력"
-                            style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent', fontSize: 12, fontFamily: 'var(--font-ko)', color: 'var(--color-ink-strong)', padding: 0, minWidth: 0 }}
-                          />
-                        </>
-                      )}
-                    </div>
+              {/* Flight table — 자체 가로 스크롤로 좁은 화면에서도 보이도록 */}
+              <div style={{ overflowX: 'auto', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-md)' }}>
+                <div style={{ minWidth: 720 }}>
+                  {/* Header */}
+                  <div style={{ display: 'flex', background: 'var(--color-bg-subtle)', height: 40, borderBottom: '1px solid var(--color-border-subtle)' }}>
+                    <div style={{ ...hdCell, width: 80, flexShrink: 0 }}>Type</div>
+                    <div style={{ ...hdCell, width: 160, flexShrink: 0 }}>Flight No.</div>
+                    <div style={{ ...hdCell, flex: 1, minWidth: 150 }}>Date of Entry</div>
+                    <div style={{ ...hdCell, flex: 1, minWidth: 150 }}>Date of Return</div>
+                    <div style={{ ...hdCell, flex: 1, minWidth: 160, borderRight: 'none' }}>Pick&amp;Drop</div>
                   </div>
-                ))}
+                  {/* Rows */}
+                  {flightRows.map(({ row, onChange, label, labelBg, labelColor, rowKey }, idx) => {
+                    const isLast = idx === flightRows.length - 1;
+                    const cellBase: React.CSSProperties = {
+                      height: CELL_H,
+                      borderBottom: isLast ? 'none' : '1px solid var(--color-border-subtle)',
+                      borderRight: '1px solid var(--color-border-subtle)',
+                      background: 'var(--color-canvas)',
+                      display: 'flex', alignItems: 'center',
+                    };
+                    return (
+                    <div key={rowKey} style={{ display: 'flex' }}>
+                      {/* Type badge */}
+                      <div style={{ ...cellBase, width: 80, background: labelBg, justifyContent: 'center', flexShrink: 0 }}>
+                        <span style={{ fontSize: 11, fontWeight: 500, color: labelColor, whiteSpace: 'pre' }}>✈  {label}</span>
+                      </div>
+                      {/* Flight No */}
+                      <div style={{ ...cellBase, width: 160, flexShrink: 0 }}>
+                        <input
+                          value={row.flightNo}
+                          onChange={e => onChange({ ...row, flightNo: e.target.value })}
+                          placeholder="KE 124"
+                          style={{ width: '100%', height: '100%', border: 'none', outline: 'none', background: 'transparent', fontSize: 12, fontFamily: 'var(--font-mono)', color: row.flightNo ? 'var(--color-ink-strong)' : 'var(--color-ink-faint)', padding: '0 12px' }}
+                        />
+                      </div>
+                      {/* Date of Entry */}
+                      <div style={{ ...cellBase, flex: 1, minWidth: 150, padding: '0 12px', overflow: 'hidden' }}>
+                        <CalendarTimeCell
+                          dateISO={row.dateEntry} time={row.timeEntry}
+                          cellId={`${rowKey}-entry`}
+                          openCell={ftOpenCell} setOpenCell={setFtOpenCell}
+                          onDateChange={v => onChange({ ...row, dateEntry: v })}
+                          onTimeChange={v => onChange({ ...row, timeEntry: v })}
+                          onCellClick={() => {}}
+                        />
+                      </div>
+                      {/* Date of Return */}
+                      <div style={{ ...cellBase, flex: 1, minWidth: 150, padding: '0 12px', overflow: 'hidden' }}>
+                        <CalendarTimeCell
+                          dateISO={row.dateReturn} time={row.timeReturn}
+                          cellId={`${rowKey}-return`}
+                          openCell={ftOpenCell} setOpenCell={setFtOpenCell}
+                          onDateChange={v => onChange({ ...row, dateReturn: v })}
+                          onTimeChange={v => onChange({ ...row, timeReturn: v })}
+                          onCellClick={() => {}}
+                        />
+                      </div>
+                      {/* Pick&Drop */}
+                      <div style={{ ...cellBase, flex: 1, minWidth: 160, borderRight: 'none', padding: '0 10px', gap: 6 }}>
+                        <select
+                          value={row.pickDrop}
+                          onChange={e => onChange({ ...row, pickDrop: e.target.value, pickDropPlace: e.target.value === '없음' ? '' : row.pickDropPlace })}
+                          style={{ border: 'none', outline: 'none', background: 'transparent', fontSize: 12, fontFamily: 'var(--font-ko)', color: row.pickDrop ? 'var(--color-ink-strong)' : 'var(--color-ink-faint)', cursor: 'pointer', flexShrink: 0 }}
+                        >
+                          <option value="" disabled>선택</option>
+                          {(rowKey === 'dep' ? ['픽업', '없음'] : ['드랍', '없음']).map(o => <option key={o} value={o}>{o}</option>)}
+                        </select>
+                        {row.pickDrop && row.pickDrop !== '없음' && (
+                          <>
+                            <div style={{ width: 1, height: 14, background: 'var(--color-border-subtle)', flexShrink: 0 }} />
+                            <input
+                              value={row.pickDropPlace}
+                              onChange={e => onChange({ ...row, pickDropPlace: e.target.value })}
+                              placeholder="장소 입력"
+                              style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent', fontSize: 12, fontFamily: 'var(--font-ko)', color: 'var(--color-ink-strong)', padding: 0, minWidth: 0 }}
+                            />
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  );
+                  })}
+                </div>
               </div>
             </div>
           </SectionCard>
