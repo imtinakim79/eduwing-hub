@@ -302,14 +302,14 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
           <input type="text" placeholder="학생 이름 검색" value={query} onChange={e => { setQuery(e.target.value); setPage(1); }} />
         </div>
       </div>
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '8px 30px', border: '1px solid var(--color-border-subtle)', background: 'var(--color-canvas)', justifyContent: 'flex-end'}}>
-        <span style={{ flex: 1, fontSize: 12, color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)', lineHeight: '26px' }}>{selected.size > 0 ? `${selected.size}명 선택됨` : ''}</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', padding: 'var(--space-2) var(--page-px)', background: 'var(--color-canvas)', justifyContent: 'flex-end' }}>
+        <span style={{ flex: 1, fontSize: 'var(--text-sm)', color: 'var(--color-ink-soft)', lineHeight: '26px' }}>{selected.size > 0 ? `${selected.size}명 선택됨` : ''}</span>
         {onStudentUpdate && <button className="ew-btn ew-btn--primary ew-btn--xsm" onClick={() => setShowPicker(true)}>학생 추가</button>}
         {selected.size > 0 && onStudentUpdate && <button className="ew-btn ew-btn--danger ew-btn--xsm" onClick={handleRemoveStudents}>캠프에서 제거</button>}
         <button className="ew-btn ew-btn--secondary ew-btn--xsm">엑셀 업로드</button>
         <button className="ew-btn ew-btn--secondary ew-btn--xsm">엑셀 다운로드</button>
       </div>
-      <div className="ew-board" style={{ borderRadius: 0, border: 'none', borderTop: '1px solid var(--color-border-table)' }}>
+      <div className="ew-board" style={{ borderRadius: 0, border: 'none', boxShadow: 'none' }}>
         <div style={{ overflowX: 'auto' }}>
           <table className="ew-table" style={{ minWidth: 39 + BOARD_COLS.reduce((s, c) => s + colW(c.key), 0) }}>
             <colgroup>
