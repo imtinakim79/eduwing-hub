@@ -28,7 +28,7 @@ export function ClassCompletedView({ campId }: { campId: string }) {
   const classes = loadClasses(campId);
   if (classes.length === 0) {
     return (
-      <div style={{ padding: '16px 24px', fontSize: 13, color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)' }}>
+      <div style={{ padding: '16px 24px', fontSize: 'var(--text-base)', color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)' }}>
         등록된 클래스 없음
       </div>
     );
@@ -37,9 +37,9 @@ export function ClassCompletedView({ campId }: { campId: string }) {
     <div style={{ padding: '12px 24px', display: 'flex', flexWrap: 'wrap', gap: 8 }}>
       {classes.map(c => (
         <div key={c.id} style={{ background: '#F0F4FF', borderRadius: 8, padding: '6px 14px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-primary)', fontFamily: 'var(--font-ko)' }}>{c.name}</span>
-          {c.teacher && <span style={{ fontSize: 11, color: 'var(--color-text-sub)', fontFamily: 'var(--font-ko)' }}>담당: {c.teacher}</span>}
-          <span style={{ fontSize: 11, color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)' }}>학생 {c.studentIds.length}명</span>
+          <span style={{ fontSize: 'var(--text-base)', fontWeight: 600, color: 'var(--color-primary)', fontFamily: 'var(--font-ko)' }}>{c.name}</span>
+          {c.teacher && <span style={{ fontSize: 'var(--text-2xs)', color: 'var(--color-text-sub)', fontFamily: 'var(--font-ko)' }}>담당: {c.teacher}</span>}
+          <span style={{ fontSize: 'var(--text-2xs)', color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)' }}>학생 {c.studentIds.length}명</span>
         </div>
       ))}
     </div>
@@ -49,7 +49,7 @@ export function ClassCompletedView({ campId }: { campId: string }) {
 // ── Input helpers ─────────────────────────────────────────────────────────────
 const inputStyle: React.CSSProperties = {
   height: 36, padding: '0 10px', border: '1px solid var(--color-border-default)',
-  borderRadius: 6, fontSize: 13, fontFamily: 'var(--font-ko)',
+  borderRadius: 6, fontSize: 'var(--text-base)', fontFamily: 'var(--font-ko)',
   color: 'var(--color-text-primary)', outline: 'none', background: 'var(--color-canvas)',
   width: '100%', boxSizing: 'border-box',
 };
@@ -63,9 +63,9 @@ function StudentRow({
     <label style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 0', cursor: 'pointer', borderBottom: '1px solid var(--color-border-faint)' }}>
       <input type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)}
         style={{ width: 15, height: 15, cursor: 'pointer', accentColor: 'var(--color-primary)' }} />
-      <span style={{ fontSize: 13, fontFamily: 'var(--font-ko)', color: 'var(--color-text-primary)' }}>{name}</span>
+      <span style={{ fontSize: 'var(--text-base)', fontFamily: 'var(--font-ko)', color: 'var(--color-text-primary)' }}>{name}</span>
       {student.name_en && student.name_ko && (
-        <span style={{ fontSize: 12, color: 'var(--color-text-muted)', fontFamily: 'var(--font-en)' }}>{student.name_en}</span>
+        <span style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)', fontFamily: 'var(--font-en)' }}>{student.name_en}</span>
       )}
     </label>
   );
@@ -81,10 +81,10 @@ function ClassCard({
       border: `1px solid ${selected ? 'var(--color-primary)' : 'var(--color-border-subtle)'}`,
       borderRadius: 8, padding: '10px 14px', cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: 4,
     }}>
-      <span style={{ fontSize: 14, fontWeight: 600, color: selected ? 'var(--color-primary)' : 'var(--color-text-primary)', fontFamily: 'var(--font-ko)' }}>
+      <span style={{ fontSize: 'var(--text-md)', fontWeight: 600, color: selected ? 'var(--color-primary)' : 'var(--color-text-primary)', fontFamily: 'var(--font-ko)' }}>
         {cls.name || '(미입력)'}
       </span>
-      <div style={{ display: 'flex', gap: 12, fontSize: 12, color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)' }}>
+      <div style={{ display: 'flex', gap: 12, fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)' }}>
         {cls.teacher && <span>담당: {cls.teacher}</span>}
         <span>학생 {cls.studentIds.length}명</span>
       </div>
@@ -164,14 +164,14 @@ export default function CampClassTab({
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', borderBottom: '1px solid var(--color-border-table)' }}>
-        <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-ink-strong)', fontFamily: 'var(--font-ko)', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+        <span style={{ fontSize: 'var(--text-md)', fontWeight: 600, color: 'var(--color-ink-strong)', fontFamily: 'var(--font-ko)', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
           {form.isDirty && <span aria-hidden style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-warning)', display: 'inline-block', flexShrink: 0 }} />}
           클래스 관리
         </span>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={handleReset} style={{ height: 34, padding: '0 14px', border: '1px solid var(--color-border-subtle)', borderRadius: 6, background: 'var(--color-canvas)', fontSize: 13, fontWeight: 500, color: 'var(--color-ink-soft)', cursor: 'pointer', fontFamily: 'var(--font-ko)' }}>초기화</button>
+          <button onClick={handleReset} style={{ height: 34, padding: '0 14px', border: '1px solid var(--color-border-subtle)', borderRadius: 6, background: 'var(--color-canvas)', fontSize: 'var(--text-base)', fontWeight: 500, color: 'var(--color-ink-soft)', cursor: 'pointer', fontFamily: 'var(--font-ko)' }}>초기화</button>
           {form.isDirty && (
-            <button onClick={form.reset} style={{ height: 34, padding: '0 14px', border: '1px solid var(--color-border-subtle)', borderRadius: 6, background: 'var(--color-canvas)', fontSize: 13, fontWeight: 500, color: 'var(--color-ink-soft)', cursor: 'pointer', fontFamily: 'var(--font-ko)' }}>취소</button>
+            <button onClick={form.reset} style={{ height: 34, padding: '0 14px', border: '1px solid var(--color-border-subtle)', borderRadius: 6, background: 'var(--color-canvas)', fontSize: 'var(--text-base)', fontWeight: 500, color: 'var(--color-ink-soft)', cursor: 'pointer', fontFamily: 'var(--font-ko)' }}>취소</button>
           )}
           <button
             onClick={handleSave}
@@ -179,7 +179,7 @@ export default function CampClassTab({
             style={{
               height: 34, padding: '0 14px', border: 'none', borderRadius: 6,
               background: form.isDirty ? 'var(--color-primary)' : 'var(--color-border-subtle)',
-              fontSize: 13, fontWeight: 500,
+              fontSize: 'var(--text-base)', fontWeight: 500,
               color: form.isDirty ? '#fff' : 'var(--color-ink-mute)',
               cursor: form.isDirty ? 'pointer' : 'not-allowed',
               fontFamily: 'var(--font-ko)',
@@ -199,7 +199,7 @@ export default function CampClassTab({
           + 클래스 추가
         </button>
         {classes.length === 0 && (
-          <div style={{ fontSize: 13, color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)', textAlign: 'center', marginTop: 16 }}>
+          <div style={{ fontSize: 'var(--text-base)', color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)', textAlign: 'center', marginTop: 16 }}>
             클래스를 추가하세요
           </div>
         )}
@@ -213,7 +213,7 @@ export default function CampClassTab({
         <div style={{ flex: 1, padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 20, overflowY: 'auto' }}>
           {/* Header */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--color-text-primary)', fontFamily: 'var(--font-ko)', flex: 1 }}>
+            <span style={{ fontSize: 'var(--text-md)', fontWeight: 600, color: 'var(--color-text-primary)', fontFamily: 'var(--font-ko)', flex: 1 }}>
               클래스 상세
             </span>
             <button
@@ -228,7 +228,7 @@ export default function CampClassTab({
           {/* Class name & teacher */}
           <div style={{ display: 'flex', gap: 16 }}>
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <label style={{ fontSize: 12, fontWeight: 500, color: 'var(--color-text-sub)', fontFamily: 'var(--font-ko)' }}>
+              <label style={{ fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--color-text-sub)', fontFamily: 'var(--font-ko)' }}>
                 클래스명 <span style={{ color: 'var(--color-error)' }}>*</span>
               </label>
               <input
@@ -239,7 +239,7 @@ export default function CampClassTab({
               />
             </div>
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <label style={{ fontSize: 12, fontWeight: 500, color: 'var(--color-text-sub)', fontFamily: 'var(--font-ko)' }}>
+              <label style={{ fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--color-text-sub)', fontFamily: 'var(--font-ko)' }}>
                 담당 강사
               </label>
               <input
@@ -254,15 +254,15 @@ export default function CampClassTab({
           {/* Student assignment */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-text-primary)', fontFamily: 'var(--font-ko)', flex: 1 }}>
+              <span style={{ fontSize: 'var(--text-base)', fontWeight: 600, color: 'var(--color-text-primary)', fontFamily: 'var(--font-ko)', flex: 1 }}>
                 학생 배정
               </span>
-              <span style={{ fontSize: 12, color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)' }}>
+              <span style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)' }}>
                 {selected.studentIds.length} / {enrolledStudents.length}명
               </span>
             </div>
             {enrolledStudents.length === 0 ? (
-              <div style={{ padding: '12px 0', fontSize: 13, color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)' }}>
+              <div style={{ padding: '12px 0', fontSize: 'var(--text-base)', color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)' }}>
                 이 캠프에 등록된 학생이 없습니다
               </div>
             ) : (
@@ -285,7 +285,7 @@ export default function CampClassTab({
           </div>
         </div>
       ) : (
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-muted)', fontSize: 14, fontFamily: 'var(--font-ko)' }}>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-muted)', fontSize: 'var(--text-md)', fontFamily: 'var(--font-ko)' }}>
           왼쪽에서 클래스를 선택하거나 추가하세요
         </div>
       )}

@@ -32,7 +32,7 @@ const DIVIDER   = '1px solid var(--color-border-subtle)';
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
     <div style={{ height: 28, display: 'flex', alignItems: 'flex-end', marginBottom: 12 }}>
-      <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-ink-strong)', fontFamily: 'var(--font-ko)' }}>
+      <span style={{ fontSize: 'var(--text-base)', fontWeight: 600, color: 'var(--color-ink-strong)', fontFamily: 'var(--font-ko)' }}>
         {children}
       </span>
     </div>
@@ -201,7 +201,7 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
           style={{
             display: 'inline-flex', alignItems: 'center', gap: 6,
             background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0',
-            fontSize: 13, color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)',
+            fontSize: 'var(--text-base)', color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)',
           }}
           onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'var(--color-primary)'; }}
           onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--color-text-muted)'; }}
@@ -216,14 +216,14 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
           <div style={{ display: 'flex', gap: 5 }}>
             <button
               className="ew-btn ew-btn--secondary ew-btn--sm"
-              style={{ width: 80, height: 32, fontSize: 12 }}
+              style={{ width: 80, height: 32, fontSize: 'var(--text-sm)' }}
               onClick={onBack}
             >
               취소
             </button>
             <button
               className="ew-btn ew-btn--primary ew-btn--sm"
-              style={{ width: 80, height: 32, fontSize: 12 }}
+              style={{ width: 80, height: 32, fontSize: 'var(--text-sm)' }}
               onClick={handleSave}
             >
               저장
@@ -258,12 +258,12 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
                 </div>
               )}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <span style={{ fontSize: 12, color: 'var(--color-ink-faint)', fontFamily: 'var(--font-ko)' }}>
+                <span style={{ fontSize: 'var(--text-sm)', color: 'var(--color-ink-faint)', fontFamily: 'var(--font-ko)' }}>
                   JPG, PNG 형식 지원 · 최대 5MB, 가로/세로 100px 권장
                 </span>
                 <button
                   style={{
-                    width: 100, height: 32, fontSize: 12, fontWeight: 600,
+                    width: 100, height: 32, fontSize: 'var(--text-sm)', fontWeight: 600,
                     color: 'var(--color-primary)', border: '1px solid #3B82F6',
                     borderRadius: 6, background: 'var(--color-canvas)', cursor: 'pointer',
                     fontFamily: 'var(--font-ko)',
@@ -293,7 +293,7 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
                 onChange={v => { set('name_ko', v); if (v.trim()) setNameError(false); }}
               />
               {nameError && (
-                <span style={{ fontSize: 11, color: 'var(--color-error)', padding: '3px 16px', fontFamily: 'var(--font-ko)' }}>
+                <span style={{ fontSize: 'var(--text-2xs)', color: 'var(--color-error)', padding: '3px 16px', fontFamily: 'var(--font-ko)' }}>
                   이름을 입력해주세요.
                 </span>
               )}
@@ -308,7 +308,7 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
                 onChange={v => { set('name_en', v); if (v.trim()) setNameEnError(false); }}
               />
               {nameEnError && (
-                <span style={{ fontSize: 11, color: 'var(--color-error)', padding: '3px 16px', fontFamily: 'var(--font-ko)' }}>
+                <span style={{ fontSize: 'var(--text-2xs)', color: 'var(--color-error)', padding: '3px 16px', fontFamily: 'var(--font-ko)' }}>
                   이름을 입력해주세요.
                 </span>
               )}
@@ -374,7 +374,7 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
                   borderBottom: '1px solid var(--color-border-subtle)', borderRight: '1px solid var(--color-border-subtle)',
                   borderTop: 'none', borderLeft: '1px solid var(--color-border-subtle)',
                   outline: 'none', padding: '0 12px',
-                  fontSize: 13, fontFamily: 'var(--font-ko)',
+                  fontSize: 'var(--text-base)', fontFamily: 'var(--font-ko)',
                   color: 'var(--color-text-primary)',
                 }}
               />

@@ -26,7 +26,7 @@ function TagList({ items, color }: { items: string[]; color: string }) {
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
       {items.map((item, i) => (
-        <span key={i} className="ew-tag" style={{ background: color === 'var(--color-primary)' ? 'var(--color-primary-light)' : 'var(--color-primary-bg)', color, fontFamily: 'var(--font-ko)', fontSize: 12 }}>
+        <span key={i} className="ew-tag" style={{ background: color === 'var(--color-primary)' ? 'var(--color-primary-light)' : 'var(--color-primary-bg)', color, fontFamily: 'var(--font-ko)', fontSize: 'var(--text-sm)' }}>
           {item}
         </span>
       ))}
@@ -236,7 +236,7 @@ export default function CampDetailPage({
                             setActiveTimetableClassId(cls.id);
                           }}
                           style={{
-                            padding: '8px 16px', fontSize: 13, fontFamily: 'var(--font-ko)',
+                            padding: '8px 16px', fontSize: 'var(--text-base)', fontFamily: 'var(--font-ko)',
                             fontWeight: cls.id === activeTimetableClassId ? 600 : 400,
                             color: cls.id === activeTimetableClassId ? 'var(--color-primary)' : 'var(--color-text-sub)',
                             background: 'none', border: 'none',
@@ -245,7 +245,7 @@ export default function CampDetailPage({
                           }}
                         >
                           {cls.name || '(미입력)'}
-                          {cls.teacher && <span style={{ fontSize: 11, color: 'var(--color-text-muted)', marginLeft: 6 }}>{cls.teacher}</span>}
+                          {cls.teacher && <span style={{ fontSize: 'var(--text-2xs)', color: 'var(--color-text-muted)', marginLeft: 6 }}>{cls.teacher}</span>}
                         </button>
                       ))}
                     </div>
@@ -268,7 +268,7 @@ export default function CampDetailPage({
             </Card>
           </>
         ) : (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 200, color: 'var(--color-text-muted)', fontSize: 14, fontFamily: 'var(--font-ko)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 200, color: 'var(--color-text-muted)', fontSize: 'var(--text-md)', fontFamily: 'var(--font-ko)' }}>
             캠프를 찾을 수 없습니다.
           </div>
         )}

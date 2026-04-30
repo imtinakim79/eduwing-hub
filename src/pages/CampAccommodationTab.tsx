@@ -44,7 +44,7 @@ function XBtn({ onClick, title }: { onClick: () => void; title?: string }) {
   return (
     <button
       onClick={onClick} title={title}
-      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-ink-mute)', fontSize: 14, padding: '2px 6px', borderRadius: 4, lineHeight: 1 }}
+      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-ink-mute)', fontSize: 'var(--text-md)', padding: '2px 6px', borderRadius: 4, lineHeight: 1 }}
     >✕</button>
   );
 }
@@ -54,7 +54,7 @@ export function HotelCompletedView({ campId }: { campId: string }) {
   const hotels = loadHotels(campId);
   if (!hotels.length) {
     return (
-      <div style={{ padding: '24px', color: 'var(--color-text-muted)', fontSize: 13, fontFamily: 'var(--font-ko)' }}>
+      <div style={{ padding: '24px', color: 'var(--color-text-muted)', fontSize: 'var(--text-base)', fontFamily: 'var(--font-ko)' }}>
         등록된 호텔이 없습니다.
       </div>
     );
@@ -64,12 +64,12 @@ export function HotelCompletedView({ campId }: { campId: string }) {
       {hotels.map((hotel, idx) => (
         <div key={hotel.id} style={{ border: '1px solid var(--color-border-table)', borderRadius: 8, padding: '12px 16px', background: 'var(--color-paper)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: hotel.roomTypes.length ? 10 : 0 }}>
-            <span style={{ fontSize: 12, color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)', minWidth: 18, textAlign: 'center' }}>{idx + 1}</span>
-            <span style={{ fontWeight: 600, fontSize: 14, fontFamily: 'var(--font-ko)', color: 'var(--color-text-primary)' }}>
+            <span style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)', minWidth: 18, textAlign: 'center' }}>{idx + 1}</span>
+            <span style={{ fontWeight: 600, fontSize: 'var(--text-md)', fontFamily: 'var(--font-ko)', color: 'var(--color-text-primary)' }}>
               {hotel.name || '(이름 없음)'}
             </span>
             {hotel.invoiceEnabled && (
-              <span className="ew-tag" style={{ background: 'var(--color-primary-bg)', color: 'var(--color-primary)', fontSize: 11, fontFamily: 'var(--font-ko)' }}>
+              <span className="ew-tag" style={{ background: 'var(--color-primary-bg)', color: 'var(--color-primary)', fontSize: 'var(--text-2xs)', fontFamily: 'var(--font-ko)' }}>
                 인보이스 발행
               </span>
             )}
@@ -79,11 +79,11 @@ export function HotelCompletedView({ campId }: { campId: string }) {
               {hotel.roomTypes.map(r => (
                 <span key={r.id} style={{
                   display: 'inline-flex', alignItems: 'center', gap: 4,
-                  padding: '3px 10px', borderRadius: 20, fontSize: 12, fontFamily: 'var(--font-ko)',
+                  padding: '3px 10px', borderRadius: 20, fontSize: 'var(--text-sm)', fontFamily: 'var(--font-ko)',
                   background: 'var(--color-bg-subtle)', color: 'var(--color-text-sub)',
                 }}>
                   {r.name || '(이름 없음)'}
-                  {r.extraBed && <span style={{ color: 'var(--color-primary)', fontSize: 11 }}>· 엑스트라베드</span>}
+                  {r.extraBed && <span style={{ color: 'var(--color-primary)', fontSize: 'var(--text-2xs)' }}>· 엑스트라베드</span>}
                 </span>
               ))}
             </div>
@@ -154,14 +154,14 @@ export default function CampAccommodationTab({ campId, onHotelsChange }: { campI
 
       {/* 헤더: 제목 + 액션 버튼 */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-ink-strong)', fontFamily: 'var(--font-ko)', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+        <span style={{ fontSize: 'var(--text-md)', fontWeight: 600, color: 'var(--color-ink-strong)', fontFamily: 'var(--font-ko)', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
           {form.isDirty && <span aria-hidden style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-warning)', display: 'inline-block', flexShrink: 0 }} />}
           숙박정보
         </span>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={handleReset} style={{ height: 34, padding: '0 14px', border: '1px solid var(--color-border-subtle)', borderRadius: 6, background: 'var(--color-canvas)', fontSize: 13, fontWeight: 500, color: 'var(--color-ink-soft)', cursor: 'pointer', fontFamily: 'var(--font-ko)' }}>초기화</button>
+          <button onClick={handleReset} style={{ height: 34, padding: '0 14px', border: '1px solid var(--color-border-subtle)', borderRadius: 6, background: 'var(--color-canvas)', fontSize: 'var(--text-base)', fontWeight: 500, color: 'var(--color-ink-soft)', cursor: 'pointer', fontFamily: 'var(--font-ko)' }}>초기화</button>
           {form.isDirty && (
-            <button onClick={form.reset} style={{ height: 34, padding: '0 14px', border: '1px solid var(--color-border-subtle)', borderRadius: 6, background: 'var(--color-canvas)', fontSize: 13, fontWeight: 500, color: 'var(--color-ink-soft)', cursor: 'pointer', fontFamily: 'var(--font-ko)' }}>취소</button>
+            <button onClick={form.reset} style={{ height: 34, padding: '0 14px', border: '1px solid var(--color-border-subtle)', borderRadius: 6, background: 'var(--color-canvas)', fontSize: 'var(--text-base)', fontWeight: 500, color: 'var(--color-ink-soft)', cursor: 'pointer', fontFamily: 'var(--font-ko)' }}>취소</button>
           )}
           <button
             onClick={handleSave}
@@ -169,7 +169,7 @@ export default function CampAccommodationTab({ campId, onHotelsChange }: { campI
             style={{
               height: 34, padding: '0 14px', border: 'none', borderRadius: 6,
               background: form.isDirty ? 'var(--color-primary)' : 'var(--color-border-subtle)',
-              fontSize: 13, fontWeight: 500,
+              fontSize: 'var(--text-base)', fontWeight: 500,
               color: form.isDirty ? '#fff' : 'var(--color-ink-mute)',
               cursor: form.isDirty ? 'pointer' : 'not-allowed',
               fontFamily: 'var(--font-ko)',
@@ -180,7 +180,7 @@ export default function CampAccommodationTab({ campId, onHotelsChange }: { campI
       <div style={{ height: 1, background: 'var(--color-border-subtle)' }} />
 
       {hotels.length === 0 && (
-        <div style={{ padding: '32px 0', textAlign: 'center', color: 'var(--color-text-muted)', fontSize: 14, fontFamily: 'var(--font-ko)' }}>
+        <div style={{ padding: '32px 0', textAlign: 'center', color: 'var(--color-text-muted)', fontSize: 'var(--text-md)', fontFamily: 'var(--font-ko)' }}>
           등록된 호텔이 없습니다. 아래 버튼으로 추가하세요.
         </div>
       )}
@@ -190,10 +190,10 @@ export default function CampAccommodationTab({ campId, onHotelsChange }: { campI
 
           {/* 호텔 헤더 */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)', width: 18, textAlign: 'center', flexShrink: 0 }}>
+            <span style={{ fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)', width: 18, textAlign: 'center', flexShrink: 0 }}>
               {hIdx + 1}
             </span>
-            <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--color-text-sub)', fontFamily: 'var(--font-ko)', flexShrink: 0 }}>호텔명</span>
+            <span style={{ fontSize: 'var(--text-base)', fontWeight: 500, color: 'var(--color-text-sub)', fontFamily: 'var(--font-ko)', flexShrink: 0 }}>호텔명</span>
             <input
               value={hotel.name}
               onChange={e => setHotelField(hotel.id, 'name', e.target.value)}
@@ -207,7 +207,7 @@ export default function CampAccommodationTab({ campId, onHotelsChange }: { campI
                 checked={hotel.invoiceEnabled}
                 onChange={e => setHotelField(hotel.id, 'invoiceEnabled', e.target.checked)}
               />
-              <span style={{ fontSize: 13, color: 'var(--color-text-sub)', fontFamily: 'var(--font-ko)' }}>인보이스 발행</span>
+              <span style={{ fontSize: 'var(--text-base)', color: 'var(--color-text-sub)', fontFamily: 'var(--font-ko)' }}>인보이스 발행</span>
             </label>
             <div style={{ flex: 1 }} />
             <XBtn onClick={() => removeHotel(hotel.id)} title="호텔 삭제" />
@@ -215,10 +215,10 @@ export default function CampAccommodationTab({ campId, onHotelsChange }: { campI
 
           {/* 룸 타입 */}
           <div style={{ marginLeft: 28, display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <div style={{ fontSize: 12, color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)', marginBottom: 2 }}>룸 타입</div>
+            <div style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)', marginBottom: 2 }}>룸 타입</div>
 
             {hotel.roomTypes.length === 0 && (
-              <div style={{ fontSize: 12, color: 'var(--color-border-default)', fontFamily: 'var(--font-ko)', paddingBottom: 4 }}>룸 타입을 추가하세요.</div>
+              <div style={{ fontSize: 'var(--text-sm)', color: 'var(--color-border-default)', fontFamily: 'var(--font-ko)', paddingBottom: 4 }}>룸 타입을 추가하세요.</div>
             )}
 
             {hotel.roomTypes.map(room => (
@@ -229,11 +229,11 @@ export default function CampAccommodationTab({ campId, onHotelsChange }: { campI
                   placeholder="룸 타입 (예: Deluxe TWN)"
                   style={{ ...INPUT, width: 220 }}
                 />
-                <span style={{ fontSize: 12, color: 'var(--color-text-sub)', fontFamily: 'var(--font-ko)', whiteSpace: 'nowrap' }}>
+                <span style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-sub)', fontFamily: 'var(--font-ko)', whiteSpace: 'nowrap' }}>
                   엑스트라 베드
                 </span>
                 <Toggle value={room.extraBed} onChange={v => setRoomField(hotel.id, room.id, 'extraBed', v)} />
-                <span style={{ fontSize: 11, fontFamily: 'var(--font-ko)', color: room.extraBed ? 'var(--color-primary)' : 'var(--color-text-muted)', minWidth: 32 }}>
+                <span style={{ fontSize: 'var(--text-2xs)', fontFamily: 'var(--font-ko)', color: room.extraBed ? 'var(--color-primary)' : 'var(--color-text-muted)', minWidth: 32 }}>
                   {room.extraBed ? '지원' : '미지원'}
                 </span>
                 <XBtn onClick={() => removeRoom(hotel.id, room.id)} title="룸 삭제" />
@@ -260,7 +260,7 @@ export default function CampAccommodationTab({ campId, onHotelsChange }: { campI
       </button>
 
       {hotels.length > 0 && (
-        <p style={{ fontSize: 12, color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)', margin: 0 }}>
+        <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)', margin: 0 }}>
           ※ 엑스트라 베드 <strong>미지원</strong> 룸 타입은 학생 숙박정보 입력 시 해당 항목이 비활성화됩니다.
         </p>
       )}
@@ -270,5 +270,5 @@ export default function CampAccommodationTab({ campId, onHotelsChange }: { campI
 
 const INPUT: React.CSSProperties = {
   height: 36, padding: '0 10px', border: '1px solid var(--color-border-default)', borderRadius: 6,
-  fontSize: 13, fontFamily: 'var(--font-ko)', outline: 'none', background: 'var(--color-canvas)', boxSizing: 'border-box',
+  fontSize: 'var(--text-base)', fontFamily: 'var(--font-ko)', outline: 'none', background: 'var(--color-canvas)', boxSizing: 'border-box',
 };

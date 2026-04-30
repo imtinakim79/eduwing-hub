@@ -58,18 +58,19 @@
   --font-mono:    'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
   --font-input:   'JetBrains Mono', 'Manrope', sans-serif;
 
-  /* ── Type scale (modular, 1.125 ratio around 14px base) ─── */
-  --text-2xs:    10px;
-  --text-xs:     11px;
-  --text-sm:     12px;
-  --text-base:   13px;
-  --text-md:     14px;
-  --text-lg:     16px;
-  --text-xl:     18px;
-  --text-2xl:    20px;
-  --text-3xl:    24px;
-  --text-4xl:    28px;
-  --text-5xl:    34px;
+  /* ── Type scale ─────────────────────────────────────────────
+     운영자 40대+ 가독성 고려. base 14 → 15 상향, 라벨/캡션도 12 이상 유지 */
+  --text-2xs:    11px;
+  --text-xs:     12px;
+  --text-sm:     13px;
+  --text-base:   14px;
+  --text-md:     15px;
+  --text-lg:     17px;
+  --text-xl:     19px;
+  --text-2xl:    22px;
+  --text-3xl:    26px;
+  --text-4xl:    30px;
+  --text-5xl:    36px;
 
   --leading-tight: 1.2;
   --leading-snug:  1.35;

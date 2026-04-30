@@ -32,9 +32,9 @@ function saveCampStaff(campId: string, data: CampStaffData) {
 // ── Tag chip ──────────────────────────────────────────────────────────────────
 function Chip({ name, onRemove }: { name: string; onRemove: () => void }) {
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 16, background: 'var(--color-primary-bg)', color: 'var(--color-primary)', fontSize: 13, fontFamily: 'var(--font-ko)', fontWeight: 500 }}>
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 16, background: 'var(--color-primary-bg)', color: 'var(--color-primary)', fontSize: 'var(--text-base)', fontFamily: 'var(--font-ko)', fontWeight: 500 }}>
       {name}
-      <button onClick={onRemove} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-ink-mute)', fontSize: 13, padding: 0, lineHeight: 1, display: 'flex', alignItems: 'center' }}>✕</button>
+      <button onClick={onRemove} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-ink-mute)', fontSize: 'var(--text-base)', padding: 0, lineHeight: 1, display: 'flex', alignItems: 'center' }}>✕</button>
     </span>
   );
 }
@@ -99,11 +99,11 @@ function MemberPanel({
 
   return (
     <div style={{ flex: 1, minWidth: 0 }}>
-      <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-text-primary)', fontFamily: 'var(--font-ko)', marginBottom: 14 }}>스탭</div>
+      <div style={{ fontSize: 'var(--text-md)', fontWeight: 600, color: 'var(--color-text-primary)', fontFamily: 'var(--font-ko)', marginBottom: 14 }}>스탭</div>
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, minHeight: 40, marginBottom: 12, alignContent: 'flex-start' }}>
         {assigned.length === 0
-          ? <span style={{ fontSize: 13, color: 'var(--color-border-default)', fontFamily: 'var(--font-ko)' }}>배정된 스탭 없음</span>
+          ? <span style={{ fontSize: 'var(--text-base)', color: 'var(--color-border-default)', fontFamily: 'var(--font-ko)' }}>배정된 스탭 없음</span>
           : assigned.map(m => <Chip key={m.id} name={m.name} onRemove={() => unassign(m.id)} />)
         }
       </div>
@@ -125,7 +125,7 @@ function MemberPanel({
                 onChange={e => setNewName(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') addToMaster(); if (e.key === 'Escape') setOpen(false); }}
                 placeholder="이름 입력 후 Enter"
-                style={{ flex: 1, border: 'none', outline: 'none', fontSize: 13, fontFamily: 'var(--font-ko)' }}
+                style={{ flex: 1, border: 'none', outline: 'none', fontSize: 'var(--text-base)', fontFamily: 'var(--font-ko)' }}
               />
               <button className="ew-btn ew-btn--primary ew-btn--xsm" onClick={addToMaster}>추가</button>
             </div>
@@ -141,20 +141,20 @@ function MemberPanel({
                   >
                     <span
                       onClick={() => assign(m.id)}
-                      style={{ flex: 1, fontSize: 13, fontFamily: 'var(--font-ko)', color: 'var(--color-text-primary)', cursor: 'pointer' }}
+                      style={{ flex: 1, fontSize: 'var(--text-base)', fontFamily: 'var(--font-ko)', color: 'var(--color-text-primary)', cursor: 'pointer' }}
                     >
                       {m.name}
                     </span>
                     <button
                       onClick={() => deleteFromMaster(m.id)}
                       title="전체 명단에서 삭제"
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-border-default)', fontSize: 13, padding: '0 2px', lineHeight: 1 }}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-border-default)', fontSize: 'var(--text-base)', padding: '0 2px', lineHeight: 1 }}
                     >✕</button>
                   </div>
                 ))}
               </div>
             ) : (
-              <div style={{ padding: '10px 12px', fontSize: 12, color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)' }}>
+              <div style={{ padding: '10px 12px', fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)' }}>
                 {masterList.length === 0 ? '전체 명단이 비어있습니다.' : '모두 배정됨'}
               </div>
             )}
@@ -164,7 +164,7 @@ function MemberPanel({
 
       {masterList.length > 0 && (
         <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px dashed var(--color-border-subtle)' }}>
-          <div style={{ fontSize: 11, color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)', marginBottom: 8, letterSpacing: '0.02em' }}>
+          <div style={{ fontSize: 'var(--text-2xs)', color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)', marginBottom: 8, letterSpacing: '0.02em' }}>
             전체 명단 (다른 캠프와 공유됨)
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
@@ -173,7 +173,7 @@ function MemberPanel({
                 key={m.id}
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: 4,
-                  padding: '3px 8px', borderRadius: 4, fontSize: 12, fontFamily: 'var(--font-ko)',
+                  padding: '3px 8px', borderRadius: 4, fontSize: 'var(--text-sm)', fontFamily: 'var(--font-ko)',
                   background: assignedIds.includes(m.id) ? 'var(--color-primary-bg)' : 'var(--color-bg-subtle)',
                   color: assignedIds.includes(m.id) ? 'var(--color-primary)' : 'var(--color-text-sub)',
                   border: `1px solid ${assignedIds.includes(m.id) ? '#BFDBFE' : 'var(--color-border-subtle)'}`,
@@ -183,7 +183,7 @@ function MemberPanel({
                 <button
                   onClick={() => deleteFromMaster(m.id)}
                   title="전체 명단에서 삭제"
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-border-default)', fontSize: 11, padding: 0, lineHeight: 1 }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-border-default)', fontSize: 'var(--text-2xs)', padding: 0, lineHeight: 1 }}
                 >✕</button>
               </span>
             ))}
@@ -202,7 +202,7 @@ export function StaffCompletedView({ campId }: { campId: string }) {
 
   if (!assignedStaff.length) return (
     <div style={{ padding: '20px 24px' }}>
-      <span style={{ fontSize: 13, color: 'var(--color-border-default)', fontFamily: 'var(--font-ko)' }}>없음</span>
+      <span style={{ fontSize: 'var(--text-base)', color: 'var(--color-border-default)', fontFamily: 'var(--font-ko)' }}>없음</span>
     </div>
   );
 
@@ -210,7 +210,7 @@ export function StaffCompletedView({ campId }: { campId: string }) {
     <div style={{ padding: '20px 24px', display: 'flex', flexWrap: 'wrap', gap: 8 }}>
       {assignedStaff.map(m => (
         <span key={m.id} style={{
-          padding: '4px 12px', borderRadius: 16, fontSize: 13, fontFamily: 'var(--font-ko)', fontWeight: 500,
+          padding: '4px 12px', borderRadius: 16, fontSize: 'var(--text-base)', fontFamily: 'var(--font-ko)', fontWeight: 500,
           background: 'var(--color-primary-bg)', color: 'var(--color-primary)',
         }}>
           {m.name}
@@ -273,14 +273,14 @@ export default function CampStaffTab({ campId, onStaffChange }: {
     <div style={{ padding: '20px 24px' }}>
       {/* 헤더: 배정 영역의 dirty/액션만 다룸 */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-        <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-ink-strong)', fontFamily: 'var(--font-ko)', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+        <span style={{ fontSize: 'var(--text-md)', fontWeight: 600, color: 'var(--color-ink-strong)', fontFamily: 'var(--font-ko)', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
           {form.isDirty && <span aria-hidden style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-warning)', display: 'inline-block', flexShrink: 0 }} />}
           스탭 배정
         </span>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={handleReset} style={{ height: 34, padding: '0 14px', border: '1px solid var(--color-border-subtle)', borderRadius: 6, background: 'var(--color-canvas)', fontSize: 13, fontWeight: 500, color: 'var(--color-ink-soft)', cursor: 'pointer', fontFamily: 'var(--font-ko)' }}>초기화</button>
+          <button onClick={handleReset} style={{ height: 34, padding: '0 14px', border: '1px solid var(--color-border-subtle)', borderRadius: 6, background: 'var(--color-canvas)', fontSize: 'var(--text-base)', fontWeight: 500, color: 'var(--color-ink-soft)', cursor: 'pointer', fontFamily: 'var(--font-ko)' }}>초기화</button>
           {form.isDirty && (
-            <button onClick={form.reset} style={{ height: 34, padding: '0 14px', border: '1px solid var(--color-border-subtle)', borderRadius: 6, background: 'var(--color-canvas)', fontSize: 13, fontWeight: 500, color: 'var(--color-ink-soft)', cursor: 'pointer', fontFamily: 'var(--font-ko)' }}>취소</button>
+            <button onClick={form.reset} style={{ height: 34, padding: '0 14px', border: '1px solid var(--color-border-subtle)', borderRadius: 6, background: 'var(--color-canvas)', fontSize: 'var(--text-base)', fontWeight: 500, color: 'var(--color-ink-soft)', cursor: 'pointer', fontFamily: 'var(--font-ko)' }}>취소</button>
           )}
           <button
             onClick={handleSave}
@@ -288,7 +288,7 @@ export default function CampStaffTab({ campId, onStaffChange }: {
             style={{
               height: 34, padding: '0 14px', border: 'none', borderRadius: 6,
               background: form.isDirty ? 'var(--color-primary)' : 'var(--color-border-subtle)',
-              fontSize: 13, fontWeight: 500,
+              fontSize: 'var(--text-base)', fontWeight: 500,
               color: form.isDirty ? '#fff' : 'var(--color-ink-mute)',
               cursor: form.isDirty ? 'pointer' : 'not-allowed',
               fontFamily: 'var(--font-ko)',

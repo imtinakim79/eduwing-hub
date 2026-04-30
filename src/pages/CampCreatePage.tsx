@@ -38,7 +38,7 @@ const EMPTY_USER: UserForm = {
 function Field({ label, required, dirty, children }: { label: string; required?: boolean; dirty?: boolean; children: React.ReactNode }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: 1, minWidth: 0 }}>
-      <label style={{ fontSize: 12, fontWeight: 500, color: 'var(--color-text-sub)', fontFamily: 'var(--font-ko)', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+      <label style={{ fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--color-text-sub)', fontFamily: 'var(--font-ko)', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
         {dirty && <span aria-hidden style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-warning)', display: 'inline-block', flexShrink: 0 }} />}
         {label}{required && <span style={{ color: 'var(--color-error)', marginLeft: 2 }}>*</span>}
       </label>
@@ -49,7 +49,7 @@ function Field({ label, required, dirty, children }: { label: string; required?:
 
 const inputStyle: React.CSSProperties = {
   height: 40, padding: '0 12px', border: '1px solid var(--color-border-default)',
-  borderRadius: 6, fontSize: 13, fontFamily: 'var(--font-ko)',
+  borderRadius: 6, fontSize: 'var(--text-base)', fontFamily: 'var(--font-ko)',
   color: 'var(--color-text-primary)', outline: 'none', background: 'var(--color-canvas)', width: '100%', boxSizing: 'border-box',
 };
 
@@ -169,7 +169,7 @@ export default function CampCreatePage({ camps, editCampId, allStudents = [], on
           캠프 목록
         </button>
         <div style={{ width: 1, height: 20, background: 'var(--color-border-table)' }} />
-        <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--color-text-primary)', fontFamily: 'var(--font-ko)', flex: 1 }}>
+        <span style={{ fontSize: 'var(--text-lg)', fontWeight: 600, color: 'var(--color-text-primary)', fontFamily: 'var(--font-ko)', flex: 1 }}>
           {editCampId ? '캠프 수정' : '캠프 등록'}
         </span>
         {isEdit ? (
@@ -211,7 +211,7 @@ export default function CampCreatePage({ camps, editCampId, allStudents = [], on
               <div style={{ position: 'relative' }}>
                 <input style={{ ...inputStyle, paddingRight: 32 }} value={form.capacity}
                   onChange={e => set('capacity')(e.target.value.replace(/[^0-9]/g, ''))} placeholder="00" />
-                <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 13, color: 'var(--color-text-sub)', fontFamily: 'var(--font-ko)', pointerEvents: 'none' }}>명</span>
+                <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 'var(--text-base)', color: 'var(--color-text-sub)', fontFamily: 'var(--font-ko)', pointerEvents: 'none' }}>명</span>
               </div>
             </Field>
           </div>
@@ -237,7 +237,7 @@ export default function CampCreatePage({ camps, editCampId, allStudents = [], on
                   disabled={disabled}
                   title={disabled ? '클래스를 먼저 추가해주세요' : undefined}
                   style={{
-                    padding: '12px 20px', fontSize: 14, fontFamily: 'var(--font-ko)',
+                    padding: '12px 20px', fontSize: 'var(--text-md)', fontFamily: 'var(--font-ko)',
                     fontWeight: activeTab === tab ? 600 : 400,
                     color: disabled ? 'var(--color-ink-faint)' : activeTab === tab ? 'var(--color-primary)' : 'var(--color-text-sub)',
                     background: 'none', border: 'none',
@@ -295,7 +295,7 @@ export default function CampCreatePage({ camps, editCampId, allStudents = [], on
                         setActiveTimetableClassId(cls.id);
                       }}
                       style={{
-                        padding: '8px 16px', fontSize: 13, fontFamily: 'var(--font-ko)',
+                        padding: '8px 16px', fontSize: 'var(--text-base)', fontFamily: 'var(--font-ko)',
                         fontWeight: cls.id === activeTimetableClassId ? 600 : 400,
                         color: cls.id === activeTimetableClassId ? 'var(--color-primary)' : 'var(--color-text-sub)',
                         background: 'none', border: 'none',
@@ -304,7 +304,7 @@ export default function CampCreatePage({ camps, editCampId, allStudents = [], on
                       }}
                     >
                       {cls.name || '(미입력)'}
-                      {cls.teacher && <span style={{ fontSize: 11, color: 'var(--color-text-muted)', marginLeft: 6 }}>{cls.teacher}</span>}
+                      {cls.teacher && <span style={{ fontSize: 'var(--text-2xs)', color: 'var(--color-text-muted)', marginLeft: 6 }}>{cls.teacher}</span>}
                     </button>
                   ))}
                 </div>

@@ -81,22 +81,22 @@ function FlightPickupRow({ flightLabel, pickupLabel, flightNo, date, time, pickS
   const hasPickup = pickStatus && pickStatus !== '없음';
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 5, minWidth: 0 }}>
-      <span style={{ fontSize: 13, color: 'var(--color-text-primary)', whiteSpace: 'nowrap', minWidth: 28 }}>{flightLabel}</span>
+      <span style={{ fontSize: 'var(--text-base)', color: 'var(--color-text-primary)', whiteSpace: 'nowrap', minWidth: 28 }}>{flightLabel}</span>
       {hasFlight ? (
         <>
-          <span style={{ fontSize: 12, color: 'var(--color-text-sub)', whiteSpace: 'nowrap' }}>{flightNo}</span>
+          <span style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-sub)', whiteSpace: 'nowrap' }}>{flightNo}</span>
           {date && <><img src="/icon/Calendar.svg" alt="" style={{ width: 14, height: 14, flexShrink: 0 }} />
-          <span style={{ fontSize: 12, color: 'var(--color-text-sub)', whiteSpace: 'nowrap' }}>{isoToDisplay(date)}</span></>}
+          <span style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-sub)', whiteSpace: 'nowrap' }}>{isoToDisplay(date)}</span></>}
           {time && <><div style={{ width: 1, height: 14, background: 'var(--color-border-table)', flexShrink: 0 }} />
           <img src="/icon/Clock.svg" alt="" style={{ width: 14, height: 14, flexShrink: 0 }} />
-          <span style={{ fontSize: 12, color: 'var(--color-text-sub)', whiteSpace: 'nowrap' }}>{time}</span></>}
+          <span style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-sub)', whiteSpace: 'nowrap' }}>{time}</span></>}
         </>
       ) : (
-        <span style={{ fontSize: 12, color: 'var(--color-border-default)' }}>-</span>
+        <span style={{ fontSize: 'var(--text-sm)', color: 'var(--color-border-default)' }}>-</span>
       )}
       <div style={{ width: 1, height: 14, background: 'var(--color-border-table)', flexShrink: 0, marginLeft: 2 }} />
-      <span style={{ fontSize: 12, color: 'var(--color-text-sub)', whiteSpace: 'nowrap' }}>{pickupLabel}</span>
-      <span style={{ fontSize: 12, color: 'var(--color-text-muted)', whiteSpace: 'nowrap' }}>
+      <span style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-sub)', whiteSpace: 'nowrap' }}>{pickupLabel}</span>
+      <span style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)', whiteSpace: 'nowrap' }}>
         {hasPickup && pickPlace ? pickPlace : '-'}
       </span>
     </div>
@@ -124,23 +124,23 @@ function StudentPickerModal({ campId, allStudents, onAdd, onClose }: {
     <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.3)' }} onClick={onClose}>
       <div style={{ background: 'var(--color-canvas)', borderRadius: 12, width: 480, maxHeight: '70vh', display: 'flex', flexDirection: 'column', boxShadow: '0 8px 32px rgba(0,0,0,0.18)' }} onClick={e => e.stopPropagation()}>
         <div style={{ display: 'flex', alignItems: 'center', padding: '16px 20px', borderBottom: '1px solid var(--color-border-table)' }}>
-          <span style={{ flex: 1, fontSize: 15, fontWeight: 600, fontFamily: 'var(--font-ko)', color: 'var(--color-text-primary)' }}>학생 추가</span>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, color: 'var(--color-ink-mute)', lineHeight: 1 }}>✕</button>
+          <span style={{ flex: 1, fontSize: 'var(--text-md)', fontWeight: 600, fontFamily: 'var(--font-ko)', color: 'var(--color-text-primary)' }}>학생 추가</span>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 'var(--text-xl)', color: 'var(--color-ink-mute)', lineHeight: 1 }}>✕</button>
         </div>
         <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--color-border-table)' }}>
           <input autoFocus value={q} onChange={e => setQ(e.target.value)} placeholder="이름 검색"
-            style={{ width: '100%', height: 36, padding: '0 12px', border: '1px solid var(--color-border-default)', borderRadius: 6, fontSize: 13, fontFamily: 'var(--font-ko)', outline: 'none', boxSizing: 'border-box' }} />
+            style={{ width: '100%', height: 36, padding: '0 12px', border: '1px solid var(--color-border-default)', borderRadius: 6, fontSize: 'var(--text-base)', fontFamily: 'var(--font-ko)', outline: 'none', boxSizing: 'border-box' }} />
         </div>
         <div style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
           {candidates.length === 0 ? (
             q ? (
-              <div style={{ padding: '32px 20px', textAlign: 'center', fontSize: 13, color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)' }}>"{q}"에 해당하는 학생이 없습니다.</div>
+              <div style={{ padding: '32px 20px', textAlign: 'center', fontSize: 'var(--text-base)', color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)' }}>"{q}"에 해당하는 학생이 없습니다.</div>
             ) : (
               <div style={{ padding: '28px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
                 <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="19" stroke="#E5E7EB" strokeWidth="1.5"/><path d="M20 13v8M20 25v1.5" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round"/></svg>
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-text-primary)', fontFamily: 'var(--font-ko)', marginBottom: 8 }}>추가 가능한 학생이 없습니다.</div>
-                  <div style={{ fontSize: 12, color: 'var(--color-text-sub)', fontFamily: 'var(--font-ko)', lineHeight: 1.8 }}>
+                  <div style={{ fontSize: 'var(--text-base)', fontWeight: 600, color: 'var(--color-text-primary)', fontFamily: 'var(--font-ko)', marginBottom: 8 }}>추가 가능한 학생이 없습니다.</div>
+                  <div style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-sub)', fontFamily: 'var(--font-ko)', lineHeight: 1.8 }}>
                     캠프 인원을 추가하려면 먼저<br /><strong style={{ color: 'var(--color-primary)' }}>학생 관리 탭</strong>에서 학생을 등록한 후<br />이 화면에서 캠프 인원으로 추가해 주세요.
                   </div>
                 </div>
@@ -152,14 +152,14 @@ function StudentPickerModal({ campId, allStudents, onAdd, onClose }: {
               onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
               <input type="checkbox" className="ew-checkbox" checked={sel.has(s.id)} onChange={() => toggle(s.id)} />
               <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <span style={{ fontSize: 13, fontFamily: 'var(--font-ko)', fontWeight: 500 }}>{s.name_ko}</span>
-                <span style={{ fontSize: 11, fontFamily: 'var(--font-en)', color: 'var(--color-text-sub)' }}>{s.name_en} · {s.age}세 · {s.gender}</span>
+                <span style={{ fontSize: 'var(--text-base)', fontFamily: 'var(--font-ko)', fontWeight: 500 }}>{s.name_ko}</span>
+                <span style={{ fontSize: 'var(--text-2xs)', fontFamily: 'var(--font-en)', color: 'var(--color-text-sub)' }}>{s.name_en} · {s.age}세 · {s.gender}</span>
               </div>
             </label>
           ))}
         </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '12px 20px', borderTop: '1px solid var(--color-border-table)' }}>
-          <span style={{ flex: 1, fontSize: 12, color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)', lineHeight: '32px' }}>{sel.size > 0 ? `${sel.size}명 선택` : ''}</span>
+          <span style={{ flex: 1, fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)', lineHeight: '32px' }}>{sel.size > 0 ? `${sel.size}명 선택` : ''}</span>
           <button className="ew-btn ew-btn--ghost ew-btn--sm" onClick={onClose}>취소</button>
           <button className="ew-btn ew-btn--primary ew-btn--sm" onClick={() => onAdd(candidates.filter(s => sel.has(s.id)))} disabled={sel.size === 0}>추가</button>
         </div>
@@ -355,7 +355,7 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
                     <td style={{ ...TD_STYLE, padding: '0 16px', cursor: onStudentClick ? 'pointer' : 'default' }}
                         onClick={onStudentClick ? () => onStudentClick(s.id) : undefined}>
                       <div className="ew-camp-thumbnail-card">
-                        <div className="ew-avatar" style={{ background: avatarColor(s.name_en), width: 32, height: 32, fontSize: 12 }}>{initials(s.name_en)}</div>
+                        <div className="ew-avatar" style={{ background: avatarColor(s.name_en), width: 32, height: 32, fontSize: 'var(--text-sm)' }}>{initials(s.name_en)}</div>
                         <div className="ew-camp-thumbnail-info">
                           <div className="ew-camp-thumbnail-name-row">
                             <span className="ew-camp-thumbnail-name-en" style={{ color: onStudentClick ? 'var(--color-primary)' : undefined }}>{s.name_en}</span>
@@ -369,13 +369,13 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
                     </td>
                     <td style={TD_STYLE}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                        <span style={{ fontSize: 12, color: 'var(--color-text-primary)' }}>보호자 : {s.guardian.name}({relLabel(s.guardian.relation)})</span>
-                        <span style={{ fontSize: 12, color: 'var(--color-text-sub)' }}>{s.guardian.contact}</span>
-                        <span style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>{s.guardian.email}</span>
+                        <span style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-primary)' }}>보호자 : {s.guardian.name}({relLabel(s.guardian.relation)})</span>
+                        <span style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-sub)' }}>{s.guardian.contact}</span>
+                        <span style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)' }}>{s.guardian.email}</span>
                       </div>
                     </td>
                     <td style={TD_STYLE}>
-                      <span style={{ fontSize: 13, fontFamily: 'var(--font-en)' }}>{agentVal}</span>
+                      <span style={{ fontSize: 'var(--text-base)', fontFamily: 'var(--font-en)' }}>{agentVal}</span>
                     </td>
                     <td style={TD_STYLE}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -385,14 +385,14 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
                                 {f.name}({f.relation === '기타' ? ((f as any).relationCustom || '기타') : f.relation})
                               </span>
                             ))
-                          : <span style={{ fontSize: 12, color: 'var(--color-border-default)' }}>-</span>
+                          : <span style={{ fontSize: 'var(--text-sm)', color: 'var(--color-border-default)' }}>-</span>
                         }
                       </div>
                     </td>
                     <td style={TD_STYLE}>
                       {studentClass
                         ? <span className="ew-tag" style={{ background: 'var(--color-primary-bg)', color: 'var(--color-primary)' }}>{studentClass.name}</span>
-                        : <span style={{ fontSize: 12, color: 'var(--color-border-default)' }}>-</span>}
+                        : <span style={{ fontSize: 'var(--text-sm)', color: 'var(--color-border-default)' }}>-</span>}
                     </td>
                     <td style={TD_STYLE}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -400,10 +400,10 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
                           ? rooms.map((r, i) => (
                               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                                 <span className="ew-tag ew-tag--blue" style={{ whiteSpace: 'nowrap' }}>{r.roomType || '(미입력)'}</span>
-                                <span style={{ fontSize: 13, color: 'var(--color-text-sub)' }}>X1</span>
+                                <span style={{ fontSize: 'var(--text-base)', color: 'var(--color-text-sub)' }}>X1</span>
                               </div>
                             ))
-                          : <span style={{ fontSize: 12, color: 'var(--color-border-default)' }}>-</span>
+                          : <span style={{ fontSize: 'var(--text-sm)', color: 'var(--color-border-default)' }}>-</span>
                         }
                       </div>
                     </td>
