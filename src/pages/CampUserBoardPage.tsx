@@ -292,7 +292,7 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
   };
 
   return (
-    <div style={{ minWidth: 1440, overflowX: 'auto' }} onClick={() => { setOpenCell(null); setActiveCell(null); }}>
+    <div onClick={() => { setOpenCell(null); setActiveCell(null); }}>
       {showPicker && onStudentUpdate && (
         <StudentPickerModal campId={campId} allStudents={allStudentsSource} onAdd={handlePickerAdd} onClose={() => setShowPicker(false)} />
       )}
@@ -302,7 +302,7 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
           <input type="text" placeholder="학생 이름 검색" value={query} onChange={e => { setQuery(e.target.value); setPage(1); }} />
         </div>
       </div>
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '8px 30px', border: '1px solid var(--color-border-subtle)', background: 'var(--color-canvas)', justifyContent: 'flex-end', minWidth: 1440 }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '8px 30px', border: '1px solid var(--color-border-subtle)', background: 'var(--color-canvas)', justifyContent: 'flex-end'}}>
         <span style={{ flex: 1, fontSize: 12, color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)', lineHeight: '26px' }}>{selected.size > 0 ? `${selected.size}명 선택됨` : ''}</span>
         {onStudentUpdate && <button className="ew-btn ew-btn--primary ew-btn--xsm" onClick={() => setShowPicker(true)}>학생 추가</button>}
         {selected.size > 0 && onStudentUpdate && <button className="ew-btn ew-btn--danger ew-btn--xsm" onClick={handleRemoveStudents}>캠프에서 제거</button>}

@@ -204,14 +204,14 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
   }
 
   return (
-    <div style={{ background: 'var(--color-paper)', minHeight: 'calc(100vh - var(--topnav-h))', overflowX: 'auto' }}>
+    <div style={{ background: 'var(--color-paper)', minHeight: 'calc(100vh - var(--topnav-h))' }}>
 
       {/* Page Header */}
       <div style={{
         display: 'flex', alignItems: 'center', gap: 'var(--space-3)',
         height: 'var(--header-h)', padding: '0 var(--page-px)',
         background: 'var(--color-canvas)', borderBottom: '1px solid var(--color-border-subtle)',
-        overflow: 'hidden', minWidth: 1360,
+        overflow: 'hidden',
       }}>
         <button
           onClick={onBack}
@@ -250,7 +250,7 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
       </div>
 
       {/* Content */}
-      <div style={{ padding: 'var(--space-7) var(--page-px)', minWidth: 1360 }}>
+      <div style={{ padding: 'var(--space-7) var(--page-px)'}}>
         <div style={{ background: 'var(--color-canvas)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-7)', boxShadow: 'var(--shadow-soft)' }}>
 
           {/* ── 프로필 사진 ── */}

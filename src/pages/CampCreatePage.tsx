@@ -158,7 +158,7 @@ export default function CampCreatePage({ camps, editCampId, allStudents = [], on
   }
 
   return (
-    <div style={{ minWidth: 1440, overflowX: 'auto' }}>
+    <div>
 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', padding: 'var(--space-3) var(--page-px)', borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-canvas)' }}>

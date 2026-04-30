@@ -112,7 +112,7 @@ export default function DashboardPage({ students, camps, agents, onNavigate }: P
   };
 
   return (
-    <div style={{ padding: '24px 30px', display: 'flex', flexDirection: 'column', gap: 24, minWidth: 1440, overflowX: 'auto' }}>
+    <div style={{ padding: '24px 30px', display: 'flex', flexDirection: 'column', gap: 24, overflowX: 'auto' }}>
 
       {/* KPI 카드 */}
       <div style={{ display: 'flex', gap: 16 }}>

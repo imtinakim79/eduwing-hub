@@ -336,14 +336,14 @@ export default function StudentDetailPage({
   };
 
   return (
-    <div style={{ background: 'var(--color-paper)', minHeight: 'calc(100vh - var(--topnav-h))', overflowX: 'auto' }}>
+    <div style={{ background: 'var(--color-paper)', minHeight: 'calc(100vh - var(--topnav-h))' }}>
 
       {/* Page Header */}
       <div style={{
         display: 'flex', alignItems: 'center', gap: 'var(--space-2)',
         height: 'var(--header-h)', padding: '0 var(--page-px)',
         background: 'var(--color-canvas)', borderBottom: '1px solid var(--color-border-subtle)',
-        minWidth: 1360,
+       
       }}>
         <button
           onClick={onBack}
@@ -355,7 +355,7 @@ export default function StudentDetailPage({
         <span style={{ fontSize: 'var(--text-lg)', fontWeight: 600, color: 'var(--color-ink-strong)', letterSpacing: 'var(--tracking-tight)' }}>학생 상세</span>
       </div>
 
-      <div style={{ padding: 'var(--space-7) var(--page-px)', minWidth: 1360, display: 'flex', flexDirection: 'column', gap: 0 }}>
+      <div style={{ padding: 'var(--space-7) var(--page-px)', display: 'flex', flexDirection: 'column', gap: 0 }}>
 
         {/* ProfileCard */}
         <div style={{ background: 'var(--color-canvas)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-6)', display: 'flex', alignItems: 'center', gap: 'var(--space-5)', boxShadow: 'var(--shadow-soft)' }}>

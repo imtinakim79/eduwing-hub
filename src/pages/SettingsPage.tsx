@@ -68,7 +68,7 @@ export default function SettingsPage({ trashedStudents, onRestore, onPermanentDe
   };
 
   return (
-    <div style={{ padding: '24px 30px', minWidth: 1440 }}>
+    <div style={{ padding: '24px 30px'}}>
 
       {/* 탭 */}
       <div style={{ display: 'flex', borderBottom: '1px solid var(--color-border-table)', marginBottom: 24 }}>

@@ -88,7 +88,7 @@ export default function CampDetailPage({
   const statusStyle = STATUS_STYLE[camp?.status ?? ''] ?? { bg: 'var(--color-bg-subtle)', color: 'var(--color-ink-soft)' };
 
   return (
-    <div style={{ minWidth: 1440 }}>
+    <div>
 
       {/* 상단 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', padding: 'var(--space-3) var(--page-px)', borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-canvas)' }}>
@@ -128,7 +128,7 @@ export default function CampDetailPage({
             <div style={{ background: 'var(--color-canvas)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-5) var(--space-6)', display: 'flex', flexDirection: 'column', gap: 'var(--space-5)', boxShadow: 'var(--shadow-soft)' }}>
               <div style={{ fontSize: 'var(--text-md)', fontWeight: 600, color: 'var(--color-ink-strong)', letterSpacing: 'var(--tracking-tight)' }}>캠프 기본 정보</div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 'var(--space-6)' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 'var(--space-6)' }}>
                 <InfoItem label="캠프명">
                   <span style={{ fontWeight: 600, fontSize: 'var(--text-lg)', color: 'var(--color-ink-strong)' }}>{camp.name}</span>
                 </InfoItem>
@@ -144,7 +144,7 @@ export default function CampDetailPage({
                 <InfoItem label="숙소">{camp.accommodation}</InfoItem>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 'var(--space-6)' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 'var(--space-6)' }}>
                 <InfoItem label="스탭">
                   <TagList items={camp.staff} color="var(--color-primary)" />
                 </InfoItem>

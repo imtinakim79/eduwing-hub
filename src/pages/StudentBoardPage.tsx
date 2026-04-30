@@ -347,7 +347,7 @@ export default function StudentBoardPage({
   const pageData = filtered.slice((page - 1) * perPage, page * perPage);
 
   return (
-    <div style={{ minWidth: 1440, overflowX: 'auto' }}>
+    <div>
 
       {/* Filter Bar */}
       <div className="ew-filter-bar">
@@ -377,7 +377,7 @@ export default function StudentBoardPage({
       </div>
 
       {/* Action bar */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-2)', padding: 'var(--space-2) var(--page-px)', borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-canvas)', justifyContent: 'flex-end', minWidth: 1440 }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-2)', padding: 'var(--space-2) var(--page-px)', borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-canvas)', justifyContent: 'flex-end'}}>
         <span style={{ flex: 1, fontSize: 12, color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)', lineHeight: '26px' }}>
           {selected.size > 0 ? `${selected.size}명 선택됨` : ''}
         </span>
