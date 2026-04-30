@@ -50,21 +50,50 @@ export default function TopNav({ activePage, onNavigate }: TopNavProps) {
     );
   }
 
+  function IconButton({ kind, active, ariaLabel, onClick }: {
+    kind: 'settings' | 'notification';
+    active: boolean;
+    ariaLabel: string;
+    onClick?: () => void;
+  }) {
+    const [hover, setHover] = useState(false);
+    const src = active
+      ? `/icon/${kind}_selected.svg`
+      : hover
+        ? `/icon/${kind}_hover.svg`
+        : `/icon/${kind}.svg`;
+    return (
+      <button
+        aria-label={ariaLabel}
+        onClick={onClick}
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}
+        style={{
+          background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+          height: 32, width: 32, display: 'inline-flex',
+          alignItems: 'center', justifyContent: 'center',
+          borderRadius: 'var(--radius-sm)',
+          transition: 'background var(--dur-fast) var(--ease-out)',
+        }}
+      >
+        <img src={src} alt="" style={{ width: 22, height: 22 }} />
+      </button>
+    );
+  }
+
   const RightActions = (
     <div className="ew-nav__right" style={{ display: 'flex', gap: 'var(--space-4)', alignItems: 'center', flexShrink: 0, justifyContent: 'flex-end' }}>
-      <button
-        aria-label="Settings"
-        style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', height: 32, width: 32, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+      <IconButton
+        kind="settings"
+        ariaLabel="Settings"
+        active={activePage === 'account'}
         onClick={() => handleNav('account')}
-      >
-        <img src="/icon/settings.svg" alt="" style={{ width: 22, height: 22, opacity: 0.75 }} />
-      </button>
-      <button
-        aria-label="Notifications"
-        style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', height: 32, width: 32, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-      >
-        <img src="/icon/notification.svg" alt="" style={{ width: 22, height: 22, opacity: 0.75 }} />
-      </button>
+      />
+      <IconButton
+        kind="notification"
+        ariaLabel="Notifications"
+        active={false}
+      />
       <div style={{ width: 1, height: 20, background: 'var(--color-border-subtle)' }} />
       <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'center' }}>
         <img src="/image/thumb=Avatar56.png" alt="" style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover' }} />
