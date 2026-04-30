@@ -87,8 +87,8 @@ function SectionCard({ title, children, onSave, onReset, onCancel, dirty = false
 }) {
   return (
     <div style={{
-      background: 'var(--color-canvas)', border: '1px solid var(--color-border-subtle)', borderRadius: 8,
-      padding: '20px 20px 24px', display: 'flex', flexDirection: 'column', gap: 16,
+      background: 'var(--color-canvas)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-lg)',
+      padding: 'var(--space-5) var(--space-5) var(--space-6)', display: 'flex', flexDirection: 'column', gap: 'var(--space-4)',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-ink-strong)', fontFamily: 'var(--font-en)', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
@@ -356,7 +356,7 @@ export default function StudentDetailPage({
       <div style={{ padding: 'var(--space-7) var(--page-px)', display: 'flex', flexDirection: 'column', gap: 0 }}>
 
         {/* ProfileCard */}
-        <div style={{ background: 'var(--color-canvas)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-6)', display: 'flex', alignItems: 'center', gap: 'var(--space-5)', boxShadow: 'var(--shadow-soft)' }}>
+        <div style={{ background: 'var(--color-canvas)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-6)', display: 'flex', alignItems: 'center', gap: 'var(--space-5)' }}>
           {student.profile_img_url ? (
             <img src={student.profile_img_url} alt="" style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
           ) : (
@@ -419,7 +419,7 @@ export default function StudentDetailPage({
 
           {/* Camp Basic Info */}
           {camp && (
-            <div style={{ background: 'var(--color-canvas)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-5) var(--space-6)', boxShadow: 'var(--shadow-soft)' }}>
+            <div style={{ background: 'var(--color-canvas)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-5) var(--space-6)' }}>
               <span style={{ fontSize: 16, fontWeight: 500, color: 'var(--color-ink-strong)', fontFamily: 'var(--font-en)', display: 'block', marginBottom: 16 }}>Camp Basic Info.</span>
               <div style={{ display: 'flex', borderTop: '1px solid var(--color-border-faint)' }}>
                 {[
