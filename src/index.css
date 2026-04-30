@@ -705,6 +705,7 @@ table { font-feature-settings: 'tnum' 1, 'cv11' 1; }
   /* 데스크톱 가로 메뉴 숨김, 햄버거 노출 */
   .ew-nav__links { display: none !important; }
   .ew-nav__hamburger { display: flex; }
+  .ew-nav__logo { display: none !important; }  /* 모바일에선 로고는 사이드바에서만 */
   .ew-nav__user-text { display: none; }  /* 좁은 화면에선 아바타만 */
 
   /* Backdrop */

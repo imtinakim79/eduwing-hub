@@ -41,12 +41,14 @@ export default function TopNav({ activePage, onNavigate }: TopNavProps) {
     onNavigate(key);
   }
 
-  const Logo = (
-    <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
-      <img src="/image/EDUWING WORLD_LOGO 34 3-1.png" alt="" style={{ height: 32, objectFit: 'contain' }} />
-      <img src="/image/EDUWING WORLD_LOGO 34 4.png" alt="EduWing World" style={{ height: 18, objectFit: 'contain' }} />
-    </div>
-  );
+  function Logo({ className }: { className?: string }) {
+    return (
+      <div className={className} style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+        <img src="/image/EDUWING WORLD_LOGO 34 3-1.png" alt="" style={{ height: 32, objectFit: 'contain' }} />
+        <img src="/image/EDUWING WORLD_LOGO 34 4.png" alt="EduWing World" style={{ height: 18, objectFit: 'contain' }} />
+      </div>
+    );
+  }
 
   const RightActions = (
     <div className="ew-nav__right" style={{ display: 'flex', gap: 'var(--space-4)', alignItems: 'center', flexShrink: 0, justifyContent: 'flex-end' }}>
@@ -90,7 +92,7 @@ export default function TopNav({ activePage, onNavigate }: TopNavProps) {
           <span /><span /><span />
         </button>
 
-        {Logo}
+        <Logo className="ew-nav__logo" />
 
         {/* Desktop nav links */}
         <div className="ew-nav__links" style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'center', flex: 1, justifyContent: 'center' }}>
@@ -122,7 +124,7 @@ export default function TopNav({ activePage, onNavigate }: TopNavProps) {
         aria-hidden={!sidebarOpen}
       >
         <div className="ew-nav-sidebar__header">
-          {Logo}
+          <Logo />
           <button
             aria-label="메뉴 닫기"
             className="ew-nav-sidebar__close"
