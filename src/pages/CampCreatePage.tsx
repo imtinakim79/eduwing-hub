@@ -185,7 +185,7 @@ export default function CampCreatePage({ camps, editCampId, allStudents = [], on
           <img src="/icon/arrow_fill_left.svg" alt="" style={{ width: 14, height: 14 }} />
           캠프 목록
         </button>
-        <div style={{ width: 1, height: 20, background: 'var(--color-border-table)' }} />
+        <div style={{ width: 1, height: 20, background: 'var(--color-border-subtle)' }} />
         <span style={{ fontSize: 'var(--text-lg)', fontWeight: 600, color: 'var(--color-text-primary)', fontFamily: 'var(--font-ko)', flex: 1 }}>
           {editCampId ? '캠프 수정' : '캠프 등록'}
         </span>

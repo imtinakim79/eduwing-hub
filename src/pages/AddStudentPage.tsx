@@ -197,21 +197,17 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
         overflow: 'hidden',
       }}>
         <button
+          className="ew-btn ew-btn--ghost ew-btn--sm"
           onClick={onBack}
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-            background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0',
-            fontSize: 'var(--text-base)', color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)',
-          }}
-          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'var(--color-primary)'; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--color-text-muted)'; }}
+          style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-1)' }}
         >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          {isEdit ? '학생 상세로 돌아가기' : '학생 목록으로 돌아가기'}
+          <img src="/icon/arrow_fill_left.svg" alt="" style={{ width: 14, height: 14 }} />
+          {isEdit ? '학생 상세' : '학생 목록'}
         </button>
-        <div style={{ flex: 1 }} />
+        <div style={{ width: 1, height: 20, background: 'var(--color-border-subtle)' }} />
+        <span style={{ fontSize: 'var(--text-lg)', fontWeight: 600, color: 'var(--color-ink-strong)', letterSpacing: 'var(--tracking-tight)', flex: 1 }}>
+          {isEdit ? '학생 수정' : '학생 등록'}
+        </span>
         {!isEdit && (
           <div style={{ display: 'flex', gap: 5 }}>
             <button

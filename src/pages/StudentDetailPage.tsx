@@ -321,13 +321,15 @@ export default function StudentDetailPage({
         height: 'var(--header-h)', padding: '0 var(--page-px)',
       }}>
         <button
+          className="ew-btn ew-btn--ghost ew-btn--sm"
           onClick={onBack}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--space-2)', background: 'none', border: 'none', cursor: 'pointer', padding: 'var(--space-1) 0', fontSize: 'var(--text-md)', color: 'var(--color-ink-soft)', letterSpacing: 'var(--tracking-tight)' }}
+          style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-1)' }}
         >
-          ← 학생 목록으로
+          <img src="/icon/arrow_fill_left.svg" alt="" style={{ width: 14, height: 14 }} />
+          학생 목록
         </button>
-        <div style={{ width: 1, height: 16, background: 'var(--color-border-subtle)', margin: '0 var(--space-2)' }} />
-        <span style={{ fontSize: 'var(--text-lg)', fontWeight: 600, color: 'var(--color-ink-strong)', letterSpacing: 'var(--tracking-tight)' }}>학생 상세</span>
+        <div style={{ width: 1, height: 20, background: 'var(--color-border-subtle)' }} />
+        <span style={{ fontSize: 'var(--text-lg)', fontWeight: 600, color: 'var(--color-ink-strong)', letterSpacing: 'var(--tracking-tight)', flex: 1 }}>학생 상세</span>
       </div>
 
       <div style={{ padding: 'var(--space-7) var(--page-px)', display: 'flex', flexDirection: 'column', gap: 0 }}>
