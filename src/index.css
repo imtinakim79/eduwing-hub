@@ -696,6 +696,103 @@ table { font-feature-settings: 'tnum' 1, 'cv11' 1; }
 }
 
 /* ──────────────────────────────────────────────
+   Mobile sidebar — 1024px 미만에서 햄버거 + 슬라이드
+   ────────────────────────────────────────────── */
+.ew-nav__hamburger { display: none; }
+.ew-nav-backdrop, .ew-nav-sidebar { display: none; }
+
+@media (max-width: 1024px) {
+  /* 데스크톱 가로 메뉴 숨김, 햄버거 노출 */
+  .ew-nav__links { display: none !important; }
+  .ew-nav__hamburger { display: flex; }
+  .ew-nav__user-text { display: none; }  /* 좁은 화면에선 아바타만 */
+
+  /* Backdrop */
+  .ew-nav-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 17, 21, 0.45);
+    z-index: var(--z-overlay);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--dur-base) var(--ease-out);
+  }
+  .ew-nav-backdrop[data-open="true"] {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Sidebar — 좌측에서 슬라이드 인 */
+  .ew-nav-sidebar {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    max-width: 86vw;
+    height: 100dvh;
+    background: var(--color-canvas);
+    border-right: 1px solid var(--color-border-subtle);
+    box-shadow: 0 12px 40px rgba(15, 17, 21, 0.18);
+    z-index: calc(var(--z-overlay) + 1);
+    transform: translateX(-100%);
+    transition: transform var(--dur-slow) var(--ease-spring);
+    overflow-y: auto;
+  }
+  .ew-nav-sidebar[data-open="true"] { transform: translateX(0); }
+
+  .ew-nav-sidebar__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-4) var(--space-5);
+    border-bottom: 1px solid var(--color-border-subtle);
+    flex-shrink: 0;
+  }
+  .ew-nav-sidebar__close {
+    background: none; border: none; cursor: pointer;
+    width: 32px; height: 32px; display: inline-flex;
+    align-items: center; justify-content: center;
+    color: var(--color-ink-soft); font-size: 18px;
+    border-radius: var(--radius-sm);
+    transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+  }
+  .ew-nav-sidebar__close:hover { background: var(--color-bg-subtle); color: var(--color-ink-strong); }
+
+  .ew-nav-sidebar__menu {
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-3) var(--space-3);
+    gap: 2px;
+  }
+  .ew-nav-sidebar__item {
+    text-align: left;
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-md);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    font-size: var(--text-md);
+    font-weight: 500;
+    color: var(--color-ink-soft);
+    letter-spacing: var(--tracking-tight);
+    transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+  }
+  .ew-nav-sidebar__item:hover {
+    background: var(--color-bg-subtle);
+    color: var(--color-ink-strong);
+  }
+  .ew-nav-sidebar__item.active {
+    background: var(--color-primary-bg);
+    color: var(--color-primary-strong);
+    font-weight: 600;
+  }
+}
+
+/* ──────────────────────────────────────────────
    Responsive — 보드/시간표는 자체 가로 스크롤,
    나머지 페이지 영역은 좁아질 때 자연스럽게 흐름
    ────────────────────────────────────────────── */

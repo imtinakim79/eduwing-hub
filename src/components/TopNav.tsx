@@ -1,5 +1,6 @@
 // TopNav — 피그마 node 49:5613 / 472:5113 기반
-
+// 데스크톱(1024px+): 가로 nav. 모바일/태블릿(1024px 미만): 햄버거 + 슬라이드 사이드바.
+import { useEffect, useState } from 'react';
 
 type NavItem = { label: string; key: string };
 
@@ -18,68 +19,130 @@ interface TopNavProps {
 }
 
 export default function TopNav({ activePage, onNavigate }: TopNavProps) {
-  return (
-    <nav className="ew-nav" style={{ justifyContent: 'space-between' }}>
-      {/* Logo */}
-      <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
-        <img
-          src="/image/EDUWING WORLD_LOGO 34 3-1.png"
-          alt=""
-          style={{ height: 32, objectFit: 'contain' }}
-        />
-        <img
-          src="/image/EDUWING WORLD_LOGO 34 4.png"
-          alt="EduWing World"
-          style={{ height: 18, objectFit: 'contain' }}
-        />
-      </div>
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-      {/* Nav links */}
-      <div style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'center', flex: 1, justifyContent: 'center' }}>
-        {NAV_ITEMS.map((item) => (
-          <button
-            key={item.key}
-            className={`ew-nav-menu${activePage === item.key ? ' active' : ''}`}
-            style={{ background: 'none', border: 'none' }}
-            onClick={() => onNavigate(item.key)}
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>
+  // 사이드바 열렸을 때 ESC로 닫기 + body 스크롤 잠금
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setSidebarOpen(false);
+    }
+    document.addEventListener('keydown', handleKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', handleKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [sidebarOpen]);
 
-      {/* Right: settings, notifications, user */}
-      <div style={{ display: 'flex', gap: 'var(--space-4)', alignItems: 'center', flexShrink: 0, justifyContent: 'flex-end' }}>
-        <button
-          aria-label="Settings"
-          style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', height: 32, width: 32, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-          onClick={() => onNavigate('account')}
-        >
-          <img src="/icon/settings.svg" alt="" style={{ width: 22, height: 22, opacity: 0.75 }} />
-        </button>
-        <button
-          aria-label="Notifications"
-          style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', height: 32, width: 32, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-        >
-          <img src="/icon/notification.svg" alt="" style={{ width: 22, height: 22, opacity: 0.75 }} />
-        </button>
-        <div style={{ width: 1, height: 20, background: 'var(--color-border-subtle)' }} />
-        <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'center' }}>
-          <img
-            src="/image/thumb=Avatar56.png"
-            alt=""
-            style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover' }}
-          />
-          <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.15 }}>
-            <span style={{ fontSize: 'var(--text-base)', fontWeight: 600, color: 'var(--color-ink-strong)', letterSpacing: 'var(--tracking-tight)' }}>
-              김가영
-            </span>
-            <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-ink-soft)', letterSpacing: 'var(--tracking-wide)', textTransform: 'uppercase' }}>
-              Master
-            </span>
-          </div>
+  function handleNav(key: string) {
+    setSidebarOpen(false);
+    onNavigate(key);
+  }
+
+  const Logo = (
+    <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+      <img src="/image/EDUWING WORLD_LOGO 34 3-1.png" alt="" style={{ height: 32, objectFit: 'contain' }} />
+      <img src="/image/EDUWING WORLD_LOGO 34 4.png" alt="EduWing World" style={{ height: 18, objectFit: 'contain' }} />
+    </div>
+  );
+
+  const RightActions = (
+    <div className="ew-nav__right" style={{ display: 'flex', gap: 'var(--space-4)', alignItems: 'center', flexShrink: 0, justifyContent: 'flex-end' }}>
+      <button
+        aria-label="Settings"
+        style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', height: 32, width: 32, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+        onClick={() => handleNav('account')}
+      >
+        <img src="/icon/settings.svg" alt="" style={{ width: 22, height: 22, opacity: 0.75 }} />
+      </button>
+      <button
+        aria-label="Notifications"
+        style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', height: 32, width: 32, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+      >
+        <img src="/icon/notification.svg" alt="" style={{ width: 22, height: 22, opacity: 0.75 }} />
+      </button>
+      <div style={{ width: 1, height: 20, background: 'var(--color-border-subtle)' }} />
+      <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'center' }}>
+        <img src="/image/thumb=Avatar56.png" alt="" style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover' }} />
+        <div className="ew-nav__user-text" style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.15 }}>
+          <span style={{ fontSize: 'var(--text-base)', fontWeight: 600, color: 'var(--color-ink-strong)', letterSpacing: 'var(--tracking-tight)' }}>
+            김가영
+          </span>
+          <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-ink-soft)', letterSpacing: 'var(--tracking-wide)', textTransform: 'uppercase' }}>
+            Master
+          </span>
         </div>
       </div>
-    </nav>
+    </div>
+  );
+
+  return (
+    <>
+      <nav className="ew-nav" style={{ justifyContent: 'space-between' }}>
+        {/* Mobile menu button (data-mobile-only via CSS) */}
+        <button
+          className="ew-mobile-menu-btn ew-nav__hamburger"
+          aria-label="메뉴 열기"
+          onClick={() => setSidebarOpen(true)}
+        >
+          <span /><span /><span />
+        </button>
+
+        {Logo}
+
+        {/* Desktop nav links */}
+        <div className="ew-nav__links" style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'center', flex: 1, justifyContent: 'center' }}>
+          {NAV_ITEMS.map((item) => (
+            <button
+              key={item.key}
+              className={`ew-nav-menu${activePage === item.key ? ' active' : ''}`}
+              style={{ background: 'none', border: 'none' }}
+              onClick={() => handleNav(item.key)}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+
+        {RightActions}
+      </nav>
+
+      {/* Mobile sidebar + backdrop */}
+      <div
+        className="ew-nav-backdrop"
+        data-open={sidebarOpen}
+        onClick={() => setSidebarOpen(false)}
+        aria-hidden
+      />
+      <aside
+        className="ew-nav-sidebar"
+        data-open={sidebarOpen}
+        aria-hidden={!sidebarOpen}
+      >
+        <div className="ew-nav-sidebar__header">
+          {Logo}
+          <button
+            aria-label="메뉴 닫기"
+            className="ew-nav-sidebar__close"
+            onClick={() => setSidebarOpen(false)}
+          >
+            ✕
+          </button>
+        </div>
+        <div className="ew-nav-sidebar__menu">
+          {NAV_ITEMS.map((item) => (
+            <button
+              key={item.key}
+              className={`ew-nav-sidebar__item${activePage === item.key ? ' active' : ''}`}
+              onClick={() => handleNav(item.key)}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      </aside>
+    </>
   );
 }
