@@ -296,7 +296,7 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
       {showPicker && onStudentUpdate && (
         <StudentPickerModal campId={campId} allStudents={allStudentsSource} onAdd={handlePickerAdd} onClose={() => setShowPicker(false)} />
       )}
-      <div className="ew-filter-bar">
+      <div className="ew-filter-bar ew-filter-bar--inline">
         <div className="ew-filter-input-wrap" style={{ width: 220 }}>
           <span className="search-icon"><SearchIcon /></span>
           <input type="text" placeholder="학생 이름 검색" value={query} onChange={e => { setQuery(e.target.value); setPage(1); }} />

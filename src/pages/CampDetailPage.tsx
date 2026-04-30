@@ -91,7 +91,7 @@ export default function CampDetailPage({
     <div>
 
       {/* 상단 헤더 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', padding: 'var(--space-3) var(--page-px)', borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-canvas)' }}>
+      <div className="ew-page-header" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', padding: 'var(--space-3) var(--page-px)' }}>
         <button
           className="ew-btn ew-btn--ghost ew-btn--sm"
           onClick={onBack}

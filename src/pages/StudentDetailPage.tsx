@@ -339,11 +339,9 @@ export default function StudentDetailPage({
     <div style={{ background: 'var(--color-paper)', minHeight: 'calc(100vh - var(--topnav-h))' }}>
 
       {/* Page Header */}
-      <div style={{
+      <div className="ew-page-header" style={{
         display: 'flex', alignItems: 'center', gap: 'var(--space-2)',
         height: 'var(--header-h)', padding: '0 var(--page-px)',
-        background: 'var(--color-canvas)', borderBottom: '1px solid var(--color-border-subtle)',
-       
       }}>
         <button
           onClick={onBack}

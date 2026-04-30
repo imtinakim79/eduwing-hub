@@ -695,6 +695,21 @@ table { font-feature-settings: 'tnum' 1, 'cv11' 1; }
   min-width: 0;
 }
 
+/* nested 컨텍스트(예: 캠프 상세 안의 학생 보드) — sticky 끄기 */
+.ew-filter-bar--inline {
+  position: static;
+  z-index: auto;
+}
+
+/* 상세 페이지 상단 헤더 — TopNav 아래에 sticky */
+.ew-page-header {
+  position: sticky;
+  top: var(--topnav-h);
+  z-index: var(--z-raised);
+  background: var(--color-canvas);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
 /* ──────────────────────────────────────────────
    Mobile sidebar — 1024px 미만에서 햄버거 + 슬라이드
    ────────────────────────────────────────────── */
