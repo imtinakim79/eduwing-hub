@@ -156,19 +156,20 @@ export function DropdownCell({ value, options, cellId, openCell, setOpenCell, on
     <div
       ref={triggerRef}
       style={{
-        display: 'flex', alignItems: 'center', gap: 4, height: '100%', cursor: 'pointer',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--space-2)',
+        width: '100%', height: '100%', cursor: 'pointer',
         background: isOpen ? 'var(--color-primary-bg)' : 'transparent',
-        borderBottom: isOpen ? '2px solid var(--color-primary)' : '2px solid transparent',
         margin: '0 -12px', padding: '0 12px',
+        transition: 'background var(--dur-fast) var(--ease-out)',
       }}
       onClick={(e) => { e.stopPropagation(); onCellClick(); setOpenCell(isOpen ? null : cellId); }}
     >
-      <span style={{ fontSize: 13, color: value ? 'var(--color-text-primary)' : 'var(--color-ink-faint)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+      <span style={{ fontSize: 'var(--text-base)', color: value ? 'var(--color-ink-strong)' : 'var(--color-ink-faint)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
         {value || '선택'}
       </span>
       <img
         src={isOpen ? '/icon/arrowup.svg' : '/icon/arrowdown.svg'}
-        alt="" style={{ width: 14, height: 14, flexShrink: 0 }}
+        alt="" style={{ width: 16, height: 16, flexShrink: 0, opacity: 0.65 }}
       />
       {isOpen && (
         <SmartOverlay triggerRef={triggerRef} onOutsideClick={() => setOpenCell(null)}>
