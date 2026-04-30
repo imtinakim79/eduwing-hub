@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import type { ColumnDef } from './types';
 import {
   HeadlineCell, TextCell, CalendarCell, DropdownCell,
@@ -42,6 +42,11 @@ export default function BoardTable<T extends { id: string }>({
 }: BoardTableProps<T>) {
   const [openCell,   setOpenCell]   = useState<string | null>(null);
   const [activeCell, setActiveCell] = useState<string | null>(null);
+
+  // popup이 닫히면 cell 선택 강조도 같이 해제 (외부 클릭/ESC 모두 이 경로로)
+  useEffect(() => {
+    if (openCell === null) setActiveCell(null);
+  }, [openCell]);
 
   // ── Column resize ──────────────────────────────────────────────────────────
   const colWidthsRef = useRef<Record<string, number>>({});
