@@ -650,12 +650,15 @@ table { font-feature-settings: 'tnum' 1, 'cv11' 1; }
 .ew-nav {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 0 20px;
-  height: 68px;
-  background: #fff;
-  border-bottom: 1px solid var(--color-border-divider);
+  gap: var(--space-3);
+  padding: 0 var(--page-px);
+  height: var(--topnav-h);
+  background: var(--color-canvas);
+  border-bottom: 1px solid var(--color-border-subtle);
   min-width: 1440px;
+  position: sticky;
+  top: 0;
+  z-index: var(--z-raised);
 }
 
 /* ============================================================

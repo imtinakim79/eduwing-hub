@@ -410,7 +410,7 @@ export default function CampBoardPage({
       </div>
 
       {/* Action bar */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 30px', borderBottom: '1px solid var(--color-border-table)', background: '#fff', justifyContent: 'flex-end', minWidth: 1440 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', padding: 'var(--space-2) var(--page-px)', borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-canvas)', justifyContent: 'flex-end', minWidth: 1440 }}>
         <span style={{ flex: 1, fontSize: 12, color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)' }}>
           {selected.size > 0 ? `${selected.size}개 선택됨` : ''}
         </span>

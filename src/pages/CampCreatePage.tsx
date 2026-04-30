@@ -161,7 +161,7 @@ export default function CampCreatePage({ camps, editCampId, allStudents = [], on
     <div style={{ minWidth: 1440, overflowX: 'auto' }}>
 
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 30px', borderBottom: '1px solid var(--color-border-table)', background: '#fff' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', padding: 'var(--space-3) var(--page-px)', borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-canvas)' }}>
         <button className="ew-btn ew-btn--ghost ew-btn--sm" onClick={onBack}
           style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
           <img src="/icon/arrow_fill_left.svg" alt="" style={{ width: 14, height: 14 }} />

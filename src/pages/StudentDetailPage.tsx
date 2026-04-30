@@ -336,25 +336,26 @@ export default function StudentDetailPage({
   };
 
   return (
-    <div style={{ background: '#F5F7FA', minHeight: 'calc(100vh - 66px)', overflowX: 'auto' }}>
+    <div style={{ background: 'var(--color-paper)', minHeight: 'calc(100vh - var(--topnav-h))', overflowX: 'auto' }}>
 
       {/* Page Header */}
       <div style={{
-        display: 'flex', alignItems: 'center', gap: 8,
-        height: 52, padding: '0 40px',
-        background: '#fff', borderBottom: '1px solid #E2E5EA',
+        display: 'flex', alignItems: 'center', gap: 'var(--space-2)',
+        height: 'var(--header-h)', padding: '0 var(--page-px)',
+        background: 'var(--color-canvas)', borderBottom: '1px solid var(--color-border-subtle)',
         minWidth: 1360,
       }}>
         <button
           onClick={onBack}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0', fontSize: 14, color: '#6B7280', fontFamily: 'var(--font-en)' }}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--space-2)', background: 'none', border: 'none', cursor: 'pointer', padding: 'var(--space-1) 0', fontSize: 'var(--text-md)', color: 'var(--color-ink-soft)', letterSpacing: 'var(--tracking-tight)' }}
         >
-          ←
+          ← 학생 목록으로
         </button>
-        <span style={{ fontSize: 16, fontWeight: 500, color: '#1A1D23', fontFamily: 'var(--font-ko)' }}>학생 상세</span>
+        <div style={{ width: 1, height: 16, background: 'var(--color-border-subtle)', margin: '0 var(--space-2)' }} />
+        <span style={{ fontSize: 'var(--text-lg)', fontWeight: 600, color: 'var(--color-ink-strong)', letterSpacing: 'var(--tracking-tight)' }}>학생 상세</span>
       </div>
 
-      <div style={{ padding: '32px 40px', minWidth: 1360, display: 'flex', flexDirection: 'column', gap: 0 }}>
+      <div style={{ padding: 'var(--space-7) var(--page-px)', minWidth: 1360, display: 'flex', flexDirection: 'column', gap: 0 }}>
 
         {/* ProfileCard */}
         <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 8, padding: 24, display: 'flex', alignItems: 'center', gap: 20, marginBottom: 0 }}>

@@ -19,28 +19,28 @@ interface TopNavProps {
 
 export default function TopNav({ activePage, onNavigate }: TopNavProps) {
   return (
-    <nav className="ew-nav" style={{ justifyContent: 'space-between', minWidth: 1440 }}>
+    <nav className="ew-nav" style={{ justifyContent: 'space-between' }}>
       {/* Logo */}
-      <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
         <img
           src="/image/EDUWING WORLD_LOGO 34 3-1.png"
           alt=""
-          style={{ height: 38, objectFit: 'contain' }}
+          style={{ height: 32, objectFit: 'contain' }}
         />
         <img
           src="/image/EDUWING WORLD_LOGO 34 4.png"
           alt="EduWing World"
-          style={{ height: 20, objectFit: 'contain' }}
+          style={{ height: 18, objectFit: 'contain' }}
         />
       </div>
 
       {/* Nav links */}
-      <div style={{ display: 'flex', gap: 60, alignItems: 'center', flex: 1, justifyContent: 'center' }}>
+      <div style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'center', flex: 1, justifyContent: 'center' }}>
         {NAV_ITEMS.map((item) => (
           <button
             key={item.key}
             className={`ew-nav-menu${activePage === item.key ? ' active' : ''}`}
-            style={{ background: 'none', border: 'none', padding: 0 }}
+            style={{ background: 'none', border: 'none' }}
             onClick={() => onNavigate(item.key)}
           >
             {item.label}
@@ -49,26 +49,34 @@ export default function TopNav({ activePage, onNavigate }: TopNavProps) {
       </div>
 
       {/* Right: settings, notifications, user */}
-      <div style={{ display: 'flex', gap: 20, alignItems: 'center', flexShrink: 0, width: 280, justifyContent: 'flex-end' }}>
-        <button style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }} onClick={() => onNavigate('account')}>
-          <img src="/icon/settings.svg" alt="Settings" style={{ width: 32, height: 32 }} />
+      <div style={{ display: 'flex', gap: 'var(--space-4)', alignItems: 'center', flexShrink: 0, justifyContent: 'flex-end' }}>
+        <button
+          aria-label="Settings"
+          style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', height: 32, width: 32, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+          onClick={() => onNavigate('account')}
+        >
+          <img src="/icon/settings.svg" alt="" style={{ width: 22, height: 22, opacity: 0.75 }} />
         </button>
-        <button style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
-          <img src="/icon/notification.svg" alt="Notifications" style={{ width: 32, height: 32 }} />
+        <button
+          aria-label="Notifications"
+          style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', height: 32, width: 32, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+        >
+          <img src="/icon/notification.svg" alt="" style={{ width: 22, height: 22, opacity: 0.75 }} />
         </button>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <div style={{ width: 1, height: 20, background: 'var(--color-border-subtle)' }} />
+        <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'center' }}>
           <img
             src="/image/thumb=Avatar56.png"
-            alt="avatar"
-            style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover' }}
+            alt=""
+            style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover' }}
           />
-          <div style={{ lineHeight: 1 }}>
-            <div style={{ fontSize: 15, fontWeight: 500, fontFamily: 'var(--font-ko)', color: 'var(--color-text-primary)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.15 }}>
+            <span style={{ fontSize: 'var(--text-base)', fontWeight: 600, color: 'var(--color-ink-strong)', letterSpacing: 'var(--tracking-tight)' }}>
               김가영
-            </div>
-            <div style={{ fontSize: 13, color: '#717171', fontFamily: 'var(--font-ko)' }}>
+            </span>
+            <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-ink-soft)', letterSpacing: 'var(--tracking-wide)', textTransform: 'uppercase' }}>
               Master
-            </div>
+            </span>
           </div>
         </div>
       </div>

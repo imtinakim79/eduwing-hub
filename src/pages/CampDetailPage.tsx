@@ -35,9 +35,9 @@ function TagList({ items, color }: { items: string[]; color: string }) {
 
 function InfoItem({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0 }}>
-      <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--color-text-sub)', fontFamily: 'var(--font-ko)' }}>{label}</span>
-      <div style={{ fontSize: 14, color: 'var(--color-text-primary)', fontFamily: 'var(--font-ko)' }}>{children}</div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)', minWidth: 0 }}>
+      <span style={{ fontSize: 'var(--text-xs)', fontWeight: 500, color: 'var(--color-ink-soft)', letterSpacing: 'var(--tracking-wide)', textTransform: 'uppercase' }}>{label}</span>
+      <div style={{ fontSize: 'var(--text-md)', color: 'var(--color-ink-strong)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{children}</div>
     </div>
   );
 }
@@ -91,21 +91,21 @@ export default function CampDetailPage({
     <div style={{ minWidth: 1440 }}>
 
       {/* 상단 헤더 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 30px', borderBottom: '1px solid var(--color-border-table)', background: '#fff' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', padding: 'var(--space-3) var(--page-px)', borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-canvas)' }}>
         <button
           className="ew-btn ew-btn--ghost ew-btn--sm"
           onClick={onBack}
-          style={{ display: 'flex', alignItems: 'center', gap: 4 }}
+          style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-1)' }}
         >
           <img src="/icon/arrow_fill_left.svg" alt="" style={{ width: 14, height: 14 }} />
           캠프 목록
         </button>
-        <div style={{ width: 1, height: 20, background: 'var(--color-border-table)' }} />
-        <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--color-text-primary)', fontFamily: 'var(--font-ko)', flex: 1 }}>
+        <div style={{ width: 1, height: 20, background: 'var(--color-border-subtle)' }} />
+        <span style={{ fontSize: 'var(--text-lg)', fontWeight: 600, color: 'var(--color-ink-strong)', letterSpacing: 'var(--tracking-tight)', flex: 1 }}>
           캠프 상세
         </span>
         {onEdit && (
-          <button className="ew-btn ew-btn--ghost ew-btn--sm" onClick={onEdit}>정보수정</button>
+          <button className="ew-btn ew-btn--secondary ew-btn--sm" onClick={onEdit}>정보 수정</button>
         )}
         <button className="ew-btn ew-btn--danger ew-btn--sm" onClick={() => {
           if (!onCampDelete) return;
@@ -120,23 +120,23 @@ export default function CampDetailPage({
         }}>정보삭제</button>
       </div>
 
-      <div style={{ padding: '24px 30px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ padding: 'var(--space-6) var(--page-px)', display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
 
         {camp ? (
           <>
             {/* 캠프 기본 정보 카드 */}
-            <div style={{ background: '#fff', border: '1px solid var(--color-border-table)', borderRadius: 8, padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 20 }}>
-              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-text-primary)', fontFamily: 'var(--font-ko)' }}>캠프 기본 정보</div>
+            <div style={{ background: 'var(--color-canvas)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-5) var(--space-6)', display: 'flex', flexDirection: 'column', gap: 'var(--space-5)', boxShadow: 'var(--shadow-soft)' }}>
+              <div style={{ fontSize: 'var(--text-md)', fontWeight: 600, color: 'var(--color-ink-strong)', letterSpacing: 'var(--tracking-tight)' }}>캠프 기본 정보</div>
 
-              <div style={{ display: 'flex', gap: 40 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 'var(--space-6)' }}>
                 <InfoItem label="캠프명">
-                  <span style={{ fontWeight: 600, fontSize: 15 }}>{camp.name}</span>
+                  <span style={{ fontWeight: 600, fontSize: 'var(--text-lg)', color: 'var(--color-ink-strong)' }}>{camp.name}</span>
                 </InfoItem>
                 <InfoItem label="캠프코드">
-                  <span style={{ fontFamily: 'var(--font-en)' }}>{camp.id}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontFeatureSettings: '"tnum" 1' }}>{camp.id}</span>
                 </InfoItem>
                 <InfoItem label="기간">
-                  <span style={{ fontFamily: 'var(--font-en)' }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontFeatureSettings: '"tnum" 1' }}>
                     {isoToDisplay(camp.start_date)} ~ {isoToDisplay(camp.end_date)}
                   </span>
                 </InfoItem>
@@ -144,24 +144,25 @@ export default function CampDetailPage({
                 <InfoItem label="숙소">{camp.accommodation}</InfoItem>
               </div>
 
-              <div style={{ display: 'flex', gap: 40 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 'var(--space-6)' }}>
                 <InfoItem label="스탭">
-                  <TagList items={camp.staff} color="#3B82F6" />
+                  <TagList items={camp.staff} color="var(--color-primary)" />
                 </InfoItem>
                 <InfoItem label="정원">
-                  <span>{camp.capacity}명</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontFeatureSettings: '"tnum" 1' }}>{camp.capacity}<span style={{ color: 'var(--color-ink-soft)', marginLeft: 2 }}>명</span></span>
                 </InfoItem>
                 <InfoItem label="상태">
-                  <span className="ew-tag" style={{ background: statusStyle.bg, color: statusStyle.color, fontFamily: 'var(--font-ko)', fontSize: 12 }}>
+                  <span className="ew-tag" style={{ background: statusStyle.bg, color: statusStyle.color }}>
                     {camp.status}
                   </span>
                 </InfoItem>
+                <div /><div />
               </div>
             </div>
 
             {/* 탭 */}
-            <div style={{ background: '#fff', border: '1px solid var(--color-border-table)', borderRadius: 8 }}>
-              <div style={{ display: 'flex', borderBottom: '1px solid var(--color-border-table)' }}>
+            <div style={{ background: 'var(--color-canvas)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+              <div className="ew-tab-bar" style={{ padding: '0 var(--space-3)' }}>
                 {TABS.map(tab => {
                   const disabled = tab === 'Timetable' && classes.length === 0;
                   return (
@@ -170,14 +171,8 @@ export default function CampDetailPage({
                       onClick={() => !disabled && handleTabSwitch(tab)}
                       disabled={disabled}
                       title={disabled ? '클래스를 먼저 추가해주세요' : undefined}
-                      style={{
-                        padding: '12px 20px', fontSize: 14, fontFamily: 'var(--font-ko)',
-                        fontWeight: activeTab === tab ? 600 : 400,
-                        color: disabled ? '#C8D0D8' : activeTab === tab ? 'var(--color-primary)' : 'var(--color-text-sub)',
-                        background: 'none', border: 'none',
-                        borderBottom: activeTab === tab ? '2px solid var(--color-primary)' : '2px solid transparent',
-                        cursor: disabled ? 'not-allowed' : 'pointer', marginBottom: -1,
-                      }}
+                      className={`ew-tab${activeTab === tab ? ' active' : ''}`}
+                      style={{ opacity: disabled ? 0.4 : 1, cursor: disabled ? 'not-allowed' : 'pointer' }}
                     >
                       {tab}
                     </button>

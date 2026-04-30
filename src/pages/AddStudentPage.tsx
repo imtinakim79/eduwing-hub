@@ -204,13 +204,13 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
   }
 
   return (
-    <div style={{ background: '#F3F4F7', minHeight: 'calc(100vh - 66px)', overflowX: 'auto' }}>
+    <div style={{ background: 'var(--color-paper)', minHeight: 'calc(100vh - var(--topnav-h))', overflowX: 'auto' }}>
 
       {/* Page Header */}
       <div style={{
-        display: 'flex', alignItems: 'center', gap: 12,
-        height: 52, padding: '0 40px',
-        background: '#fff', border: '1px solid #E0E4EB',
+        display: 'flex', alignItems: 'center', gap: 'var(--space-3)',
+        height: 'var(--header-h)', padding: '0 var(--page-px)',
+        background: 'var(--color-canvas)', borderBottom: '1px solid var(--color-border-subtle)',
         overflow: 'hidden', minWidth: 1360,
       }}>
         <button
