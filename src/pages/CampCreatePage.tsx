@@ -12,6 +12,7 @@ import type { Student } from './StudentBoardPage';
 import { useDirtyForm } from '../hooks/useDirtyForm';
 import StickySaveBar from '../components/StickySaveBar';
 import { useDirtyGuard } from '../hooks/useDirtyGuard';
+import Card from '../components/Card';
 
 const LOCATIONS = ['나트랑', '다낭', '세부', '발리', '방콕', '싱가포르', '코타키나발루'];
 const STATUSES  = ['진행중', '준비중', '종료'];
@@ -184,9 +185,8 @@ export default function CampCreatePage({ camps, editCampId, allStudents = [], on
       <div style={{ padding: '24px 30px', display: 'flex', flexDirection: 'column', gap: 20 }}>
 
         {/* 기본 정보 */}
-        <div style={{ background: 'var(--color-canvas)', border: '1px solid var(--color-border-table)', borderRadius: 8, padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-text-primary)', fontFamily: 'var(--font-ko)', marginBottom: 4 }}>기본 정보</div>
-          <div style={{ display: 'flex', gap: 16 }}>
+        <Card title="기본 정보">
+          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
             <Field label="캠프명" required dirty={isEdit && isFieldDirty('name')}>
               <TextInput value={form.name} onChange={set('name')} placeholder="공식 캠프명을 입력하세요." />
             </Field>
@@ -215,7 +215,7 @@ export default function CampCreatePage({ camps, editCampId, allStudents = [], on
               </div>
             </Field>
           </div>
-          <div style={{ display: 'flex', gap: 16 }}>
+          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginTop: 16 }}>
             <Field label="스탭">
               <DisabledInput value={form.staff} placeholder="스탭&강사 탭에서 자동 입력" />
             </Field>
@@ -224,10 +224,10 @@ export default function CampCreatePage({ camps, editCampId, allStudents = [], on
             </Field>
             <div style={{ flex: 2 }} />
           </div>
-        </div>
+        </Card>
 
         {/* 탭 */}
-        <div style={{ background: 'var(--color-canvas)', border: '1px solid var(--color-border-table)', borderRadius: 8 }}>
+        <Card flush style={{ overflow: 'hidden' }}>
           <div style={{ display: 'flex', borderBottom: '1px solid var(--color-border-table)' }}>
             {TABS.map(tab => {
               const disabled = tab === 'Timetable' && classes.length === 0;
@@ -320,7 +320,7 @@ export default function CampCreatePage({ camps, editCampId, allStudents = [], on
               </div>
             )}
           </div>
-        </div>
+        </Card>
         <div style={{ height: isEdit ? 80 : 0 }} />
       </div>
       <StickySaveBar visible={isEdit && isDirty} count={count} onCancel={reset} onSave={handleSave} />

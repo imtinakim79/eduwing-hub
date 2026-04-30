@@ -9,6 +9,7 @@ import CampStaffTab from './CampStaffTab';
 import CampClassTab, { loadClasses } from './CampClassTab';
 import type { ClassLevel } from './CampClassTab';
 import type { Student } from './StudentBoardPage';
+import Card from '../components/Card';
 
 
 function isoToDisplay(iso: string) {
@@ -125,10 +126,8 @@ export default function CampDetailPage({
         {camp ? (
           <>
             {/* 캠프 기본 정보 카드 */}
-            <div style={{ background: 'var(--color-canvas)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-5) var(--space-6)', display: 'flex', flexDirection: 'column', gap: 'var(--space-5)', boxShadow: 'var(--shadow-soft)' }}>
-              <div style={{ fontSize: 'var(--text-md)', fontWeight: 600, color: 'var(--color-ink-strong)', letterSpacing: 'var(--tracking-tight)' }}>캠프 기본 정보</div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 'var(--space-6)' }}>
+            <Card title="캠프 기본 정보">
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 'var(--space-6)', marginBottom: 'var(--space-5)' }}>
                 <InfoItem label="캠프명">
                   <span style={{ fontWeight: 600, fontSize: 'var(--text-lg)', color: 'var(--color-ink-strong)' }}>{camp.name}</span>
                 </InfoItem>
@@ -158,10 +157,10 @@ export default function CampDetailPage({
                 </InfoItem>
                 <div /><div />
               </div>
-            </div>
+            </Card>
 
             {/* 탭 */}
-            <div style={{ background: 'var(--color-canvas)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+            <Card flush style={{ overflow: 'hidden' }}>
               <div className="ew-tab-bar" style={{ padding: '0 var(--space-3)' }}>
                 {TABS.map(tab => {
                   const disabled = tab === 'Timetable' && classes.length === 0;
@@ -266,7 +265,7 @@ export default function CampDetailPage({
                   </div>
                 )}
               </div>
-            </div>
+            </Card>
           </>
         ) : (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 200, color: 'var(--color-text-muted)', fontSize: 14, fontFamily: 'var(--font-ko)' }}>

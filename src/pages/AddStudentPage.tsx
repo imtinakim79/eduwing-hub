@@ -8,6 +8,7 @@ import type { Agent } from './AgentBoardPage';
 import { useDirtyForm } from '../hooks/useDirtyForm';
 import StickySaveBar from '../components/StickySaveBar';
 import { useDirtyGuard } from '../hooks/useDirtyGuard';
+import Card from '../components/Card';
 
 const GENDER_OPTIONS   = ['Male', 'Female', 'Other', 'Prefer not to say'];
 const RELATION_OPTIONS = ['아빠', '엄마', '기타'];
@@ -250,7 +251,7 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
 
       {/* Content */}
       <div style={{ padding: 'var(--space-7) var(--page-px)'}}>
-        <div style={{ background: 'var(--color-canvas)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-7)', boxShadow: 'var(--shadow-soft)' }}>
+        <Card style={{ padding: 'var(--space-7)' }}>
 
           {/* ── 프로필 사진 ── */}
           <FieldRow label="프로필 사진" height={100} dirty={isEdit && isFieldDirty('profile_img_url')}>
@@ -434,7 +435,7 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
             </CellWrapper>
           </FieldRow>
 
-        </div>
+        </Card>
         <div style={{ height: isEdit ? 80 : 0 }} />
       </div>
       <StickySaveBar visible={isEdit && isDirty} count={count} onCancel={reset} onSave={handleSave} />
