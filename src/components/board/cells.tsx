@@ -146,9 +146,11 @@ export function DropdownCell({ value, options, cellId, openCell, setOpenCell, on
       ref={triggerRef}
       style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--space-2)',
-        width: '100%', height: '100%', cursor: 'pointer',
+        width: 'calc(100% + 24px)',  // td/ew-form-cell padding(12)을 외부로 흡수해 셀 전체 차지
+        height: '100%', cursor: 'pointer',
         background: isOpen ? 'var(--color-primary-bg)' : 'transparent',
         margin: '0 -12px', padding: '0 12px',
+        boxSizing: 'border-box',
         transition: 'background var(--dur-fast) var(--ease-out)',
       }}
       onClick={(e) => { e.stopPropagation(); onCellClick(); setOpenCell(isOpen ? null : cellId); }}

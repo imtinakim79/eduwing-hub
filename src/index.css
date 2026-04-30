@@ -395,20 +395,18 @@ table { font-feature-settings: 'tnum' 1, 'cv11' 1; }
   border-color: var(--color-primary-hover);
 }
 
-/* check mark — DropdownItem의 svg와 같은 곡선
-   path: M3 8.5 L6.8 11.5 L13 5 (16x16 viewBox 기준)
-   CSS pseudo로 같은 시각 만들기: 회전한 ㄴ자 */
+/* check mark — 정중앙 정렬: 좌상단 고정 대신 50%로 중앙 + transform 회전 */
 .ew-checkbox:checked::after,
 .ew-checkbox.is-checked::after {
   content: '';
   position: absolute;
-  left: 4px;
-  top: 3px;
+  left: 50%;
+  top: 46%;  /* 시각적 중심 보정 (-45deg 회전 시 살짝 위) */
   width: 8px;
   height: 4.5px;
   border-left: 1.6px solid #fff;
   border-bottom: 1.6px solid #fff;
-  transform: rotate(-45deg);
+  transform: translate(-50%, -50%) rotate(-45deg);
   border-bottom-left-radius: 1px;
 }
 
