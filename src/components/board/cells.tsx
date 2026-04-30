@@ -92,14 +92,21 @@ function SmartOverlay({ triggerRef, children, onOutsideClick }: {
 
   useEffect(() => {
     if (!onOutsideClick) return;
-    function handle(e: MouseEvent) {
+    function handleClick(e: MouseEvent) {
       const target = e.target as Node;
       if (wrapperRef.current?.contains(target)) return;
       if (triggerRef.current?.contains(target)) return;
       onOutsideClick!();
     }
-    document.addEventListener('mousedown', handle);
-    return () => document.removeEventListener('mousedown', handle);
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') onOutsideClick!();
+    }
+    document.addEventListener('mousedown', handleClick);
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      document.removeEventListener('mousedown', handleClick);
+      document.removeEventListener('keydown', handleKey);
+    };
   }, [onOutsideClick, triggerRef]);
 
   return createPortal(
@@ -164,7 +171,7 @@ export function DropdownCell({ value, options, cellId, openCell, setOpenCell, on
         alt="" style={{ width: 14, height: 14, flexShrink: 0 }}
       />
       {isOpen && (
-        <SmartOverlay triggerRef={triggerRef}>
+        <SmartOverlay triggerRef={triggerRef} onOutsideClick={() => setOpenCell(null)}>
           <div className="ew-dropdown-overlay" onClick={(e) => e.stopPropagation()}>
             {options.map(opt => (
               <DropdownItem
@@ -546,7 +553,7 @@ export function CalendarTimeCell({ dateISO, time, cellId, openCell, setOpenCell,
         <span style={{ fontSize: 13, color: 'var(--color-ink-faint)', whiteSpace: 'nowrap' }}>날짜/시간 선택</span>
       )}
       {isOpen && (
-        <SmartOverlay triggerRef={triggerRef}>
+        <SmartOverlay triggerRef={triggerRef} onOutsideClick={() => setOpenCell(null)}>
           <CalendarOverlay
             key={cellId + dateISO}
             dateISO={dateISO}
@@ -607,7 +614,7 @@ export function CalendarCell({ dateISO, displayDate, cellId, openCell, setOpenCe
         {displayDate || '날짜 선택'}
       </span>
       {isOpen && (
-        <SmartOverlay triggerRef={triggerRef}>
+        <SmartOverlay triggerRef={triggerRef} onOutsideClick={() => setOpenCell(null)}>
           <CalendarOverlay
             key={cellId + dateISO}
             dateISO={dateISO}
@@ -645,7 +652,7 @@ export function GenderCell({ value, cellId, openCell, setOpenCell, onChange, onC
       </span>
       <img src={isOpen ? '/icon/arrowup.svg' : '/icon/arrowdown.svg'} alt="" style={{ width: 14, height: 14, flexShrink: 0 }} />
       {isOpen && (
-        <SmartOverlay triggerRef={triggerRef}>
+        <SmartOverlay triggerRef={triggerRef} onOutsideClick={() => setOpenCell(null)}>
           <div className="ew-dropdown-overlay" onClick={(e) => e.stopPropagation()}>
             {GENDER_OPTIONS.map(opt => (
               <DropdownItem
@@ -701,7 +708,7 @@ export function StatusCell({ value, options, cellId, openCell, setOpenCell, onCh
       <span className="ew-tag" style={{ background: style.bg, color: style.color, fontFamily: 'var(--font-ko)' }}>{value}</span>
       <img src={isOpen ? '/icon/arrowup.svg' : '/icon/arrowdown.svg'} alt="" style={{ width: 14, height: 14 }} />
       {isOpen && (
-        <SmartOverlay triggerRef={triggerRef}>
+        <SmartOverlay triggerRef={triggerRef} onOutsideClick={() => setOpenCell(null)}>
           <div className="ew-dropdown-overlay" onClick={(e) => e.stopPropagation()}>
             {options.map(opt => (
               <DropdownItem
@@ -939,7 +946,7 @@ export function CalendarRangeCell({ value, cellId, openCell, setOpenCell, onSave
       <img src={isOpen ? '/icon/Calendar_selected.svg' : '/icon/Calendar.svg'} alt="" style={{ width: 14, height: 14, flexShrink: 0 }} />
       <span style={{ fontSize: 13, color: startISO ? 'var(--color-text-primary)' : 'var(--color-ink-faint)', whiteSpace: 'nowrap' }}>{display}</span>
       {isOpen && (
-        <SmartOverlay triggerRef={triggerRef}>
+        <SmartOverlay triggerRef={triggerRef} onOutsideClick={() => setOpenCell(null)}>
           <CalendarRangeOverlay
             key={cellId + value}
             startISO={startISO ?? ''}
