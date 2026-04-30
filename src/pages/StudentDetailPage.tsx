@@ -358,56 +358,59 @@ export default function StudentDetailPage({
       <div style={{ padding: 'var(--space-7) var(--page-px)', minWidth: 1360, display: 'flex', flexDirection: 'column', gap: 0 }}>
 
         {/* ProfileCard */}
-        <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 8, padding: 24, display: 'flex', alignItems: 'center', gap: 20, marginBottom: 0 }}>
+        <div style={{ background: 'var(--color-canvas)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-6)', display: 'flex', alignItems: 'center', gap: 'var(--space-5)', boxShadow: 'var(--shadow-soft)' }}>
           {student.profile_img_url ? (
             <img src={student.profile_img_url} alt="" style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
           ) : (
-            <div style={{ width: 56, height: 56, borderRadius: '50%', background: avatarBg, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, fontWeight: 700, color: '#fff', fontFamily: 'var(--font-en)' }}>
+            <div style={{ width: 56, height: 56, borderRadius: '50%', background: avatarBg, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--text-2xl)', fontWeight: 700, color: '#fff', fontFamily: 'var(--font-en)', letterSpacing: 'var(--tracking-tight)' }}>
               {initStr}
             </div>
           )}
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6, overflow: 'hidden' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 20, fontWeight: 500, color: '#1A1D23', fontFamily: 'var(--font-ko)' }}>{student.name_ko}</span>
-              <span style={{ fontSize: 13, color: '#9CA3AF', fontFamily: 'var(--font-en)' }}>{student.name_en.toLowerCase()}</span>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 'var(--space-2)', overflow: 'hidden' }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 'var(--space-2)' }}>
+              <span style={{ fontSize: 'var(--text-2xl)', fontWeight: 600, color: 'var(--color-ink-strong)', letterSpacing: 'var(--tracking-tight)' }}>{student.name_ko}</span>
+              <span style={{ fontSize: 'var(--text-md)', color: 'var(--color-ink-mute)', fontFamily: 'var(--font-en)', letterSpacing: 'var(--tracking-wide)' }}>{student.name_en.toLowerCase()}</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: '#6B7280', fontFamily: 'var(--font-ko)' }}>
-              <span>{student.age}세</span><span style={{ color: '#9CA3AF' }}>·</span>
-              <span>{student.gender}</span><span style={{ color: '#9CA3AF' }}>·</span>
-              <span style={{ color: '#9CA3AF' }}>가입일 {student.history.joined_date}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', fontSize: 'var(--text-sm)', color: 'var(--color-ink-soft)' }}>
+              <span><span style={{ fontFamily: 'var(--font-mono)', fontFeatureSettings: '"tnum" 1' }}>{student.age}</span>세</span>
+              <span style={{ color: 'var(--color-ink-faint)' }}>·</span>
+              <span>{student.gender}</span>
+              <span style={{ color: 'var(--color-ink-faint)' }}>·</span>
+              <span style={{ color: 'var(--color-ink-mute)' }}>가입일 <span style={{ fontFamily: 'var(--font-mono)', fontFeatureSettings: '"tnum" 1' }}>{student.history.joined_date}</span></span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, fontFamily: 'var(--font-ko)' }}>
-              <span style={{ color: '#6B7280' }}>보호자 {student.guardian.name}({relLabel(student.guardian.relation)})</span>
-              <span style={{ color: '#9CA3AF' }}>·</span>
-              <span style={{ color: '#6B7280', fontFamily: 'var(--font-en)' }}>{student.guardian.contact}</span>
-              <span style={{ color: '#9CA3AF' }}>·</span>
-              <span style={{ color: '#9CA3AF', fontFamily: 'var(--font-en)' }}>{student.guardian.email}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', fontSize: 'var(--text-sm)' }}>
+              <span style={{ color: 'var(--color-ink-soft)' }}>보호자 <span style={{ color: 'var(--color-ink)' }}>{student.guardian.name}</span>({relLabel(student.guardian.relation)})</span>
+              <span style={{ color: 'var(--color-ink-faint)' }}>·</span>
+              <span style={{ color: 'var(--color-ink-soft)', fontFamily: 'var(--font-mono)', fontFeatureSettings: '"tnum" 1' }}>{student.guardian.contact}</span>
+              <span style={{ color: 'var(--color-ink-faint)' }}>·</span>
+              <span style={{ color: 'var(--color-ink-mute)', fontFamily: 'var(--font-en)' }}>{student.guardian.email}</span>
             </div>
           </div>
-          <div style={{ display: 'flex', gap: 12, flexShrink: 0 }}>
-            <button onClick={onEdit} style={{ height: 40, minWidth: 80, padding: '0 16px', background: '#fff', border: '1px solid #E2E5EA', borderRadius: 6, fontSize: 13, fontWeight: 500, color: '#6B7280', cursor: 'pointer', fontFamily: 'var(--font-ko)' }}>수정</button>
-            <button style={{ height: 40, minWidth: 80, padding: '0 16px', background: '#F5F7FA', border: '1px solid #FF7070', borderRadius: 6, fontSize: 13, fontWeight: 500, color: '#FF7070', cursor: 'pointer', fontFamily: 'var(--font-ko)' }}>삭제</button>
+          <div style={{ display: 'flex', gap: 'var(--space-2)', flexShrink: 0 }}>
+            <button className="ew-btn ew-btn--secondary ew-btn--sm" onClick={onEdit}>수정</button>
+            <button className="ew-btn ew-btn--danger ew-btn--sm">삭제</button>
           </div>
         </div>
 
-        {/* TabBar */}
-        <div style={{ display: 'flex', borderBottom: '2px solid #E5E7EB', padding: '0 4px' }}>
+        {/* TabBar — 캠프 탭 */}
+        <div style={{ display: 'flex', borderBottom: '1px solid var(--color-border-subtle)', padding: '0 var(--space-1)', marginTop: 'var(--space-6)' }}>
           {campIds.map(id => {
             const isActive  = id === activeTab;
             const isCurrent = id === student.history.current_camp_id;
             const campName  = campMap[id]?.name ?? id;
             return (
-              <button key={id} onClick={() => setActiveTab(id)} style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
-                padding: '14px 16px 0', background: 'none', border: 'none', cursor: 'pointer',
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                  <span style={{ fontSize: 14, fontWeight: 500, color: isActive ? '#4173F5' : '#73808F', fontFamily: 'var(--font-en)', whiteSpace: 'nowrap' }}>{campName}</span>
+              <button
+                key={id}
+                onClick={() => setActiveTab(id)}
+                className={`ew-tab${isActive ? ' active' : ''}`}
+                style={{ fontFamily: 'var(--font-en)' }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-1)' }}>
+                  <span style={{ whiteSpace: 'nowrap' }}>{campName}</span>
                   {isCurrent && (
-                    <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: '#E5F7ED', color: '#16A34A', fontFamily: 'var(--font-ko)', fontWeight: 500, whiteSpace: 'nowrap' }}>참여중</span>
+                    <span style={{ fontSize: 'var(--text-2xs)', padding: '1px 6px', borderRadius: 'var(--radius-pill)', background: 'var(--color-success-light)', color: 'var(--color-success)', fontWeight: 600, letterSpacing: 'var(--tracking-wide)', textTransform: 'uppercase' }}>참여중</span>
                   )}
                 </div>
-                <div style={{ width: '100%', height: 2, borderRadius: 1, background: isActive ? '#4173F5' : 'transparent' }} />
               </button>
             );
           })}

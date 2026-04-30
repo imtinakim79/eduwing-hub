@@ -250,8 +250,8 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
       </div>
 
       {/* Content */}
-      <div style={{ padding: '32px 40px', minWidth: 1360 }}>
-        <div style={{ background: '#fff', border: '1px solid #E0E4EB', borderRadius: 8, padding: 28 }}>
+      <div style={{ padding: 'var(--space-7) var(--page-px)', minWidth: 1360 }}>
+        <div style={{ background: 'var(--color-canvas)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-7)', boxShadow: 'var(--shadow-soft)' }}>
 
           {/* ── 프로필 사진 ── */}
           <FieldRow label="프로필 사진" height={100} dirty={isEdit && isFieldDirty('profile_img_url')}>
