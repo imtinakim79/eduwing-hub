@@ -33,27 +33,16 @@ const STATUS_STYLE: Record<string, { bg: string; color: string }> = {
 };
 
 // ── Shared primitives ──────────────────────────────────────────────────────────
-const CELL_H = 48;
-const CELL_BORDER: React.CSSProperties = {
-  borderBottom: '1px solid var(--color-border-subtle)',
-  borderRight:  '1px solid var(--color-border-subtle)',
-};
+const CELL_H = 44;
 const FIELD_LABEL: React.CSSProperties = {
-  fontSize: 12, fontWeight: 500, color: 'var(--color-ink-strong)', fontFamily: 'var(--font-ko)',
-  whiteSpace: 'nowrap', marginBottom: 6,
+  fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--color-ink-soft)',
+  letterSpacing: 'var(--tracking-wide)', textTransform: 'uppercase',
+  whiteSpace: 'nowrap', marginBottom: 'var(--space-2)',
 };
 
 function CellBox({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
   return (
-    <div style={{
-      height: CELL_H, padding: '0 12px',
-      display: 'flex', alignItems: 'center',
-      overflow: 'hidden',
-      borderBottom: '1px solid var(--color-border-subtle)',
-      borderRight:  '1px solid var(--color-border-subtle)',
-      background: 'var(--color-canvas)',
-      ...style,
-    }}>
+    <div className="ew-form-cell" style={{ height: CELL_H, overflow: 'hidden', ...style }}>
       {children}
     </div>
   );
@@ -63,19 +52,14 @@ function TextFieldCell({ placeholder, value, onChange, disabled }: {
   placeholder?: string; value: string;
   onChange?: (v: string) => void; disabled?: boolean;
 }) {
+  const cls = `ew-form-cell${disabled ? ' ew-form-cell--disabled' : ''}`;
   return (
-    <div style={{ height: CELL_H, ...CELL_BORDER, background: disabled ? 'var(--color-bg-subtle)' : '#fff', display: 'flex', alignItems: 'center' }}>
+    <div className={cls} style={{ height: CELL_H }}>
       <input
         value={value}
         disabled={disabled}
         placeholder={placeholder}
         onChange={e => onChange?.(e.target.value)}
-        style={{
-          width: '100%', height: '100%', border: 'none', outline: 'none',
-          background: 'transparent', fontSize: 13, fontFamily: 'var(--font-ko)',
-          color: disabled ? 'var(--color-ink-mute)' : 'var(--color-text-primary)',
-          padding: '0 16px',
-        }}
       />
     </div>
   );
@@ -501,14 +485,14 @@ export default function StudentDetailPage({
               {/* Stay (read-only) */}
               <div style={{ width: 90, flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
                 <span style={FIELD_LABEL}>Stay</span>
-                <div style={{ height: CELL_H, ...CELL_BORDER, background: 'var(--color-bg-subtle)', display: 'flex', alignItems: 'center', padding: '0 12px' }}>
+                <div style={{ height: CELL_H, border: '1px solid var(--color-border-default)', borderRadius: 'var(--radius-md)', background: 'var(--color-bg-subtle)', display: 'flex', alignItems: 'center', padding: '0 12px' }}>
                   <span style={{ fontSize: 13, color: 'var(--color-ink-mute)', fontFamily: 'var(--font-en)' }}>{stayDays ? `${stayDays}day` : '-'}</span>
                 </div>
               </div>
               {/* Invoice */}
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <span style={FIELD_LABEL}>Invoice</span>
-                <div style={{ height: CELL_H, ...CELL_BORDER, background: 'var(--color-canvas)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ height: CELL_H, border: '1px solid var(--color-border-default)', borderRadius: 'var(--radius-md)', background: 'var(--color-canvas)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <button
                     onClick={() => invoiceRef.current?.click()}
                     style={{ height: 32, padding: '0 14px', background: 'var(--color-bg-subtle)', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 500, color: 'var(--color-primary)', cursor: 'pointer', fontFamily: 'var(--font-ko)', maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
@@ -639,7 +623,7 @@ export default function StudentDetailPage({
                       <span style={{ fontSize: 11, fontWeight: 500, color: labelColor, fontFamily: 'var(--font-ko)', whiteSpace: 'pre' }}>✈  {label}</span>
                     </div>
                     {/* Flight No */}
-                    <div style={{ width: 171, height: CELL_H, ...CELL_BORDER, background: 'var(--color-canvas)', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+                    <div style={{ width: 171, height: CELL_H, border: '1px solid var(--color-border-default)', borderRadius: 'var(--radius-md)', background: 'var(--color-canvas)', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
                       <input
                         value={row.flightNo}
                         onChange={e => onChange({ ...row, flightNo: e.target.value })}
@@ -648,7 +632,7 @@ export default function StudentDetailPage({
                       />
                     </div>
                     {/* Date of Entry — CalendarTimeCell */}
-                    <div style={{ flex: 1, height: CELL_H, padding: '0 12px', display: 'flex', alignItems: 'center', overflow: 'hidden', ...CELL_BORDER, background: 'var(--color-canvas)' }}>
+                    <div style={{ flex: 1, height: CELL_H, padding: '0 12px', display: 'flex', alignItems: 'center', overflow: 'hidden', border: '1px solid var(--color-border-default)', borderRadius: 'var(--radius-md)', background: 'var(--color-canvas)' }}>
                       <CalendarTimeCell
                         dateISO={row.dateEntry} time={row.timeEntry}
                         cellId={`${rowKey}-entry`}
@@ -659,7 +643,7 @@ export default function StudentDetailPage({
                       />
                     </div>
                     {/* Date of Return — CalendarTimeCell */}
-                    <div style={{ flex: 1, height: CELL_H, padding: '0 12px', display: 'flex', alignItems: 'center', overflow: 'hidden', ...CELL_BORDER, background: 'var(--color-canvas)' }}>
+                    <div style={{ flex: 1, height: CELL_H, padding: '0 12px', display: 'flex', alignItems: 'center', overflow: 'hidden', border: '1px solid var(--color-border-default)', borderRadius: 'var(--radius-md)', background: 'var(--color-canvas)' }}>
                       <CalendarTimeCell
                         dateISO={row.dateReturn} time={row.timeReturn}
                         cellId={`${rowKey}-return`}
@@ -670,7 +654,7 @@ export default function StudentDetailPage({
                       />
                     </div>
                     {/* Pick&Drop */}
-                    <div style={{ flex: 1, height: CELL_H, ...CELL_BORDER, background: 'var(--color-canvas)', display: 'flex', alignItems: 'center', padding: '0 10px', gap: 6 }}>
+                    <div style={{ flex: 1, height: CELL_H, border: '1px solid var(--color-border-default)', borderRadius: 'var(--radius-md)', background: 'var(--color-canvas)', display: 'flex', alignItems: 'center', padding: '0 10px', gap: 6 }}>
                       <select
                         value={row.pickDrop}
                         onChange={e => onChange({ ...row, pickDrop: e.target.value, pickDropPlace: e.target.value === '없음' ? '' : row.pickDropPlace })}

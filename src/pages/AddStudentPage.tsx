@@ -25,13 +25,9 @@ function relLabelToKo(r: string): string {
 }
 
 // ── 공통 스타일 ────────────────────────────────────────────────────────────────
-const FIELD_H   = 48;
+const FIELD_H   = 44;
 const LABEL_W   = 180;
 const DIVIDER   = '1px solid var(--color-border-subtle)';
-const CELL_BORDER: React.CSSProperties = {
-  borderBottom: '1px solid var(--color-border-subtle)',
-  borderRight:  '1px solid var(--color-border-subtle)',
-};
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
@@ -49,10 +45,10 @@ function FieldRow({ label, height = FIELD_H, dirty = false, children }: {
   return (
     <div
       className={dirty ? 'ew-field--dirty' : undefined}
-      style={{ display: 'flex', minHeight: height, alignItems: 'stretch' }}
+      style={{ display: 'flex', minHeight: height, alignItems: 'center', gap: 'var(--space-3)' }}
     >
-      <div style={{ width: LABEL_W, flexShrink: 0, display: 'flex', alignItems: 'center', paddingRight: 16 }}>
-        <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--color-ink-soft)', fontFamily: 'var(--font-ko)', whiteSpace: 'nowrap' }}>
+      <div style={{ width: LABEL_W, flexShrink: 0, display: 'flex', alignItems: 'center' }}>
+        <span style={{ fontSize: 'var(--text-base)', fontWeight: 500, color: 'var(--color-ink-soft)', whiteSpace: 'nowrap' }}>
           {label}
         </span>
       </div>
@@ -66,24 +62,15 @@ function TextFieldCell({ placeholder, value, onChange, type = 'text', disabled, 
   onChange?: (v: string) => void;
   type?: string; disabled?: boolean; error?: boolean;
 }) {
+  const cls = `ew-form-cell${error ? ' ew-form-cell--error' : ''}${disabled ? ' ew-form-cell--disabled' : ''}`;
   return (
-    <div style={{
-      flex: 1, background: disabled ? 'var(--color-bg-subtle)' : '#fff',
-      borderBottom: error ? '2px solid var(--color-error)' : '1px solid var(--color-border-subtle)',
-      borderRight: '1px solid var(--color-border-subtle)',
-    }}>
+    <div className={cls} style={{ flex: 1, height: FIELD_H }}>
       <input
         type={type}
         placeholder={placeholder}
         value={value}
         disabled={disabled}
         onChange={e => onChange?.(e.target.value)}
-        style={{
-          width: '100%', height: FIELD_H, border: 'none', outline: 'none',
-          background: 'transparent', fontSize: 13, fontFamily: 'var(--font-ko)',
-          color: disabled ? 'var(--color-ink-mute)' : 'var(--color-text-primary)',
-          padding: '0 16px', boxSizing: 'border-box',
-        }}
       />
     </div>
   );
@@ -93,11 +80,7 @@ function CellWrapper({ children, height = FIELD_H }: {
   children: React.ReactNode; height?: number;
 }) {
   return (
-    <div style={{
-      flex: 1, height, padding: '0 12px',
-      display: 'flex', alignItems: 'center',
-      overflow: 'hidden', ...CELL_BORDER, background: 'var(--color-canvas)',
-    }}>
+    <div className="ew-form-cell" style={{ flex: 1, height, overflow: 'hidden' }}>
       {children}
     </div>
   );
@@ -106,9 +89,9 @@ function CellWrapper({ children, height = FIELD_H }: {
 
 function DisabledDateCell({ iso }: { iso: string }) {
   return (
-    <div style={{ flex: 1, height: FIELD_H, ...CELL_BORDER, background: 'var(--color-bg-subtle)', display: 'flex', alignItems: 'center', gap: 6, padding: '0 12px' }}>
+    <div className="ew-form-cell ew-form-cell--disabled" style={{ flex: 1, height: FIELD_H, gap: 6 }}>
       <img src="/icon/Calendar.svg" alt="" style={{ width: 14, height: 14, flexShrink: 0, opacity: 0.5 }} />
-      <span style={{ fontSize: 13, color: 'var(--color-ink-mute)', fontFamily: 'var(--font-en)' }}>
+      <span style={{ fontSize: 'var(--text-base)', color: 'var(--color-ink-mute)', fontFamily: 'var(--font-mono)' }}>
         {iso || 'YYYY-MM-DD'}
       </span>
     </div>
