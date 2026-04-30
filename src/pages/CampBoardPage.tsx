@@ -387,26 +387,27 @@ export default function CampBoardPage({
 
       {/* Filter Bar */}
       <div className="ew-filter-bar">
-        <div style={{ fontFamily: 'var(--font-ko)', fontWeight: 500, fontSize: 20, letterSpacing: '-0.8px', color: 'var(--color-text-medium)', width: 174, flexShrink: 0, textAlign: 'center' }}>캠프관리</div>
-        <div className="ew-filter-input-wrap" style={{ width: 255 }}>
-          <span className="search-icon"><SearchIcon /></span>
-          <input type="text" placeholder="캠프명" value={query} onChange={e => { setQuery(e.target.value); setPage(1); }} />
+        <h1 className="ew-filter-bar__title">캠프관리</h1>
+        <div className="ew-filter-bar__group">
+          <div className="ew-filter-input-wrap" style={{ width: 280 }}>
+            <span className="search-icon"><SearchIcon /></span>
+            <input type="text" placeholder="캠프명 검색" value={query} onChange={e => { setQuery(e.target.value); setPage(1); }} />
+          </div>
+          <FilterPill
+            label="지역"
+            values={locationFilter ? [locationFilter] : []}
+            options={locations}
+            withCheckbox
+            onChange={vs => { setLocationFilter(vs[0] ?? ''); setPage(1); }}
+          />
+          <FilterPill
+            label="상태"
+            values={statusFilter ? [statusFilter] : []}
+            options={statuses}
+            withCheckbox
+            onChange={vs => { setStatusFilter(vs[0] ?? ''); setPage(1); }}
+          />
         </div>
-        <FilterPill
-          label="지역"
-          values={locationFilter ? [locationFilter] : []}
-          options={locations}
-          withCheckbox
-          onChange={vs => { setLocationFilter(vs[0] ?? ''); setPage(1); }}
-        />
-        <FilterPill
-          label="상태"
-          values={statusFilter ? [statusFilter] : []}
-          options={statuses}
-          withCheckbox
-          onChange={vs => { setStatusFilter(vs[0] ?? ''); setPage(1); }}
-        />
-        <button className="ew-btn ew-btn--primary ew-btn--lg" style={{ fontFamily: 'var(--font-en)', fontWeight: 600 }}>Search</button>
       </div>
 
       {/* Action bar */}

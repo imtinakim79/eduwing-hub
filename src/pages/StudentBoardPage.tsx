@@ -351,28 +351,29 @@ export default function StudentBoardPage({
 
       {/* Filter Bar */}
       <div className="ew-filter-bar">
-        <div style={{ fontFamily: 'var(--font-ko)', fontWeight: 500, fontSize: 20, letterSpacing: '-0.8px', color: 'var(--color-text-medium)', width: 174, flexShrink: 0, textAlign: 'center' }}>학생관리</div>
-        <div className="ew-filter-input-wrap" style={{ width: 255 }}>
-          <span className="search-icon"><SearchIcon /></span>
-          <input type="text" placeholder="Email, Name, ID" value={query} onChange={e => { setQuery(e.target.value); setPage(1); }} />
+        <h1 className="ew-filter-bar__title">학생관리</h1>
+        <div className="ew-filter-bar__group">
+          <div className="ew-filter-input-wrap" style={{ width: 280 }}>
+            <span className="search-icon"><SearchIcon /></span>
+            <input type="text" placeholder="이름·이메일·ID 검색" value={query} onChange={e => { setQuery(e.target.value); setPage(1); }} />
+          </div>
+          <FilterPill
+            label="Agent"
+            values={agentFilter ? [agentIdToName[agentFilter] ?? agentFilter] : []}
+            options={agentOpts}
+            withCheckbox
+            onChange={vs => { setAgentFilter(agentNameToId[vs[0]] ?? vs[0] ?? ''); setPage(1); }}
+          />
+          <FilterPill
+            label="Camp"
+            values={campFilter}
+            options={campOpts}
+            getLabel={id => campMap[id]?.name ?? id}
+            multi
+            withCheckbox
+            onChange={vs => { setCampFilter(vs); setPage(1); }}
+          />
         </div>
-        <FilterPill
-          label="Agent"
-          values={agentFilter ? [agentIdToName[agentFilter] ?? agentFilter] : []}
-          options={agentOpts}
-          withCheckbox
-          onChange={vs => { setAgentFilter(agentNameToId[vs[0]] ?? vs[0] ?? ''); setPage(1); }}
-        />
-        <FilterPill
-          label="Camp"
-          values={campFilter}
-          options={campOpts}
-          getLabel={id => campMap[id]?.name ?? id}
-          multi
-          withCheckbox
-          onChange={vs => { setCampFilter(vs); setPage(1); }}
-        />
-        <button className="ew-btn ew-btn--primary ew-btn--lg" style={{ fontFamily: 'var(--font-en)', fontWeight: 600 }}>Search</button>
       </div>
 
       {/* Action bar */}

@@ -39,7 +39,7 @@ function Field({ label, required, dirty, children }: { label: string; required?:
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: 1, minWidth: 0 }}>
       <label style={{ fontSize: 12, fontWeight: 500, color: 'var(--color-text-sub)', fontFamily: 'var(--font-ko)', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
         {dirty && <span aria-hidden style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-warning)', display: 'inline-block', flexShrink: 0 }} />}
-        {label}{required && <span style={{ color: '#EF4444', marginLeft: 2 }}>*</span>}
+        {label}{required && <span style={{ color: 'var(--color-error)', marginLeft: 2 }}>*</span>}
       </label>
       {children}
     </div>
@@ -47,14 +47,14 @@ function Field({ label, required, dirty, children }: { label: string; required?:
 }
 
 const inputStyle: React.CSSProperties = {
-  height: 40, padding: '0 12px', border: '1px solid #D1D5DB',
+  height: 40, padding: '0 12px', border: '1px solid var(--color-border-default)',
   borderRadius: 6, fontSize: 13, fontFamily: 'var(--font-ko)',
-  color: 'var(--color-text-primary)', outline: 'none', background: '#fff', width: '100%', boxSizing: 'border-box',
+  color: 'var(--color-text-primary)', outline: 'none', background: 'var(--color-canvas)', width: '100%', boxSizing: 'border-box',
 };
 
 const disabledStyle: React.CSSProperties = {
-  ...inputStyle, background: '#F3F4F6', color: '#9CA3AF',
-  border: '1px solid #E5E7EB', cursor: 'not-allowed',
+  ...inputStyle, background: 'var(--color-bg-subtle)', color: 'var(--color-ink-mute)',
+  border: '1px solid var(--color-border-subtle)', cursor: 'not-allowed',
 };
 
 function TextInput({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
@@ -67,7 +67,7 @@ function DisabledInput({ value, placeholder }: { value: string; placeholder?: st
 
 function SelectInput({ value, onChange, placeholder, options }: { value: string; onChange: (v: string) => void; placeholder?: string; options: string[] }) {
   return (
-    <select style={{ ...inputStyle, color: value ? 'var(--color-text-primary)' : '#9CA3AF', cursor: 'pointer' }}
+    <select style={{ ...inputStyle, color: value ? 'var(--color-text-primary)' : 'var(--color-ink-mute)', cursor: 'pointer' }}
       value={value} onChange={e => onChange(e.target.value)}>
       <option value="" disabled hidden>{placeholder}</option>
       {options.map(o => <option key={o} value={o}>{o}</option>)}
@@ -184,7 +184,7 @@ export default function CampCreatePage({ camps, editCampId, allStudents = [], on
       <div style={{ padding: '24px 30px', display: 'flex', flexDirection: 'column', gap: 20 }}>
 
         {/* 기본 정보 */}
-        <div style={{ background: '#fff', border: '1px solid var(--color-border-table)', borderRadius: 8, padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div style={{ background: 'var(--color-canvas)', border: '1px solid var(--color-border-table)', borderRadius: 8, padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-text-primary)', fontFamily: 'var(--font-ko)', marginBottom: 4 }}>기본 정보</div>
           <div style={{ display: 'flex', gap: 16 }}>
             <Field label="캠프명" required dirty={isEdit && isFieldDirty('name')}>
@@ -227,7 +227,7 @@ export default function CampCreatePage({ camps, editCampId, allStudents = [], on
         </div>
 
         {/* 탭 */}
-        <div style={{ background: '#fff', border: '1px solid var(--color-border-table)', borderRadius: 8 }}>
+        <div style={{ background: 'var(--color-canvas)', border: '1px solid var(--color-border-table)', borderRadius: 8 }}>
           <div style={{ display: 'flex', borderBottom: '1px solid var(--color-border-table)' }}>
             {TABS.map(tab => {
               const disabled = tab === 'Timetable' && classes.length === 0;
@@ -239,7 +239,7 @@ export default function CampCreatePage({ camps, editCampId, allStudents = [], on
                   style={{
                     padding: '12px 20px', fontSize: 14, fontFamily: 'var(--font-ko)',
                     fontWeight: activeTab === tab ? 600 : 400,
-                    color: disabled ? '#C8D0D8' : activeTab === tab ? 'var(--color-primary)' : 'var(--color-text-sub)',
+                    color: disabled ? 'var(--color-ink-faint)' : activeTab === tab ? 'var(--color-primary)' : 'var(--color-text-sub)',
                     background: 'none', border: 'none',
                     borderBottom: activeTab === tab ? '2px solid var(--color-primary)' : '2px solid transparent',
                     cursor: disabled ? 'not-allowed' : 'pointer', marginBottom: -1,
@@ -286,7 +286,7 @@ export default function CampCreatePage({ camps, editCampId, allStudents = [], on
             {activeTab === 'Timetable' && (
               <div>
                 {/* Class subtabs */}
-                <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--color-border-table)', background: '#FAFBFF', padding: '0 16px' }}>
+                <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--color-border-table)', background: 'var(--color-paper)', padding: '0 16px' }}>
                   {classes.map(cls => (
                     <button
                       key={cls.id}

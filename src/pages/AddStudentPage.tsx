@@ -26,16 +26,16 @@ function relLabelToKo(r: string): string {
 // ── 공통 스타일 ────────────────────────────────────────────────────────────────
 const FIELD_H   = 48;
 const LABEL_W   = 180;
-const DIVIDER   = '1px solid #E0E4EB';
+const DIVIDER   = '1px solid var(--color-border-subtle)';
 const CELL_BORDER: React.CSSProperties = {
-  borderBottom: '1px solid #E2E5EA',
-  borderRight:  '1px solid #E2E5EA',
+  borderBottom: '1px solid var(--color-border-subtle)',
+  borderRight:  '1px solid var(--color-border-subtle)',
 };
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
     <div style={{ height: 28, display: 'flex', alignItems: 'flex-end', marginBottom: 12 }}>
-      <span style={{ fontSize: 13, fontWeight: 600, color: '#22262E', fontFamily: 'var(--font-ko)' }}>
+      <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-ink-strong)', fontFamily: 'var(--font-ko)' }}>
         {children}
       </span>
     </div>
@@ -51,7 +51,7 @@ function FieldRow({ label, height = FIELD_H, dirty = false, children }: {
       style={{ display: 'flex', minHeight: height, alignItems: 'stretch' }}
     >
       <div style={{ width: LABEL_W, flexShrink: 0, display: 'flex', alignItems: 'center', paddingRight: 16 }}>
-        <span style={{ fontSize: 13, fontWeight: 500, color: '#6B7280', fontFamily: 'var(--font-ko)', whiteSpace: 'nowrap' }}>
+        <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--color-ink-soft)', fontFamily: 'var(--font-ko)', whiteSpace: 'nowrap' }}>
           {label}
         </span>
       </div>
@@ -67,9 +67,9 @@ function TextFieldCell({ placeholder, value, onChange, type = 'text', disabled, 
 }) {
   return (
     <div style={{
-      flex: 1, background: disabled ? '#F3F4F6' : '#fff',
-      borderBottom: error ? '2px solid #EF4444' : '1px solid #E2E5EA',
-      borderRight: '1px solid #E2E5EA',
+      flex: 1, background: disabled ? 'var(--color-bg-subtle)' : '#fff',
+      borderBottom: error ? '2px solid var(--color-error)' : '1px solid var(--color-border-subtle)',
+      borderRight: '1px solid var(--color-border-subtle)',
     }}>
       <input
         type={type}
@@ -80,7 +80,7 @@ function TextFieldCell({ placeholder, value, onChange, type = 'text', disabled, 
         style={{
           width: '100%', height: FIELD_H, border: 'none', outline: 'none',
           background: 'transparent', fontSize: 13, fontFamily: 'var(--font-ko)',
-          color: disabled ? '#9CA3AF' : 'var(--color-text-primary)',
+          color: disabled ? 'var(--color-ink-mute)' : 'var(--color-text-primary)',
           padding: '0 16px', boxSizing: 'border-box',
         }}
       />
@@ -95,7 +95,7 @@ function CellWrapper({ children, height = FIELD_H }: {
     <div style={{
       flex: 1, height, padding: '0 12px',
       display: 'flex', alignItems: 'center',
-      overflow: 'hidden', ...CELL_BORDER, background: '#fff',
+      overflow: 'hidden', ...CELL_BORDER, background: 'var(--color-canvas)',
     }}>
       {children}
     </div>
@@ -105,9 +105,9 @@ function CellWrapper({ children, height = FIELD_H }: {
 
 function DisabledDateCell({ iso }: { iso: string }) {
   return (
-    <div style={{ flex: 1, height: FIELD_H, ...CELL_BORDER, background: '#F3F4F6', display: 'flex', alignItems: 'center', gap: 6, padding: '0 12px' }}>
+    <div style={{ flex: 1, height: FIELD_H, ...CELL_BORDER, background: 'var(--color-bg-subtle)', display: 'flex', alignItems: 'center', gap: 6, padding: '0 12px' }}>
       <img src="/icon/Calendar.svg" alt="" style={{ width: 14, height: 14, flexShrink: 0, opacity: 0.5 }} />
-      <span style={{ fontSize: 13, color: '#9CA3AF', fontFamily: 'var(--font-en)' }}>
+      <span style={{ fontSize: 13, color: 'var(--color-ink-mute)', fontFamily: 'var(--font-en)' }}>
         {iso || 'YYYY-MM-DD'}
       </span>
     </div>
@@ -257,7 +257,7 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
           <FieldRow label="프로필 사진" height={100} dirty={isEdit && isFieldDirty('profile_img_url')}>
             <div style={{
               flex: 1, height: 100,
-              background: '#F8F9FB', border: '1px solid #E0E4EB', borderRadius: 6,
+              background: 'var(--color-bg-subtle)', border: '1px solid var(--color-border-subtle)', borderRadius: 6,
               display: 'flex', alignItems: 'center', gap: 20, padding: '0 16px',
             }}>
               {form.profile_img_url ? (
@@ -265,7 +265,7 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
               ) : (
                 <div style={{
                   width: 64, height: 64, borderRadius: '50%',
-                  background: '#E0E4EB', flexShrink: 0,
+                  background: 'var(--color-border-subtle)', flexShrink: 0,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
                   <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
@@ -275,14 +275,14 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
                 </div>
               )}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <span style={{ fontSize: 12, color: '#B7BECA', fontFamily: 'var(--font-ko)' }}>
+                <span style={{ fontSize: 12, color: 'var(--color-ink-faint)', fontFamily: 'var(--font-ko)' }}>
                   JPG, PNG 형식 지원 · 최대 5MB, 가로/세로 100px 권장
                 </span>
                 <button
                   style={{
                     width: 100, height: 32, fontSize: 12, fontWeight: 600,
-                    color: '#3B82F6', border: '1px solid #3B82F6',
-                    borderRadius: 6, background: '#fff', cursor: 'pointer',
+                    color: 'var(--color-primary)', border: '1px solid #3B82F6',
+                    borderRadius: 6, background: 'var(--color-canvas)', cursor: 'pointer',
                     fontFamily: 'var(--font-ko)',
                   }}
                   onClick={() => fileInputRef.current?.click()}
@@ -301,7 +301,7 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
           {/* ── 기본 정보 ── */}
           <SectionTitle>기본 정보</SectionTitle>
 
-          <FieldRow label={<>이름(한글) <span style={{ color: '#EF4444', marginLeft: 2 }}>*</span></>} dirty={isEdit && isFieldDirty('name_ko')}>
+          <FieldRow label={<>이름(한글) <span style={{ color: 'var(--color-error)', marginLeft: 2 }}>*</span></>} dirty={isEdit && isFieldDirty('name_ko')}>
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
               <TextFieldCell
                 placeholder="이름을 입력하세요."
@@ -310,13 +310,13 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
                 onChange={v => { set('name_ko', v); if (v.trim()) setNameError(false); }}
               />
               {nameError && (
-                <span style={{ fontSize: 11, color: '#EF4444', padding: '3px 16px', fontFamily: 'var(--font-ko)' }}>
+                <span style={{ fontSize: 11, color: 'var(--color-error)', padding: '3px 16px', fontFamily: 'var(--font-ko)' }}>
                   이름을 입력해주세요.
                 </span>
               )}
             </div>
           </FieldRow>
-          <FieldRow label={<>이름(영문) <span style={{ color: '#EF4444', marginLeft: 2 }}>*</span></>} dirty={isEdit && isFieldDirty('name_en')}>
+          <FieldRow label={<>이름(영문) <span style={{ color: 'var(--color-error)', marginLeft: 2 }}>*</span></>} dirty={isEdit && isFieldDirty('name_en')}>
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
               <TextFieldCell
                 placeholder="이름을 입력하세요."
@@ -325,7 +325,7 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
                 onChange={v => { set('name_en', v); if (v.trim()) setNameEnError(false); }}
               />
               {nameEnError && (
-                <span style={{ fontSize: 11, color: '#EF4444', padding: '3px 16px', fontFamily: 'var(--font-ko)' }}>
+                <span style={{ fontSize: 11, color: 'var(--color-error)', padding: '3px 16px', fontFamily: 'var(--font-ko)' }}>
                   이름을 입력해주세요.
                 </span>
               )}
@@ -388,8 +388,8 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
                 onChange={e => set('guardian_relation_custom', e.target.value)}
                 style={{
                   width: 200, height: FIELD_H, flexShrink: 0,
-                  borderBottom: '1px solid #E2E5EA', borderRight: '1px solid #E2E5EA',
-                  borderTop: 'none', borderLeft: '1px solid #E2E5EA',
+                  borderBottom: '1px solid var(--color-border-subtle)', borderRight: '1px solid var(--color-border-subtle)',
+                  borderTop: 'none', borderLeft: '1px solid var(--color-border-subtle)',
                   outline: 'none', padding: '0 12px',
                   fontSize: 13, fontFamily: 'var(--font-ko)',
                   color: 'var(--color-text-primary)',

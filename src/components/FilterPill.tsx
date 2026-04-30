@@ -14,24 +14,17 @@ function FilterItem({ label, selected, withCheckbox, onClick }: {
       onClick={onClick}
     >
       {withCheckbox && (
-        // 24×24 wrapper, 14×14 checkbox — Figma spec
         <div style={{
           width: 24, height: 24, flexShrink: 0,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
-          <div style={{
-            width: 14, height: 14, borderRadius: 2,
-            border: selected ? 'none' : '1px solid #6F7582',
-            background: selected ? 'var(--color-primary)' : '#fff',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            flexShrink: 0,
-          }}>
-            {selected && (
-              <svg width="9" height="7" viewBox="0 0 9 7" fill="none">
-                <path d="M1 3L3.5 5.5L8 1" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            )}
-          </div>
+          <input
+            type="checkbox"
+            className="ew-checkbox"
+            checked={selected}
+            readOnly
+            style={{ pointerEvents: 'none' }}
+          />
         </div>
       )}
       <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>

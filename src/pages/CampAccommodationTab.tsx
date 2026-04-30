@@ -32,9 +32,9 @@ function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) =>
   return (
     <button
       onClick={() => onChange(!value)}
-      style={{ width: 36, height: 20, borderRadius: 10, border: 'none', cursor: 'pointer', background: value ? 'var(--color-primary)' : '#D1D5DB', position: 'relative', padding: 0, flexShrink: 0 }}
+      style={{ width: 36, height: 20, borderRadius: 10, border: 'none', cursor: 'pointer', background: value ? 'var(--color-primary)' : 'var(--color-border-default)', position: 'relative', padding: 0, flexShrink: 0 }}
     >
-      <span style={{ position: 'absolute', top: 2, left: value ? 16 : 2, width: 16, height: 16, borderRadius: '50%', background: '#fff', transition: 'left 0.15s' }} />
+      <span style={{ position: 'absolute', top: 2, left: value ? 16 : 2, width: 16, height: 16, borderRadius: '50%', background: 'var(--color-canvas)', transition: 'left 0.15s' }} />
     </button>
   );
 }
@@ -44,7 +44,7 @@ function XBtn({ onClick, title }: { onClick: () => void; title?: string }) {
   return (
     <button
       onClick={onClick} title={title}
-      style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF', fontSize: 14, padding: '2px 6px', borderRadius: 4, lineHeight: 1 }}
+      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-ink-mute)', fontSize: 14, padding: '2px 6px', borderRadius: 4, lineHeight: 1 }}
     >✕</button>
   );
 }
@@ -62,14 +62,14 @@ export function HotelCompletedView({ campId }: { campId: string }) {
   return (
     <div style={{ padding: '16px 24px', display: 'flex', flexDirection: 'column', gap: 10 }}>
       {hotels.map((hotel, idx) => (
-        <div key={hotel.id} style={{ border: '1px solid var(--color-border-table)', borderRadius: 8, padding: '12px 16px', background: '#FAFBFF' }}>
+        <div key={hotel.id} style={{ border: '1px solid var(--color-border-table)', borderRadius: 8, padding: '12px 16px', background: 'var(--color-paper)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: hotel.roomTypes.length ? 10 : 0 }}>
             <span style={{ fontSize: 12, color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)', minWidth: 18, textAlign: 'center' }}>{idx + 1}</span>
             <span style={{ fontWeight: 600, fontSize: 14, fontFamily: 'var(--font-ko)', color: 'var(--color-text-primary)' }}>
               {hotel.name || '(이름 없음)'}
             </span>
             {hotel.invoiceEnabled && (
-              <span className="ew-tag" style={{ background: '#EEF3FD', color: '#2F6FED', fontSize: 11, fontFamily: 'var(--font-ko)' }}>
+              <span className="ew-tag" style={{ background: 'var(--color-primary-bg)', color: 'var(--color-primary)', fontSize: 11, fontFamily: 'var(--font-ko)' }}>
                 인보이스 발행
               </span>
             )}
@@ -80,7 +80,7 @@ export function HotelCompletedView({ campId }: { campId: string }) {
                 <span key={r.id} style={{
                   display: 'inline-flex', alignItems: 'center', gap: 4,
                   padding: '3px 10px', borderRadius: 20, fontSize: 12, fontFamily: 'var(--font-ko)',
-                  background: '#F3F4F6', color: 'var(--color-text-sub)',
+                  background: 'var(--color-bg-subtle)', color: 'var(--color-text-sub)',
                 }}>
                   {r.name || '(이름 없음)'}
                   {r.extraBed && <span style={{ color: 'var(--color-primary)', fontSize: 11 }}>· 엑스트라베드</span>}
@@ -154,30 +154,30 @@ export default function CampAccommodationTab({ campId, onHotelsChange }: { campI
 
       {/* 헤더: 제목 + 액션 버튼 */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontSize: 14, fontWeight: 600, color: '#1A1D23', fontFamily: 'var(--font-ko)', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+        <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-ink-strong)', fontFamily: 'var(--font-ko)', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
           {form.isDirty && <span aria-hidden style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-warning)', display: 'inline-block', flexShrink: 0 }} />}
           숙박정보
         </span>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={handleReset} style={{ height: 34, padding: '0 14px', border: '1px solid #E2E5EA', borderRadius: 6, background: '#fff', fontSize: 13, fontWeight: 500, color: '#6B7280', cursor: 'pointer', fontFamily: 'var(--font-ko)' }}>초기화</button>
+          <button onClick={handleReset} style={{ height: 34, padding: '0 14px', border: '1px solid var(--color-border-subtle)', borderRadius: 6, background: 'var(--color-canvas)', fontSize: 13, fontWeight: 500, color: 'var(--color-ink-soft)', cursor: 'pointer', fontFamily: 'var(--font-ko)' }}>초기화</button>
           {form.isDirty && (
-            <button onClick={form.reset} style={{ height: 34, padding: '0 14px', border: '1px solid #E2E5EA', borderRadius: 6, background: '#fff', fontSize: 13, fontWeight: 500, color: '#6B7280', cursor: 'pointer', fontFamily: 'var(--font-ko)' }}>취소</button>
+            <button onClick={form.reset} style={{ height: 34, padding: '0 14px', border: '1px solid var(--color-border-subtle)', borderRadius: 6, background: 'var(--color-canvas)', fontSize: 13, fontWeight: 500, color: 'var(--color-ink-soft)', cursor: 'pointer', fontFamily: 'var(--font-ko)' }}>취소</button>
           )}
           <button
             onClick={handleSave}
             disabled={!form.isDirty}
             style={{
               height: 34, padding: '0 14px', border: 'none', borderRadius: 6,
-              background: form.isDirty ? '#3C82F5' : '#E5E7EB',
+              background: form.isDirty ? 'var(--color-primary)' : 'var(--color-border-subtle)',
               fontSize: 13, fontWeight: 500,
-              color: form.isDirty ? '#fff' : '#9CA3AF',
+              color: form.isDirty ? '#fff' : 'var(--color-ink-mute)',
               cursor: form.isDirty ? 'pointer' : 'not-allowed',
               fontFamily: 'var(--font-ko)',
             }}
           >저장</button>
         </div>
       </div>
-      <div style={{ height: 1, background: '#E2E5EA' }} />
+      <div style={{ height: 1, background: 'var(--color-border-subtle)' }} />
 
       {hotels.length === 0 && (
         <div style={{ padding: '32px 0', textAlign: 'center', color: 'var(--color-text-muted)', fontSize: 14, fontFamily: 'var(--font-ko)' }}>
@@ -186,7 +186,7 @@ export default function CampAccommodationTab({ campId, onHotelsChange }: { campI
       )}
 
       {hotels.map((hotel, hIdx) => (
-        <div key={hotel.id} style={{ border: '1px solid var(--color-border-table)', borderRadius: 8, padding: '16px 20px', background: '#FAFBFF' }}>
+        <div key={hotel.id} style={{ border: '1px solid var(--color-border-table)', borderRadius: 8, padding: '16px 20px', background: 'var(--color-paper)' }}>
 
           {/* 호텔 헤더 */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
@@ -218,7 +218,7 @@ export default function CampAccommodationTab({ campId, onHotelsChange }: { campI
             <div style={{ fontSize: 12, color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)', marginBottom: 2 }}>룸 타입</div>
 
             {hotel.roomTypes.length === 0 && (
-              <div style={{ fontSize: 12, color: '#D1D5DB', fontFamily: 'var(--font-ko)', paddingBottom: 4 }}>룸 타입을 추가하세요.</div>
+              <div style={{ fontSize: 12, color: 'var(--color-border-default)', fontFamily: 'var(--font-ko)', paddingBottom: 4 }}>룸 타입을 추가하세요.</div>
             )}
 
             {hotel.roomTypes.map(room => (
@@ -269,6 +269,6 @@ export default function CampAccommodationTab({ campId, onHotelsChange }: { campI
 }
 
 const INPUT: React.CSSProperties = {
-  height: 36, padding: '0 10px', border: '1px solid #D1D5DB', borderRadius: 6,
-  fontSize: 13, fontFamily: 'var(--font-ko)', outline: 'none', background: '#fff', boxSizing: 'border-box',
+  height: 36, padding: '0 10px', border: '1px solid var(--color-border-default)', borderRadius: 6,
+  fontSize: 13, fontFamily: 'var(--font-ko)', outline: 'none', background: 'var(--color-canvas)', boxSizing: 'border-box',
 };

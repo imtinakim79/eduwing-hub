@@ -9,10 +9,10 @@ import { useUndoToast } from '../hooks/useUndoToast';
 
 
 const TAG_COLORS = [
-  { bg: '#E0E9FE', color: '#3B82F6' },
+  { bg: 'var(--color-primary-light)', color: 'var(--color-primary)' },
   { bg: '#F0FDF4', color: '#22C55E' },
   { bg: '#FFF7ED', color: '#F59E0B' },
-  { bg: '#FEF2F2', color: '#EF4444' },
+  { bg: '#FEF2F2', color: 'var(--color-error)' },
 ];
 
 function relLabel(r: string) {
@@ -92,7 +92,7 @@ function FlightPickupRow({ flightLabel, pickupLabel, flightNo, date, time, pickS
           <span style={{ fontSize: 12, color: 'var(--color-text-sub)', whiteSpace: 'nowrap' }}>{time}</span></>}
         </>
       ) : (
-        <span style={{ fontSize: 12, color: '#D1D5DB' }}>-</span>
+        <span style={{ fontSize: 12, color: 'var(--color-border-default)' }}>-</span>
       )}
       <div style={{ width: 1, height: 14, background: 'var(--color-border-table)', flexShrink: 0, marginLeft: 2 }} />
       <span style={{ fontSize: 12, color: 'var(--color-text-sub)', whiteSpace: 'nowrap' }}>{pickupLabel}</span>
@@ -122,14 +122,14 @@ function StudentPickerModal({ campId, allStudents, onAdd, onClose }: {
 
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.3)' }} onClick={onClose}>
-      <div style={{ background: '#fff', borderRadius: 12, width: 480, maxHeight: '70vh', display: 'flex', flexDirection: 'column', boxShadow: '0 8px 32px rgba(0,0,0,0.18)' }} onClick={e => e.stopPropagation()}>
+      <div style={{ background: 'var(--color-canvas)', borderRadius: 12, width: 480, maxHeight: '70vh', display: 'flex', flexDirection: 'column', boxShadow: '0 8px 32px rgba(0,0,0,0.18)' }} onClick={e => e.stopPropagation()}>
         <div style={{ display: 'flex', alignItems: 'center', padding: '16px 20px', borderBottom: '1px solid var(--color-border-table)' }}>
           <span style={{ flex: 1, fontSize: 15, fontWeight: 600, fontFamily: 'var(--font-ko)', color: 'var(--color-text-primary)' }}>학생 추가</span>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, color: '#9CA3AF', lineHeight: 1 }}>✕</button>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, color: 'var(--color-ink-mute)', lineHeight: 1 }}>✕</button>
         </div>
         <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--color-border-table)' }}>
           <input autoFocus value={q} onChange={e => setQ(e.target.value)} placeholder="이름 검색"
-            style={{ width: '100%', height: 36, padding: '0 12px', border: '1px solid #D1D5DB', borderRadius: 6, fontSize: 13, fontFamily: 'var(--font-ko)', outline: 'none', boxSizing: 'border-box' }} />
+            style={{ width: '100%', height: 36, padding: '0 12px', border: '1px solid var(--color-border-default)', borderRadius: 6, fontSize: 13, fontFamily: 'var(--font-ko)', outline: 'none', boxSizing: 'border-box' }} />
         </div>
         <div style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
           {candidates.length === 0 ? (
@@ -148,7 +148,7 @@ function StudentPickerModal({ campId, allStudents, onAdd, onClose }: {
             )
           ) : candidates.map(s => (
             <label key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 20px', cursor: 'pointer' }}
-              onMouseEnter={e => (e.currentTarget.style.background = '#F9FAFB')}
+              onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-bg-subtle)')}
               onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
               <input type="checkbox" className="ew-checkbox" checked={sel.has(s.id)} onChange={() => toggle(s.id)} />
               <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -302,7 +302,7 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
           <input type="text" placeholder="학생 이름 검색" value={query} onChange={e => { setQuery(e.target.value); setPage(1); }} />
         </div>
       </div>
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '8px 30px', border: '1px solid #E5E7EB', background: '#fff', justifyContent: 'flex-end', minWidth: 1440 }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '8px 30px', border: '1px solid var(--color-border-subtle)', background: 'var(--color-canvas)', justifyContent: 'flex-end', minWidth: 1440 }}>
         <span style={{ flex: 1, fontSize: 12, color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)', lineHeight: '26px' }}>{selected.size > 0 ? `${selected.size}명 선택됨` : ''}</span>
         {onStudentUpdate && <button className="ew-btn ew-btn--primary ew-btn--xsm" onClick={() => setShowPicker(true)}>학생 추가</button>}
         {selected.size > 0 && onStudentUpdate && <button className="ew-btn ew-btn--danger ew-btn--xsm" onClick={handleRemoveStudents}>캠프에서 제거</button>}
@@ -385,14 +385,14 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
                                 {f.name}({f.relation === '기타' ? ((f as any).relationCustom || '기타') : f.relation})
                               </span>
                             ))
-                          : <span style={{ fontSize: 12, color: '#D1D5DB' }}>-</span>
+                          : <span style={{ fontSize: 12, color: 'var(--color-border-default)' }}>-</span>
                         }
                       </div>
                     </td>
                     <td style={TD_STYLE}>
                       {studentClass
-                        ? <span className="ew-tag" style={{ background: '#EEF3FD', color: '#2F6FED' }}>{studentClass.name}</span>
-                        : <span style={{ fontSize: 12, color: '#D1D5DB' }}>-</span>}
+                        ? <span className="ew-tag" style={{ background: 'var(--color-primary-bg)', color: 'var(--color-primary)' }}>{studentClass.name}</span>
+                        : <span style={{ fontSize: 12, color: 'var(--color-border-default)' }}>-</span>}
                     </td>
                     <td style={TD_STYLE}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -403,7 +403,7 @@ export default function CampUserBoardPage({ campId: propCampId, students: propSt
                                 <span style={{ fontSize: 13, color: 'var(--color-text-sub)' }}>X1</span>
                               </div>
                             ))
-                          : <span style={{ fontSize: 12, color: '#D1D5DB' }}>-</span>
+                          : <span style={{ fontSize: 12, color: 'var(--color-border-default)' }}>-</span>
                         }
                       </div>
                     </td>

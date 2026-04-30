@@ -26,19 +26,19 @@ function relLabel(r: string) {
 const RELATION_OPTIONS = ['아빠', '엄마', '기타'];
 
 const STATUS_STYLE: Record<string, { bg: string; color: string }> = {
-  '진행중': { bg: '#E5F7ED', color: '#38B873' },
-  '준비중': { bg: '#EEF3FD', color: '#2F6FED' },
-  '종료':   { bg: '#F3F4F6', color: '#6B7280' },
+  '진행중': { bg: 'var(--color-success-light)', color: 'var(--color-success)' },
+  '준비중': { bg: 'var(--color-primary-bg)', color: 'var(--color-primary)' },
+  '종료':   { bg: 'var(--color-bg-subtle)', color: 'var(--color-ink-soft)' },
 };
 
 // ── Shared primitives ──────────────────────────────────────────────────────────
 const CELL_H = 48;
 const CELL_BORDER: React.CSSProperties = {
-  borderBottom: '1px solid #E2E5EA',
-  borderRight:  '1px solid #E2E5EA',
+  borderBottom: '1px solid var(--color-border-subtle)',
+  borderRight:  '1px solid var(--color-border-subtle)',
 };
 const FIELD_LABEL: React.CSSProperties = {
-  fontSize: 12, fontWeight: 500, color: '#1A1D23', fontFamily: 'var(--font-ko)',
+  fontSize: 12, fontWeight: 500, color: 'var(--color-ink-strong)', fontFamily: 'var(--font-ko)',
   whiteSpace: 'nowrap', marginBottom: 6,
 };
 
@@ -48,9 +48,9 @@ function CellBox({ children, style }: { children: React.ReactNode; style?: React
       height: CELL_H, padding: '0 12px',
       display: 'flex', alignItems: 'center',
       overflow: 'hidden',
-      borderBottom: '1px solid #E2E5EA',
-      borderRight:  '1px solid #E2E5EA',
-      background: '#fff',
+      borderBottom: '1px solid var(--color-border-subtle)',
+      borderRight:  '1px solid var(--color-border-subtle)',
+      background: 'var(--color-canvas)',
       ...style,
     }}>
       {children}
@@ -63,7 +63,7 @@ function TextFieldCell({ placeholder, value, onChange, disabled }: {
   onChange?: (v: string) => void; disabled?: boolean;
 }) {
   return (
-    <div style={{ height: CELL_H, ...CELL_BORDER, background: disabled ? '#F3F4F6' : '#fff', display: 'flex', alignItems: 'center' }}>
+    <div style={{ height: CELL_H, ...CELL_BORDER, background: disabled ? 'var(--color-bg-subtle)' : '#fff', display: 'flex', alignItems: 'center' }}>
       <input
         value={value}
         disabled={disabled}
@@ -72,7 +72,7 @@ function TextFieldCell({ placeholder, value, onChange, disabled }: {
         style={{
           width: '100%', height: '100%', border: 'none', outline: 'none',
           background: 'transparent', fontSize: 13, fontFamily: 'var(--font-ko)',
-          color: disabled ? '#9CA3AF' : 'var(--color-text-primary)',
+          color: disabled ? 'var(--color-ink-mute)' : 'var(--color-text-primary)',
           padding: '0 16px',
         }}
       />
@@ -87,21 +87,21 @@ function SectionCard({ title, children, onSave, onReset, onCancel, dirty = false
 }) {
   return (
     <div style={{
-      background: '#fff', border: '1px solid #E5E7EA', borderRadius: 8,
+      background: 'var(--color-canvas)', border: '1px solid var(--color-border-subtle)', borderRadius: 8,
       padding: '20px 20px 24px', display: 'flex', flexDirection: 'column', gap: 16,
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontSize: 14, fontWeight: 600, color: '#1A1D23', fontFamily: 'var(--font-en)', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+        <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-ink-strong)', fontFamily: 'var(--font-en)', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
           {dirty && <span aria-hidden style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-warning)', display: 'inline-block', flexShrink: 0 }} />}
           {title}
         </span>
         {(onSave || onReset || onCancel) && (
           <div style={{ display: 'flex', gap: 8 }}>
             {onReset && (
-              <button onClick={onReset} style={{ height: 34, padding: '0 14px', border: '1px solid #E2E5EA', borderRadius: 6, background: '#fff', fontSize: 13, fontWeight: 500, color: '#6B7280', cursor: 'pointer', fontFamily: 'var(--font-ko)' }}>초기화</button>
+              <button onClick={onReset} style={{ height: 34, padding: '0 14px', border: '1px solid var(--color-border-subtle)', borderRadius: 6, background: 'var(--color-canvas)', fontSize: 13, fontWeight: 500, color: 'var(--color-ink-soft)', cursor: 'pointer', fontFamily: 'var(--font-ko)' }}>초기화</button>
             )}
             {dirty && onCancel && (
-              <button onClick={onCancel} style={{ height: 34, padding: '0 14px', border: '1px solid #E2E5EA', borderRadius: 6, background: '#fff', fontSize: 13, fontWeight: 500, color: '#6B7280', cursor: 'pointer', fontFamily: 'var(--font-ko)' }}>취소</button>
+              <button onClick={onCancel} style={{ height: 34, padding: '0 14px', border: '1px solid var(--color-border-subtle)', borderRadius: 6, background: 'var(--color-canvas)', fontSize: 13, fontWeight: 500, color: 'var(--color-ink-soft)', cursor: 'pointer', fontFamily: 'var(--font-ko)' }}>취소</button>
             )}
             {onSave && (
               <button
@@ -109,9 +109,9 @@ function SectionCard({ title, children, onSave, onReset, onCancel, dirty = false
                 disabled={!dirty}
                 style={{
                   height: 34, padding: '0 14px', border: 'none', borderRadius: 6,
-                  background: dirty ? '#3C82F5' : '#E5E7EB',
+                  background: dirty ? 'var(--color-primary)' : 'var(--color-border-subtle)',
                   fontSize: 13, fontWeight: 500,
-                  color: dirty ? '#fff' : '#9CA3AF',
+                  color: dirty ? '#fff' : 'var(--color-ink-mute)',
                   cursor: dirty ? 'pointer' : 'not-allowed',
                   fontFamily: 'var(--font-ko)',
                 }}
@@ -120,7 +120,7 @@ function SectionCard({ title, children, onSave, onReset, onCancel, dirty = false
           </div>
         )}
       </div>
-      <div style={{ height: 1, background: '#E2E5EA' }} />
+      <div style={{ height: 1, background: 'var(--color-border-subtle)' }} />
       {children}
     </div>
   );
@@ -128,7 +128,7 @@ function SectionCard({ title, children, onSave, onReset, onCancel, dirty = false
 
 function Pill({ label }: { label: string }) {
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', padding: '3px 10px', borderRadius: 100, background: '#F0F5FF', color: '#4173F5', fontSize: 12, fontFamily: 'var(--font-ko)', whiteSpace: 'nowrap' }}>
+    <span style={{ display: 'inline-flex', alignItems: 'center', padding: '3px 10px', borderRadius: 100, background: 'var(--color-primary-bg)', color: 'var(--color-primary)', fontSize: 12, fontFamily: 'var(--font-ko)', whiteSpace: 'nowrap' }}>
       {label}
     </span>
   );
@@ -326,13 +326,13 @@ export default function StudentDetailPage({
   // ── FlightTable rows (inline to avoid nested-component remount issue) ───────
   const flightRows = [
     { row: flightInfo.departure, onChange: (f: FlightRow) => setFlightInfo(p => ({ ...p, departure: f })), label: '출발편', labelBg: '#EDF5FF', labelColor: '#2E61D1', rowKey: 'dep' },
-    { row: flightInfo.return,    onChange: (f: FlightRow) => setFlightInfo(p => ({ ...p, return: f })),    label: '귀국편', labelBg: '#F0FCF5', labelColor: '#1A8C59', rowKey: 'ret' },
+    { row: flightInfo.return,    onChange: (f: FlightRow) => setFlightInfo(p => ({ ...p, return: f })),    label: '귀국편', labelBg: '#F0FCF5', labelColor: 'var(--color-success)', rowKey: 'ret' },
   ];
 
   const hdCell: React.CSSProperties = {
-    borderBottom: '1px solid #E2E5EA', borderRight: '1px solid #E2E5EA', borderTop: '1px solid #E2E5EA',
+    borderBottom: '1px solid var(--color-border-subtle)', borderRight: '1px solid var(--color-border-subtle)', borderTop: '1px solid var(--color-border-subtle)',
     height: 40, display: 'flex', alignItems: 'center', padding: '0 8px 0 10px',
-    fontSize: 11, fontWeight: 500, color: '#6B7585', fontFamily: 'var(--font-ko)', whiteSpace: 'nowrap',
+    fontSize: 11, fontWeight: 500, color: 'var(--color-ink-soft)', fontFamily: 'var(--font-ko)', whiteSpace: 'nowrap',
   };
 
   return (
@@ -421,9 +421,9 @@ export default function StudentDetailPage({
 
           {/* Camp Basic Info */}
           {camp && (
-            <div style={{ background: '#fff', border: '1px solid #E0E2E5', borderRadius: 12, padding: '20px 24px' }}>
-              <span style={{ fontSize: 16, fontWeight: 500, color: '#21262E', fontFamily: 'var(--font-en)', display: 'block', marginBottom: 16 }}>Camp Basic Info.</span>
-              <div style={{ display: 'flex', borderTop: '1px solid #F0F1F3' }}>
+            <div style={{ background: 'var(--color-canvas)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-5) var(--space-6)', boxShadow: 'var(--shadow-soft)' }}>
+              <span style={{ fontSize: 16, fontWeight: 500, color: 'var(--color-ink-strong)', fontFamily: 'var(--font-en)', display: 'block', marginBottom: 16 }}>Camp Basic Info.</span>
+              <div style={{ display: 'flex', borderTop: '1px solid var(--color-border-faint)' }}>
                 {[
                   { label: '캠프명', value: camp.name },
                   { label: '기간', value: camp.start_date && camp.end_date ? `${isoToDisplay(camp.start_date)} ~ ${camp.end_date.slice(5).replace(/-/g, '/')}` : '-' },
@@ -431,38 +431,38 @@ export default function StudentDetailPage({
                   { label: '숙소', value: camp.accommodation ?? '-' },
                 ].map(({ label, value }) => (
                   <div key={label} style={{ flex: 1, padding: '16px 16px 16px 0', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <span style={{ fontSize: 12, color: '#73808F', fontFamily: 'var(--font-ko)' }}>{label}</span>
-                    <span style={{ fontSize: 14, fontWeight: 500, color: '#21262E', fontFamily: 'var(--font-ko)' }}>{value}</span>
+                    <span style={{ fontSize: 12, color: 'var(--color-ink-soft)', fontFamily: 'var(--font-ko)' }}>{label}</span>
+                    <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--color-ink-strong)', fontFamily: 'var(--font-ko)' }}>{value}</span>
                   </div>
                 ))}
               </div>
-              <div style={{ display: 'flex', borderTop: '1px solid #F0F1F3' }}>
+              <div style={{ display: 'flex', borderTop: '1px solid var(--color-border-faint)' }}>
                 <div style={{ flex: 1, padding: '16px 16px 0 0', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <span style={{ fontSize: 12, color: '#73808F', fontFamily: 'var(--font-ko)' }}>스탭</span>
+                  <span style={{ fontSize: 12, color: 'var(--color-ink-soft)', fontFamily: 'var(--font-ko)' }}>스탭</span>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-                    {camp.staff?.map(s => <Pill key={s} label={s} />) ?? <span style={{ fontSize: 14, color: '#21262E' }}>-</span>}
+                    {camp.staff?.map(s => <Pill key={s} label={s} />) ?? <span style={{ fontSize: 14, color: 'var(--color-ink-strong)' }}>-</span>}
                   </div>
                 </div>
                 <div style={{ flex: 1, padding: '16px 16px 0 0', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <span style={{ fontSize: 12, color: '#73808F', fontFamily: 'var(--font-ko)' }}>소속 클래스</span>
+                  <span style={{ fontSize: 12, color: 'var(--color-ink-soft)', fontFamily: 'var(--font-ko)' }}>소속 클래스</span>
                   {(() => {
                     const cls = loadClasses(activeTab).find(c => c.studentIds.includes(student.id));
                     return cls
-                      ? <span style={{ display: 'inline-flex', alignItems: 'center', padding: '3px 10px', borderRadius: 100, background: '#EEF3FD', color: '#2F6FED', fontSize: 12, fontFamily: 'var(--font-ko)', alignSelf: 'flex-start' }}>{cls.name}</span>
-                      : <span style={{ fontSize: 14, color: '#21262E' }}>-</span>;
+                      ? <span style={{ display: 'inline-flex', alignItems: 'center', padding: '3px 10px', borderRadius: 100, background: 'var(--color-primary-bg)', color: 'var(--color-primary)', fontSize: 12, fontFamily: 'var(--font-ko)', alignSelf: 'flex-start' }}>{cls.name}</span>
+                      : <span style={{ fontSize: 14, color: 'var(--color-ink-strong)' }}>-</span>;
                   })()}
                 </div>
                 <div style={{ flex: 1, padding: '16px 16px 0 0', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <span style={{ fontSize: 12, color: '#73808F', fontFamily: 'var(--font-ko)' }}>정원</span>
-                  <span style={{ fontSize: 14, fontWeight: 500, color: '#21262E', fontFamily: 'var(--font-ko)' }}>{camp.capacity ? `${camp.capacity}명` : '-'}</span>
+                  <span style={{ fontSize: 12, color: 'var(--color-ink-soft)', fontFamily: 'var(--font-ko)' }}>정원</span>
+                  <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--color-ink-strong)', fontFamily: 'var(--font-ko)' }}>{camp.capacity ? `${camp.capacity}명` : '-'}</span>
                 </div>
                 <div style={{ flex: 1, padding: '16px 0 0 0', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <span style={{ fontSize: 12, color: '#73808F', fontFamily: 'var(--font-ko)' }}>상태</span>
+                  <span style={{ fontSize: 12, color: 'var(--color-ink-soft)', fontFamily: 'var(--font-ko)' }}>상태</span>
                   {camp.status ? (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', padding: '3px 10px', borderRadius: 100, background: STATUS_STYLE[camp.status]?.bg ?? '#F3F4F6', color: STATUS_STYLE[camp.status]?.color ?? '#6B7280', fontSize: 12, fontFamily: 'var(--font-ko)', alignSelf: 'flex-start' }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', padding: '3px 10px', borderRadius: 100, background: STATUS_STYLE[camp.status]?.bg ?? 'var(--color-bg-subtle)', color: STATUS_STYLE[camp.status]?.color ?? 'var(--color-ink-soft)', fontSize: 12, fontFamily: 'var(--font-ko)', alignSelf: 'flex-start' }}>
                       {camp.status}
                     </span>
-                  ) : <span style={{ fontSize: 14, color: '#21262E' }}>-</span>}
+                  ) : <span style={{ fontSize: 14, color: 'var(--color-ink-strong)' }}>-</span>}
                 </div>
               </div>
             </div>
@@ -495,7 +495,7 @@ export default function StudentDetailPage({
               {/* Check-Out */}
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <span style={FIELD_LABEL}>Check-Out</span>
-                <CellBox style={{ borderBottom: checkOutErr ? '2px solid #EF4444' : '1px solid #E2E5EA' }}>
+                <CellBox style={{ borderBottom: checkOutErr ? '2px solid var(--color-error)' : '1px solid var(--color-border-subtle)' }}>
                   <CalendarCell
                     dateISO={stayShared.checkOut} displayDate={isoToDisplay(stayShared.checkOut)}
                     cellId="stay-co" openCell={openCell} setOpenCell={setOpenCell}
@@ -504,7 +504,7 @@ export default function StudentDetailPage({
                   />
                 </CellBox>
                 {checkOutErr && (
-                  <span style={{ fontSize: 11, color: '#EF4444', padding: '3px 4px', fontFamily: 'var(--font-ko)' }}>
+                  <span style={{ fontSize: 11, color: 'var(--color-error)', padding: '3px 4px', fontFamily: 'var(--font-ko)' }}>
                     체크아웃은 체크인 이후여야 합니다.
                   </span>
                 )}
@@ -512,17 +512,17 @@ export default function StudentDetailPage({
               {/* Stay (read-only) */}
               <div style={{ width: 90, flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
                 <span style={FIELD_LABEL}>Stay</span>
-                <div style={{ height: CELL_H, ...CELL_BORDER, background: '#F3F4F6', display: 'flex', alignItems: 'center', padding: '0 12px' }}>
-                  <span style={{ fontSize: 13, color: '#9CA3AF', fontFamily: 'var(--font-en)' }}>{stayDays ? `${stayDays}day` : '-'}</span>
+                <div style={{ height: CELL_H, ...CELL_BORDER, background: 'var(--color-bg-subtle)', display: 'flex', alignItems: 'center', padding: '0 12px' }}>
+                  <span style={{ fontSize: 13, color: 'var(--color-ink-mute)', fontFamily: 'var(--font-en)' }}>{stayDays ? `${stayDays}day` : '-'}</span>
                 </div>
               </div>
               {/* Invoice */}
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <span style={FIELD_LABEL}>Invoice</span>
-                <div style={{ height: CELL_H, ...CELL_BORDER, background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ height: CELL_H, ...CELL_BORDER, background: 'var(--color-canvas)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <button
                     onClick={() => invoiceRef.current?.click()}
-                    style={{ height: 32, padding: '0 14px', background: '#F3F4F6', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 500, color: '#3B82F6', cursor: 'pointer', fontFamily: 'var(--font-ko)', maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                    style={{ height: 32, padding: '0 14px', background: 'var(--color-bg-subtle)', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 500, color: 'var(--color-primary)', cursor: 'pointer', fontFamily: 'var(--font-ko)', maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
                   >
                     {stayShared.invoiceName || '첨부'}
                   </button>
@@ -530,23 +530,23 @@ export default function StudentDetailPage({
               </div>
             </div>
 
-            <div style={{ height: 1, background: '#E2E5EA' }} />
+            <div style={{ height: 1, background: 'var(--color-border-subtle)' }} />
 
             {/* ── Room count stepper ── */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <span style={{ fontSize: 13, fontWeight: 500, color: '#1A1D23', fontFamily: 'var(--font-ko)' }}>객실 수</span>
+              <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--color-ink-strong)', fontFamily: 'var(--font-ko)' }}>객실 수</span>
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <button
                   onClick={() => setRoomCount(rooms.length - 1)}
                   disabled={rooms.length <= 1}
-                  style={{ width: 30, height: 30, border: '1px solid #E2E5EA', borderRight: 'none', borderRadius: '6px 0 0 6px', background: rooms.length <= 1 ? '#F9FAFB' : '#fff', color: rooms.length <= 1 ? '#D1D5DB' : '#374151', fontSize: 16, cursor: rooms.length <= 1 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  style={{ width: 30, height: 30, border: '1px solid var(--color-border-subtle)', borderRight: 'none', borderRadius: '6px 0 0 6px', background: rooms.length <= 1 ? 'var(--color-bg-subtle)' : '#fff', color: rooms.length <= 1 ? 'var(--color-border-default)' : '#374151', fontSize: 16, cursor: rooms.length <= 1 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >−</button>
-                <div style={{ width: 40, height: 30, border: '1px solid #E2E5EA', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 600, color: '#1A1D23', fontFamily: 'var(--font-en)' }}>
+                <div style={{ width: 40, height: 30, border: '1px solid var(--color-border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 600, color: 'var(--color-ink-strong)', fontFamily: 'var(--font-en)' }}>
                   {rooms.length}
                 </div>
                 <button
                   onClick={() => setRoomCount(rooms.length + 1)}
-                  style={{ width: 30, height: 30, border: '1px solid #E2E5EA', borderLeft: 'none', borderRadius: '0 6px 6px 0', background: '#fff', color: '#374151', fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  style={{ width: 30, height: 30, border: '1px solid var(--color-border-subtle)', borderLeft: 'none', borderRadius: '0 6px 6px 0', background: 'var(--color-canvas)', color: '#374151', fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >+</button>
               </div>
             </div>
@@ -556,18 +556,18 @@ export default function StudentDetailPage({
               <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
                 {/* Column header */}
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center', paddingBottom: 6 }}>
-                  <span style={{ width: 40, fontSize: 11, fontWeight: 500, color: '#6B7585', fontFamily: 'var(--font-ko)', textAlign: 'center' }}>No.</span>
-                  <span style={{ flex: 1, fontSize: 11, fontWeight: 500, color: '#6B7585', fontFamily: 'var(--font-ko)' }}>Room Type</span>
-                  <span style={{ flex: 1, fontSize: 11, fontWeight: 500, color: '#6B7585', fontFamily: 'var(--font-ko)' }}>Extra Bed</span>
+                  <span style={{ width: 40, fontSize: 11, fontWeight: 500, color: 'var(--color-ink-soft)', fontFamily: 'var(--font-ko)', textAlign: 'center' }}>No.</span>
+                  <span style={{ flex: 1, fontSize: 11, fontWeight: 500, color: 'var(--color-ink-soft)', fontFamily: 'var(--font-ko)' }}>Room Type</span>
+                  <span style={{ flex: 1, fontSize: 11, fontWeight: 500, color: 'var(--color-ink-soft)', fontFamily: 'var(--font-ko)' }}>Extra Bed</span>
                   <div style={{ width: 32 }} />
                 </div>
-                <div style={{ height: 1, background: '#E2E5EA', marginBottom: 8 }} />
+                <div style={{ height: 1, background: 'var(--color-border-subtle)', marginBottom: 8 }} />
                 {rooms.map((r, i) => {
                   const selOpt = roomTypeOptions.find(o => o.value === r.roomType);
                   const extraBedDisabled = selOpt ? !selOpt.extraBedSupported : false;
                   return (
                   <div key={r.id} style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
-                    <span style={{ width: 40, fontSize: 13, color: '#9CA3AF', fontFamily: 'var(--font-en)', textAlign: 'center', flexShrink: 0 }}>{i + 1}</span>
+                    <span style={{ width: 40, fontSize: 13, color: 'var(--color-ink-mute)', fontFamily: 'var(--font-en)', textAlign: 'center', flexShrink: 0 }}>{i + 1}</span>
                     <CellBox style={{ flex: 1 }}>
                       <DropdownCell
                         value={roomTypeOptions.find(o => o.value === r.roomType)?.label ?? r.roomType}
@@ -582,12 +582,12 @@ export default function StudentDetailPage({
                         onCellClick={() => {}} onEditDone={() => {}}
                       />
                     </CellBox>
-                    <CellBox style={{ flex: 1, background: extraBedDisabled ? '#F3F4F6' : '#fff' }}>
+                    <CellBox style={{ flex: 1, background: extraBedDisabled ? 'var(--color-bg-subtle)' : '#fff' }}>
                       <select
                         value={extraBedDisabled ? '없음' : r.extraBed}
                         disabled={extraBedDisabled}
                         onChange={e => updateRoom(r.id, 'extraBed', e.target.value)}
-                        style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent', fontSize: 13, fontFamily: 'var(--font-ko)', color: r.extraBed ? '#1A1D23' : '#B7BECA', cursor: extraBedDisabled ? 'not-allowed' : 'pointer' }}
+                        style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent', fontSize: 13, fontFamily: 'var(--font-ko)', color: r.extraBed ? 'var(--color-ink-strong)' : 'var(--color-ink-faint)', cursor: extraBedDisabled ? 'not-allowed' : 'pointer' }}
                       >
                         <option value="" disabled>선택</option>
                         {['있음', '없음'].map(o => <option key={o} value={o}>{o}</option>)}
@@ -597,9 +597,9 @@ export default function StudentDetailPage({
                       onClick={() => setRoomCount(rooms.length - 1)}
                       disabled={rooms.length === 1}
                       style={{
-                        width: 32, height: 32, borderRadius: 6, border: '1px solid #E2E5EA', flexShrink: 0,
-                        background: rooms.length === 1 ? '#F9FAFB' : '#fff',
-                        color: rooms.length === 1 ? '#D1D5DB' : '#EF4444',
+                        width: 32, height: 32, borderRadius: 6, border: '1px solid var(--color-border-subtle)', flexShrink: 0,
+                        background: rooms.length === 1 ? 'var(--color-bg-subtle)' : '#fff',
+                        color: rooms.length === 1 ? 'var(--color-border-default)' : 'var(--color-error)',
                         cursor: rooms.length === 1 ? 'not-allowed' : 'pointer',
                         fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center',
                       }}
@@ -623,19 +623,19 @@ export default function StudentDetailPage({
               {/* Passport fields */}
               <div style={{ width: 400, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <span style={{ fontSize: 12, fontWeight: 500, color: '#6B7585', fontFamily: 'var(--font-ko)' }}>Passport No.</span>
+                  <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--color-ink-soft)', fontFamily: 'var(--font-ko)' }}>Passport No.</span>
                   <TextFieldCell placeholder="여권 번호를 입력하세요." value={flightInfo.passportNo} onChange={v => setFlightInfo(p => ({ ...p, passportNo: v }))} />
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <span style={{ fontSize: 12, fontWeight: 500, color: '#6B7585', fontFamily: 'var(--font-ko)' }}>Passport Name.</span>
+                  <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--color-ink-soft)', fontFamily: 'var(--font-ko)' }}>Passport Name.</span>
                   <TextFieldCell placeholder="여권 표기된 이름을 입력하세요." value={flightInfo.passportName} onChange={v => setFlightInfo(p => ({ ...p, passportName: v }))} />
                 </div>
               </div>
 
               {/* Flight table — rows inlined via .map() to avoid nested-component remount */}
-              <div style={{ flex: 1, border: '1px solid #E2E5EA', borderRadius: 6, overflow: 'hidden' }}>
+              <div style={{ flex: 1, border: '1px solid var(--color-border-subtle)', borderRadius: 6, overflow: 'hidden' }}>
                 {/* Header */}
-                <div style={{ display: 'flex', background: '#F4F5F7', height: 40 }}>
+                <div style={{ display: 'flex', background: 'var(--color-bg-subtle)', height: 40 }}>
                   <div style={{ ...hdCell, width: 80, flexShrink: 0 }}>Type</div>
                   <div style={{ ...hdCell, width: 171, flexShrink: 0 }}>Flight No.</div>
                   <div style={{ ...hdCell, flex: 1 }}>Date of Entry</div>
@@ -646,20 +646,20 @@ export default function StudentDetailPage({
                 {flightRows.map(({ row, onChange, label, labelBg, labelColor, rowKey }) => (
                   <div key={rowKey} style={{ display: 'flex', height: CELL_H }}>
                     {/* Type badge */}
-                    <div style={{ width: 80, height: CELL_H, background: labelBg, border: '1px solid #E2E5EA', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <div style={{ width: 80, height: CELL_H, background: labelBg, border: '1px solid var(--color-border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                       <span style={{ fontSize: 11, fontWeight: 500, color: labelColor, fontFamily: 'var(--font-ko)', whiteSpace: 'pre' }}>✈  {label}</span>
                     </div>
                     {/* Flight No */}
-                    <div style={{ width: 171, height: CELL_H, ...CELL_BORDER, background: '#fff', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+                    <div style={{ width: 171, height: CELL_H, ...CELL_BORDER, background: 'var(--color-canvas)', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
                       <input
                         value={row.flightNo}
                         onChange={e => onChange({ ...row, flightNo: e.target.value })}
                         placeholder="KE 124"
-                        style={{ width: '100%', height: '100%', border: 'none', outline: 'none', background: 'transparent', fontSize: 12, fontFamily: 'var(--font-en)', color: row.flightNo ? '#1A1D23' : '#B7BECA', padding: '0 16px' }}
+                        style={{ width: '100%', height: '100%', border: 'none', outline: 'none', background: 'transparent', fontSize: 12, fontFamily: 'var(--font-en)', color: row.flightNo ? 'var(--color-ink-strong)' : 'var(--color-ink-faint)', padding: '0 16px' }}
                       />
                     </div>
                     {/* Date of Entry — CalendarTimeCell */}
-                    <div style={{ flex: 1, height: CELL_H, padding: '0 12px', display: 'flex', alignItems: 'center', overflow: 'hidden', ...CELL_BORDER, background: '#fff' }}>
+                    <div style={{ flex: 1, height: CELL_H, padding: '0 12px', display: 'flex', alignItems: 'center', overflow: 'hidden', ...CELL_BORDER, background: 'var(--color-canvas)' }}>
                       <CalendarTimeCell
                         dateISO={row.dateEntry} time={row.timeEntry}
                         cellId={`${rowKey}-entry`}
@@ -670,7 +670,7 @@ export default function StudentDetailPage({
                       />
                     </div>
                     {/* Date of Return — CalendarTimeCell */}
-                    <div style={{ flex: 1, height: CELL_H, padding: '0 12px', display: 'flex', alignItems: 'center', overflow: 'hidden', ...CELL_BORDER, background: '#fff' }}>
+                    <div style={{ flex: 1, height: CELL_H, padding: '0 12px', display: 'flex', alignItems: 'center', overflow: 'hidden', ...CELL_BORDER, background: 'var(--color-canvas)' }}>
                       <CalendarTimeCell
                         dateISO={row.dateReturn} time={row.timeReturn}
                         cellId={`${rowKey}-return`}
@@ -681,23 +681,23 @@ export default function StudentDetailPage({
                       />
                     </div>
                     {/* Pick&Drop */}
-                    <div style={{ flex: 1, height: CELL_H, ...CELL_BORDER, background: '#fff', display: 'flex', alignItems: 'center', padding: '0 10px', gap: 6 }}>
+                    <div style={{ flex: 1, height: CELL_H, ...CELL_BORDER, background: 'var(--color-canvas)', display: 'flex', alignItems: 'center', padding: '0 10px', gap: 6 }}>
                       <select
                         value={row.pickDrop}
                         onChange={e => onChange({ ...row, pickDrop: e.target.value, pickDropPlace: e.target.value === '없음' ? '' : row.pickDropPlace })}
-                        style={{ border: 'none', outline: 'none', background: 'transparent', fontSize: 12, fontFamily: 'var(--font-ko)', color: row.pickDrop ? '#1A1D23' : '#B7BECA', cursor: 'pointer', flexShrink: 0 }}
+                        style={{ border: 'none', outline: 'none', background: 'transparent', fontSize: 12, fontFamily: 'var(--font-ko)', color: row.pickDrop ? 'var(--color-ink-strong)' : 'var(--color-ink-faint)', cursor: 'pointer', flexShrink: 0 }}
                       >
                         <option value="" disabled>선택</option>
                         {(rowKey === 'dep' ? ['픽업', '없음'] : ['드랍', '없음']).map(o => <option key={o} value={o}>{o}</option>)}
                       </select>
                       {row.pickDrop && row.pickDrop !== '없음' && (
                         <>
-                          <div style={{ width: 1, height: 14, background: '#E2E5EA', flexShrink: 0 }} />
+                          <div style={{ width: 1, height: 14, background: 'var(--color-border-subtle)', flexShrink: 0 }} />
                           <input
                             value={row.pickDropPlace}
                             onChange={e => onChange({ ...row, pickDropPlace: e.target.value })}
                             placeholder="장소 입력"
-                            style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent', fontSize: 12, fontFamily: 'var(--font-ko)', color: '#1A1D23', padding: 0, minWidth: 0 }}
+                            style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent', fontSize: 12, fontFamily: 'var(--font-ko)', color: 'var(--color-ink-strong)', padding: 0, minWidth: 0 }}
                           />
                         </>
                       )}
@@ -718,15 +718,15 @@ export default function StudentDetailPage({
           >
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center', paddingBottom: 4 }}>
-                <span style={{ width: 40, fontSize: 11, fontWeight: 500, color: '#6B7585', fontFamily: 'var(--font-ko)' }}>No.</span>
-                <span style={{ flex: 1, fontSize: 11, fontWeight: 500, color: '#6B7585', fontFamily: 'var(--font-ko)' }}>이름</span>
-                <span style={{ flex: 1, fontSize: 11, fontWeight: 500, color: '#6B7585', fontFamily: 'var(--font-ko)' }}>관계</span>
+                <span style={{ width: 40, fontSize: 11, fontWeight: 500, color: 'var(--color-ink-soft)', fontFamily: 'var(--font-ko)' }}>No.</span>
+                <span style={{ flex: 1, fontSize: 11, fontWeight: 500, color: 'var(--color-ink-soft)', fontFamily: 'var(--font-ko)' }}>이름</span>
+                <span style={{ flex: 1, fontSize: 11, fontWeight: 500, color: 'var(--color-ink-soft)', fontFamily: 'var(--font-ko)' }}>관계</span>
                 <div style={{ width: 32 }} />
               </div>
-              <div style={{ height: 1, background: '#E2E5EA' }} />
+              <div style={{ height: 1, background: 'var(--color-border-subtle)' }} />
               {familyMembers.map((m, i) => (
                 <div key={m.id} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                  <span style={{ width: 40, fontSize: 13, color: '#9CA3AF', fontFamily: 'var(--font-en)', textAlign: 'center', flexShrink: 0 }}>{i + 1}</span>
+                  <span style={{ width: 40, fontSize: 13, color: 'var(--color-ink-mute)', fontFamily: 'var(--font-en)', textAlign: 'center', flexShrink: 0 }}>{i + 1}</span>
                   <div style={{ flex: 1 }}>
                     <TextFieldCell placeholder="이름을 입력하세요." value={m.name} onChange={v => updateFamily(m.id, 'name', v)} />
                   </div>
@@ -747,11 +747,11 @@ export default function StudentDetailPage({
                         onChange={e => updateFamily(m.id, 'relationCustom', e.target.value)}
                         style={{
                           width: 110, height: CELL_H, flexShrink: 0,
-                          borderBottom: '1px solid #E2E5EA', borderRight: '1px solid #E2E5EA',
-                          borderTop: 'none', borderLeft: '1px solid #E2E5EA',
+                          borderBottom: '1px solid var(--color-border-subtle)', borderRight: '1px solid var(--color-border-subtle)',
+                          borderTop: 'none', borderLeft: '1px solid var(--color-border-subtle)',
                           outline: 'none', padding: '0 10px',
                           fontSize: 13, fontFamily: 'var(--font-ko)',
-                          color: 'var(--color-text-primary)', background: '#fff',
+                          color: 'var(--color-text-primary)', background: 'var(--color-canvas)',
                         }}
                       />
                     )}
@@ -760,9 +760,9 @@ export default function StudentDetailPage({
                     onClick={() => removeFamily(m.id)}
                     disabled={m.id === 'guardian'}
                     style={{
-                      width: 32, height: 32, borderRadius: 6, border: '1px solid #E2E5EA',
-                      background: m.id === 'guardian' ? '#F9FAFB' : '#fff',
-                      color: m.id === 'guardian' ? '#D1D5DB' : '#EF4444',
+                      width: 32, height: 32, borderRadius: 6, border: '1px solid var(--color-border-subtle)',
+                      background: m.id === 'guardian' ? 'var(--color-bg-subtle)' : '#fff',
+                      color: m.id === 'guardian' ? 'var(--color-border-default)' : 'var(--color-error)',
                       cursor: m.id === 'guardian' ? 'not-allowed' : 'pointer',
                       fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                     }}
@@ -772,9 +772,9 @@ export default function StudentDetailPage({
               <button
                 onClick={addFamily}
                 style={{
-                  marginTop: 4, height: 36, border: '1px dashed #D1D5DB', borderRadius: 6,
-                  background: '#F9FAFB', cursor: 'pointer', fontSize: 13, fontWeight: 500,
-                  color: '#6B7280', fontFamily: 'var(--font-ko)', display: 'flex',
+                  marginTop: 4, height: 36, border: '1px dashed var(--color-border-default)', borderRadius: 6,
+                  background: 'var(--color-bg-subtle)', cursor: 'pointer', fontSize: 13, fontWeight: 500,
+                  color: 'var(--color-ink-soft)', fontFamily: 'var(--font-ko)', display: 'flex',
                   alignItems: 'center', justifyContent: 'center', gap: 6,
                 }}
               >

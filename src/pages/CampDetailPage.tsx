@@ -17,15 +17,15 @@ function isoToDisplay(iso: string) {
 
 const STATUS_STYLE: Record<string, { bg: string; color: string }> = {
   '진행중': { bg: 'var(--color-success-light)', color: 'var(--color-success)' },
-  '준비중': { bg: '#EEF3FD',                    color: '#2F6FED' },
-  '종료':   { bg: '#F3F4F6',                    color: '#6B7280' },
+  '준비중': { bg: 'var(--color-primary-bg)',                    color: 'var(--color-primary)' },
+  '종료':   { bg: 'var(--color-bg-subtle)',                    color: 'var(--color-ink-soft)' },
 };
 
 function TagList({ items, color }: { items: string[]; color: string }) {
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
       {items.map((item, i) => (
-        <span key={i} className="ew-tag" style={{ background: color === '#3B82F6' ? '#E0E9FE' : '#EEF3FD', color, fontFamily: 'var(--font-ko)', fontSize: 12 }}>
+        <span key={i} className="ew-tag" style={{ background: color === 'var(--color-primary)' ? 'var(--color-primary-light)' : 'var(--color-primary-bg)', color, fontFamily: 'var(--font-ko)', fontSize: 12 }}>
           {item}
         </span>
       ))}
@@ -85,7 +85,7 @@ export default function CampDetailPage({
     onTabChange(tab);
   }
 
-  const statusStyle = STATUS_STYLE[camp?.status ?? ''] ?? { bg: '#F3F4F6', color: '#6B7280' };
+  const statusStyle = STATUS_STYLE[camp?.status ?? ''] ?? { bg: 'var(--color-bg-subtle)', color: 'var(--color-ink-soft)' };
 
   return (
     <div style={{ minWidth: 1440 }}>
@@ -228,7 +228,7 @@ export default function CampDetailPage({
                 {activeTab === 'Timetable' && (
                   <div>
                     {/* Class subtabs */}
-                    <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--color-border-table)', background: '#FAFBFF', padding: '0 16px' }}>
+                    <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--color-border-table)', background: 'var(--color-paper)', padding: '0 16px' }}>
                       {classes.map(cls => (
                         <button
                           key={cls.id}

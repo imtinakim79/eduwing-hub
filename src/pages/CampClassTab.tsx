@@ -48,9 +48,9 @@ export function ClassCompletedView({ campId }: { campId: string }) {
 
 // ── Input helpers ─────────────────────────────────────────────────────────────
 const inputStyle: React.CSSProperties = {
-  height: 36, padding: '0 10px', border: '1px solid #D1D5DB',
+  height: 36, padding: '0 10px', border: '1px solid var(--color-border-default)',
   borderRadius: 6, fontSize: 13, fontFamily: 'var(--font-ko)',
-  color: 'var(--color-text-primary)', outline: 'none', background: '#fff',
+  color: 'var(--color-text-primary)', outline: 'none', background: 'var(--color-canvas)',
   width: '100%', boxSizing: 'border-box',
 };
 
@@ -60,7 +60,7 @@ function StudentRow({
 }: { student: Student; checked: boolean; onChange: (v: boolean) => void }) {
   const name = student.name_ko || student.name_en || '-';
   return (
-    <label style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 0', cursor: 'pointer', borderBottom: '1px solid #F3F4F6' }}>
+    <label style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 0', cursor: 'pointer', borderBottom: '1px solid var(--color-border-faint)' }}>
       <input type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)}
         style={{ width: 15, height: 15, cursor: 'pointer', accentColor: 'var(--color-primary)' }} />
       <span style={{ fontSize: 13, fontFamily: 'var(--font-ko)', color: 'var(--color-text-primary)' }}>{name}</span>
@@ -77,8 +77,8 @@ function ClassCard({
 }: { cls: ClassLevel; selected: boolean; onClick: () => void }) {
   return (
     <button onClick={onClick} style={{
-      width: '100%', textAlign: 'left', background: selected ? '#EEF3FD' : '#fff',
-      border: `1px solid ${selected ? 'var(--color-primary)' : '#E5E7EB'}`,
+      width: '100%', textAlign: 'left', background: selected ? 'var(--color-primary-bg)' : '#fff',
+      border: `1px solid ${selected ? 'var(--color-primary)' : 'var(--color-border-subtle)'}`,
       borderRadius: 8, padding: '10px 14px', cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: 4,
     }}>
       <span style={{ fontSize: 14, fontWeight: 600, color: selected ? 'var(--color-primary)' : 'var(--color-text-primary)', fontFamily: 'var(--font-ko)' }}>
@@ -164,23 +164,23 @@ export default function CampClassTab({
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', borderBottom: '1px solid var(--color-border-table)' }}>
-        <span style={{ fontSize: 14, fontWeight: 600, color: '#1A1D23', fontFamily: 'var(--font-ko)', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+        <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-ink-strong)', fontFamily: 'var(--font-ko)', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
           {form.isDirty && <span aria-hidden style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-warning)', display: 'inline-block', flexShrink: 0 }} />}
           클래스 관리
         </span>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={handleReset} style={{ height: 34, padding: '0 14px', border: '1px solid #E2E5EA', borderRadius: 6, background: '#fff', fontSize: 13, fontWeight: 500, color: '#6B7280', cursor: 'pointer', fontFamily: 'var(--font-ko)' }}>초기화</button>
+          <button onClick={handleReset} style={{ height: 34, padding: '0 14px', border: '1px solid var(--color-border-subtle)', borderRadius: 6, background: 'var(--color-canvas)', fontSize: 13, fontWeight: 500, color: 'var(--color-ink-soft)', cursor: 'pointer', fontFamily: 'var(--font-ko)' }}>초기화</button>
           {form.isDirty && (
-            <button onClick={form.reset} style={{ height: 34, padding: '0 14px', border: '1px solid #E2E5EA', borderRadius: 6, background: '#fff', fontSize: 13, fontWeight: 500, color: '#6B7280', cursor: 'pointer', fontFamily: 'var(--font-ko)' }}>취소</button>
+            <button onClick={form.reset} style={{ height: 34, padding: '0 14px', border: '1px solid var(--color-border-subtle)', borderRadius: 6, background: 'var(--color-canvas)', fontSize: 13, fontWeight: 500, color: 'var(--color-ink-soft)', cursor: 'pointer', fontFamily: 'var(--font-ko)' }}>취소</button>
           )}
           <button
             onClick={handleSave}
             disabled={!form.isDirty}
             style={{
               height: 34, padding: '0 14px', border: 'none', borderRadius: 6,
-              background: form.isDirty ? '#3C82F5' : '#E5E7EB',
+              background: form.isDirty ? 'var(--color-primary)' : 'var(--color-border-subtle)',
               fontSize: 13, fontWeight: 500,
-              color: form.isDirty ? '#fff' : '#9CA3AF',
+              color: form.isDirty ? '#fff' : 'var(--color-ink-mute)',
               cursor: form.isDirty ? 'pointer' : 'not-allowed',
               fontFamily: 'var(--font-ko)',
             }}
@@ -218,7 +218,7 @@ export default function CampClassTab({
             </span>
             <button
               className="ew-btn ew-btn--ghost ew-btn--sm"
-              style={{ color: '#EF4444', borderColor: '#EF4444' }}
+              style={{ color: 'var(--color-error)', borderColor: 'var(--color-error)' }}
               onClick={() => deleteClass(selected.id)}
             >
               삭제
@@ -229,7 +229,7 @@ export default function CampClassTab({
           <div style={{ display: 'flex', gap: 16 }}>
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
               <label style={{ fontSize: 12, fontWeight: 500, color: 'var(--color-text-sub)', fontFamily: 'var(--font-ko)' }}>
-                클래스명 <span style={{ color: '#EF4444' }}>*</span>
+                클래스명 <span style={{ color: 'var(--color-error)' }}>*</span>
               </label>
               <input
                 style={inputStyle}
@@ -266,7 +266,7 @@ export default function CampClassTab({
                 이 캠프에 등록된 학생이 없습니다
               </div>
             ) : (
-              <div style={{ border: '1px solid #E5E7EB', borderRadius: 8, padding: '8px 12px', maxHeight: 260, overflowY: 'auto' }}>
+              <div style={{ border: '1px solid var(--color-border-subtle)', borderRadius: 8, padding: '8px 12px', maxHeight: 260, overflowY: 'auto' }}>
                 {enrolledStudents.map(s => (
                   <StudentRow
                     key={s.id}

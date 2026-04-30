@@ -197,16 +197,17 @@ export default function AgentBoardPage({
 
       {/* Filter Bar */}
       <div className="ew-filter-bar">
-        <div style={{ fontFamily: 'var(--font-ko)', fontWeight: 500, fontSize: 20, letterSpacing: '-0.8px', color: 'var(--color-text-medium)', width: 174, flexShrink: 0, textAlign: 'center' }}>에이전트 관리</div>
-        <div className="ew-filter-input-wrap" style={{ width: 255 }}>
-          <span className="search-icon"><SearchIcon /></span>
-          <input type="text" placeholder="에이전트명, 담당자, Email" value={query} onChange={e => { setQuery(e.target.value); setPage(1); }} />
+        <h1 className="ew-filter-bar__title">에이전트 관리</h1>
+        <div className="ew-filter-bar__group">
+          <div className="ew-filter-input-wrap" style={{ width: 320 }}>
+            <span className="search-icon"><SearchIcon /></span>
+            <input type="text" placeholder="에이전트명·담당자·Email 검색" value={query} onChange={e => { setQuery(e.target.value); setPage(1); }} />
+          </div>
         </div>
-        <button className="ew-btn ew-btn--primary ew-btn--lg" style={{ fontFamily: 'var(--font-en)', fontWeight: 600 }}>Search</button>
       </div>
 
       {/* Action bar */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '8px 30px', border: '1px solid #E5E7EB', background: '#fff', justifyContent: 'flex-end', minWidth: 1440 }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-2)', padding: 'var(--space-2) var(--page-px)', borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-canvas)', justifyContent: 'flex-end', minWidth: 1440 }}>
         <span style={{ flex: 1, fontSize: 12, color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)', lineHeight: '26px' }}>
           {selected.size > 0 ? `${selected.size}개 선택됨` : ''}
         </span>
