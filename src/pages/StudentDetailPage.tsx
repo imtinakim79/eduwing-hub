@@ -7,6 +7,7 @@ import { loadHotels } from './CampAccommodationTab';
 import { loadClasses } from './CampClassTab';
 import { useDirtyForm } from '../hooks/useDirtyForm';
 import { useDirtyGuard } from '../hooks/useDirtyGuard';
+import Card from '../components/Card';
 
 interface FamilyMember { id: string; name: string; relation: string; relationCustom?: string; }
 interface RoomEntry { id: string; roomType: string; extraBed: string; }
@@ -85,44 +86,35 @@ function SectionCard({ title, children, onSave, onReset, onCancel, dirty = false
   onSave?: () => void; onReset?: () => void; onCancel?: () => void;
   dirty?: boolean;
 }) {
+  const titleNode = (
+    <>
+      {dirty && <span aria-hidden style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-warning)', flexShrink: 0 }} />}
+      <span style={{ fontFamily: 'var(--font-en)' }}>{title}</span>
+    </>
+  );
+  const actions = (onSave || onReset || onCancel) ? (
+    <>
+      {onReset && (
+        <button className="ew-btn ew-btn--secondary ew-btn--sm" onClick={onReset}>초기화</button>
+      )}
+      {dirty && onCancel && (
+        <button className="ew-btn ew-btn--secondary ew-btn--sm" onClick={onCancel}>취소</button>
+      )}
+      {onSave && (
+        <button
+          className="ew-btn ew-btn--primary ew-btn--sm"
+          onClick={onSave}
+          disabled={!dirty}
+        >저장</button>
+      )}
+    </>
+  ) : undefined;
   return (
-    <div style={{
-      background: 'var(--color-canvas)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-lg)',
-      padding: 'var(--space-5) var(--space-5) var(--space-6)', display: 'flex', flexDirection: 'column', gap: 'var(--space-4)',
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-ink-strong)', fontFamily: 'var(--font-en)', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-          {dirty && <span aria-hidden style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-warning)', display: 'inline-block', flexShrink: 0 }} />}
-          {title}
-        </span>
-        {(onSave || onReset || onCancel) && (
-          <div style={{ display: 'flex', gap: 8 }}>
-            {onReset && (
-              <button onClick={onReset} style={{ height: 34, padding: '0 14px', border: '1px solid var(--color-border-subtle)', borderRadius: 6, background: 'var(--color-canvas)', fontSize: 13, fontWeight: 500, color: 'var(--color-ink-soft)', cursor: 'pointer', fontFamily: 'var(--font-ko)' }}>초기화</button>
-            )}
-            {dirty && onCancel && (
-              <button onClick={onCancel} style={{ height: 34, padding: '0 14px', border: '1px solid var(--color-border-subtle)', borderRadius: 6, background: 'var(--color-canvas)', fontSize: 13, fontWeight: 500, color: 'var(--color-ink-soft)', cursor: 'pointer', fontFamily: 'var(--font-ko)' }}>취소</button>
-            )}
-            {onSave && (
-              <button
-                onClick={onSave}
-                disabled={!dirty}
-                style={{
-                  height: 34, padding: '0 14px', border: 'none', borderRadius: 6,
-                  background: dirty ? 'var(--color-primary)' : 'var(--color-border-subtle)',
-                  fontSize: 13, fontWeight: 500,
-                  color: dirty ? '#fff' : 'var(--color-ink-mute)',
-                  cursor: dirty ? 'pointer' : 'not-allowed',
-                  fontFamily: 'var(--font-ko)',
-                }}
-              >저장</button>
-            )}
-          </div>
-        )}
+    <Card title={titleNode} actions={actions}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+        {children}
       </div>
-      <div style={{ height: 1, background: 'var(--color-border-subtle)' }} />
-      {children}
-    </div>
+    </Card>
   );
 }
 
@@ -356,7 +348,7 @@ export default function StudentDetailPage({
       <div style={{ padding: 'var(--space-7) var(--page-px)', display: 'flex', flexDirection: 'column', gap: 0 }}>
 
         {/* ProfileCard */}
-        <div style={{ background: 'var(--color-canvas)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-6)', display: 'flex', alignItems: 'center', gap: 'var(--space-5)' }}>
+        <Card style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-5)' }}>
           {student.profile_img_url ? (
             <img src={student.profile_img_url} alt="" style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
           ) : (
@@ -388,7 +380,7 @@ export default function StudentDetailPage({
             <button className="ew-btn ew-btn--secondary ew-btn--sm" onClick={onEdit}>수정</button>
             <button className="ew-btn ew-btn--danger ew-btn--sm">삭제</button>
           </div>
-        </div>
+        </Card>
 
         {/* TabBar — 캠프 탭 */}
         <div style={{ display: 'flex', borderBottom: '1px solid var(--color-border-subtle)', padding: '0 var(--space-1)', marginTop: 'var(--space-6)' }}>
@@ -419,8 +411,7 @@ export default function StudentDetailPage({
 
           {/* Camp Basic Info */}
           {camp && (
-            <div style={{ background: 'var(--color-canvas)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-5) var(--space-6)' }}>
-              <span style={{ fontSize: 16, fontWeight: 500, color: 'var(--color-ink-strong)', fontFamily: 'var(--font-en)', display: 'block', marginBottom: 16 }}>Camp Basic Info.</span>
+            <Card title={<span style={{ fontFamily: 'var(--font-en)' }}>Camp Basic Info.</span>}>
               <div style={{ display: 'flex', borderTop: '1px solid var(--color-border-faint)' }}>
                 {[
                   { label: '캠프명', value: camp.name },
@@ -463,7 +454,7 @@ export default function StudentDetailPage({
                   ) : <span style={{ fontSize: 14, color: 'var(--color-ink-strong)' }}>-</span>}
                 </div>
               </div>
-            </div>
+            </Card>
           )}
 
           {/* Hotel Info */}
