@@ -2,7 +2,7 @@ import { useState, useRef, useLayoutEffect, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 
 // ── Avatar helpers ────────────────────────────────────────────────────────────
-const AVATAR_COLORS = ['#EF4444','#10B981','#F27E44','#3B82F6','#8B5CF6','#EC4899','#14B8A6'];
+const AVATAR_COLORS = ['#EF4444','#10B981','#F27E44','var(--color-primary)','#8B5CF6','#EC4899','#14B8A6'];
 export function avatarColor(name: string) {
   let h = 0;
   for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) & 0xffff;
@@ -122,7 +122,7 @@ function DropdownItem({ label, selected, onClick }: {
       {/* custom checkbox visual */}
       <div style={{
         width: 16, height: 16, flexShrink: 0, borderRadius: 2,
-        border: selected ? 'none' : '1px solid #6F7582',
+        border: selected ? 'none' : '1px solid var(--color-ink-mute)',
         background: selected ? 'var(--color-primary)' : '#fff',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>
@@ -150,13 +150,13 @@ export function DropdownCell({ value, options, cellId, openCell, setOpenCell, on
       ref={triggerRef}
       style={{
         display: 'flex', alignItems: 'center', gap: 4, height: '100%', cursor: 'pointer',
-        background: isOpen ? '#EEF3FD' : 'transparent',
-        borderBottom: isOpen ? '2px solid #2F6FED' : '2px solid transparent',
+        background: isOpen ? 'var(--color-primary-bg)' : 'transparent',
+        borderBottom: isOpen ? '2px solid var(--color-primary)' : '2px solid transparent',
         margin: '0 -12px', padding: '0 12px',
       }}
       onClick={(e) => { e.stopPropagation(); onCellClick(); setOpenCell(isOpen ? null : cellId); }}
     >
-      <span style={{ fontSize: 13, color: value ? 'var(--color-text-primary)' : '#B7BECA', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+      <span style={{ fontSize: 13, color: value ? 'var(--color-text-primary)' : 'var(--color-ink-faint)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
         {value || '선택'}
       </span>
       <img
@@ -201,15 +201,15 @@ export function MultiDropdownCell({ values, options, cellId, openCell, setOpenCe
       ref={triggerRef}
       style={{
         display: 'flex', alignItems: 'center', gap: 4, height: '100%', cursor: 'pointer',
-        background: isOpen ? '#EEF3FD' : 'transparent',
-        borderBottom: isOpen ? '2px solid #2F6FED' : '2px solid transparent',
+        background: isOpen ? 'var(--color-primary-bg)' : 'transparent',
+        borderBottom: isOpen ? '2px solid var(--color-primary)' : '2px solid transparent',
         margin: '0 -12px', padding: '0 12px',
         flexWrap: isOpen ? 'nowrap' : 'wrap',
       }}
       onClick={(e) => { e.stopPropagation(); onCellClick(); setOpenCell(isOpen ? null : cellId); }}
     >
       {values.length === 0 ? (
-        <span style={{ fontSize: 13, color: '#B7BECA', flex: 1 }}>선택</span>
+        <span style={{ fontSize: 13, color: 'var(--color-ink-faint)', flex: 1 }}>선택</span>
       ) : (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, flex: 1, overflow: 'hidden' }}>
           {values.map(v => (
@@ -227,7 +227,7 @@ export function MultiDropdownCell({ values, options, cellId, openCell, setOpenCe
             <div className={`ew-dropdown-item${allSelected ? ' selected' : ''}`} onClick={e => { e.stopPropagation(); toggleAll(); }}>
               <div style={{
                 width: 16, height: 16, flexShrink: 0, borderRadius: 2,
-                border: allSelected ? 'none' : '1px solid #6F7582',
+                border: allSelected ? 'none' : '1px solid var(--color-ink-mute)',
                 background: allSelected ? 'var(--color-primary)' : '#fff',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
@@ -267,7 +267,7 @@ function MonthYearPicker({ yr, mo, onSelect, onClose }: {
   const [yearRangeStart, setYearRangeStart] = useState(Math.floor(yr / 12) * 12);
 
   const navBtn: React.CSSProperties = {
-    width: 28, height: 28, borderRadius: 6, background: '#F5F7FA',
+    width: 28, height: 28, borderRadius: 6, background: 'var(--color-bg-subtle)',
     border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center',
     justifyContent: 'center', padding: 0, flexShrink: 0,
   };
@@ -278,11 +278,11 @@ function MonthYearPicker({ yr, mo, onSelect, onClose }: {
         style={{ position: 'absolute', inset: 0, background: '#fff', zIndex: 10, display: 'flex', flexDirection: 'column' }}
         onClick={e => e.stopPropagation()}
       >
-        <div style={{ display: 'flex', alignItems: 'center', height: 48, padding: '0 8px', borderBottom: '1px solid #E4E6EA', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', height: 48, padding: '0 8px', borderBottom: '1px solid var(--color-border-subtle)', flexShrink: 0 }}>
           <button style={navBtn} onClick={e => { e.stopPropagation(); setYearRangeStart(s => s - 12); }}>
             <img src="/icon/arrow_fill_left.svg" alt="" style={{ width: 12, height: 12 }} />
           </button>
-          <span style={{ flex: 1, textAlign: 'center', fontSize: 14, fontWeight: 600, color: '#1A1D23', fontFamily: 'var(--font-en)' }}>
+          <span style={{ flex: 1, textAlign: 'center', fontSize: 14, fontWeight: 600, color: 'var(--color-ink-strong)', fontFamily: 'var(--font-en)' }}>
             {yearRangeStart} – {yearRangeStart + 11}
           </span>
           <button style={navBtn} onClick={e => { e.stopPropagation(); setYearRangeStart(s => s + 12); }}>
@@ -297,13 +297,13 @@ function MonthYearPicker({ yr, mo, onSelect, onClose }: {
                 key={y}
                 style={{
                   height: 36, borderRadius: 6, border: 'none', cursor: 'pointer',
-                  background: isCur ? '#3B82F6' : 'transparent',
-                  color: isCur ? '#fff' : '#1A1D23',
+                  background: isCur ? 'var(--color-primary)' : 'transparent',
+                  color: isCur ? '#fff' : 'var(--color-ink-strong)',
                   fontWeight: isCur ? 600 : 400,
                   fontSize: 13, fontFamily: 'var(--font-en)',
                 }}
                 onClick={e => { e.stopPropagation(); setPickYr(y); setShowYearGrid(false); }}
-                onMouseEnter={e => { if (!isCur) (e.currentTarget as HTMLElement).style.background = '#F5F7FA'; }}
+                onMouseEnter={e => { if (!isCur) (e.currentTarget as HTMLElement).style.background = 'var(--color-bg-subtle)'; }}
                 onMouseLeave={e => { if (!isCur) (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
               >
                 {y}
@@ -320,14 +320,14 @@ function MonthYearPicker({ yr, mo, onSelect, onClose }: {
       style={{ position: 'absolute', inset: 0, background: '#fff', zIndex: 10, display: 'flex', flexDirection: 'column' }}
       onClick={e => e.stopPropagation()}
     >
-      <div style={{ display: 'flex', alignItems: 'center', height: 48, padding: '0 8px', borderBottom: '1px solid #E4E6EA', flexShrink: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', height: 48, padding: '0 8px', borderBottom: '1px solid var(--color-border-subtle)', flexShrink: 0 }}>
         <button style={navBtn} onClick={e => { e.stopPropagation(); setPickYr(y => y - 1); }}>
           <img src="/icon/arrow_fill_left.svg" alt="" style={{ width: 12, height: 12 }} />
         </button>
         <button
-          style={{ flex: 1, background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 600, color: '#1A1D23', fontFamily: 'var(--font-en)', borderRadius: 4, padding: '0 4px' }}
+          style={{ flex: 1, background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 600, color: 'var(--color-ink-strong)', fontFamily: 'var(--font-en)', borderRadius: 4, padding: '0 4px' }}
           onClick={e => { e.stopPropagation(); setYearRangeStart(Math.floor(pickYr / 12) * 12); setShowYearGrid(true); }}
-          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#F5F7FA'; }}
+          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--color-bg-subtle)'; }}
           onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'none'; }}
         >
           {pickYr}
@@ -344,13 +344,13 @@ function MonthYearPicker({ yr, mo, onSelect, onClose }: {
               key={m}
               style={{
                 height: 36, borderRadius: 6, border: 'none', cursor: 'pointer',
-                background: isCur ? '#3B82F6' : 'transparent',
-                color: isCur ? '#fff' : '#1A1D23',
+                background: isCur ? 'var(--color-primary)' : 'transparent',
+                color: isCur ? '#fff' : 'var(--color-ink-strong)',
                 fontWeight: isCur ? 600 : 400,
                 fontSize: 13, fontFamily: 'var(--font-en)',
               }}
               onClick={e => { e.stopPropagation(); onSelect(pickYr, i); onClose(); }}
-              onMouseEnter={e => { if (!isCur) (e.currentTarget as HTMLElement).style.background = '#F5F7FA'; }}
+              onMouseEnter={e => { if (!isCur) (e.currentTarget as HTMLElement).style.background = 'var(--color-bg-subtle)'; }}
               onMouseLeave={e => { if (!isCur) (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
             >
               {m}
@@ -388,7 +388,7 @@ export function CalendarOverlay({ dateISO, onSelect, footer }: {
   }
 
   const navBtnStyle: React.CSSProperties = {
-    width: 28, height: 28, borderRadius: 6, background: '#F5F7FA',
+    width: 28, height: 28, borderRadius: 6, background: 'var(--color-bg-subtle)',
     border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
     padding: 0, flexShrink: 0,
   };
@@ -396,14 +396,14 @@ export function CalendarOverlay({ dateISO, onSelect, footer }: {
   return (
     <div className="ew-calendar-overlay" onClick={(e) => e.stopPropagation()} style={{ position: 'relative' }}>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 48, padding: '0 8px', borderBottom: '1px solid #E4E6EA' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 48, padding: '0 8px', borderBottom: '1px solid var(--color-border-subtle)' }}>
         <button style={navBtnStyle} onClick={(e) => { e.stopPropagation(); prevMo(); }}>
           <img src="/icon/arrow_fill_left.svg" alt="" style={{ width: 12, height: 12 }} />
         </button>
         <button
-          style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 15, fontWeight: 600, color: '#1A1D23', fontFamily: 'var(--font-en)', padding: '0 4px', borderRadius: 4 }}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 15, fontWeight: 600, color: 'var(--color-ink-strong)', fontFamily: 'var(--font-en)', padding: '0 4px', borderRadius: 4 }}
           onClick={e => { e.stopPropagation(); setShowPicker(v => !v); }}
-          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#F5F7FA'; }}
+          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--color-bg-subtle)'; }}
           onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'none'; }}
         >
           {CAL_MONTHS[mo]} {yr}
@@ -424,7 +424,7 @@ export function CalendarOverlay({ dateISO, onSelect, footer }: {
       <div style={{ padding: '8px 8px 0' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 36px)', marginBottom: 4 }}>
           {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => (
-            <div key={d} style={{ height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 500, color: '#666E7D', fontFamily: 'var(--font-en)' }}>{d}</div>
+            <div key={d} style={{ height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 500, color: 'var(--color-ink-soft)', fontFamily: 'var(--font-en)' }}>{d}</div>
           ))}
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 36px)' }}>
@@ -438,13 +438,13 @@ export function CalendarOverlay({ dateISO, onSelect, footer }: {
                   style={{
                     width: 32, height: 32, borderRadius: '50%', border: 'none', cursor: 'pointer',
                     fontSize: 13, fontFamily: 'var(--font-en)',
-                    background: isSel ? '#3B82F6' : 'transparent',
-                    color: isSel ? '#fff' : isToday ? '#3B82F6' : '#1A1D23',
+                    background: isSel ? 'var(--color-primary)' : 'transparent',
+                    color: isSel ? '#fff' : isToday ? 'var(--color-primary)' : 'var(--color-ink-strong)',
                     fontWeight: isSel ? 700 : isToday ? 600 : 400,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}
                   onClick={(e) => { e.stopPropagation(); pick(d); }}
-                  onMouseEnter={e => { if (!isSel) (e.currentTarget as HTMLElement).style.background = '#F5F7FA'; }}
+                  onMouseEnter={e => { if (!isSel) (e.currentTarget as HTMLElement).style.background = 'var(--color-bg-subtle)'; }}
                   onMouseLeave={e => { if (!isSel) (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
                 >
                   {d}
@@ -459,8 +459,8 @@ export function CalendarOverlay({ dateISO, onSelect, footer }: {
       <button
         style={{
           margin: '8px 15px 12px', height: 32, width: 'calc(100% - 30px)',
-          background: '#F5F7FA', border: 'none', borderRadius: 6, cursor: 'pointer',
-          fontSize: 13, fontWeight: 500, color: '#2F6FED', fontFamily: 'var(--font-en)',
+          background: 'var(--color-bg-subtle)', border: 'none', borderRadius: 6, cursor: 'pointer',
+          fontSize: 13, fontWeight: 500, color: 'var(--color-primary)', fontFamily: 'var(--font-en)',
         }}
         onClick={(e) => {
           e.stopPropagation();
@@ -528,8 +528,8 @@ export function CalendarTimeCell({ dateISO, time, cellId, openCell, setOpenCell,
       ref={triggerRef}
       style={{
         display: 'flex', alignItems: 'center', gap: 6, height: '100%', cursor: 'pointer',
-        background: isOpen ? '#EEF3FD' : 'transparent',
-        borderBottom: isOpen ? '2px solid #2F6FED' : '2px solid transparent',
+        background: isOpen ? 'var(--color-primary-bg)' : 'transparent',
+        borderBottom: isOpen ? '2px solid var(--color-primary)' : '2px solid transparent',
         margin: '0 -12px', padding: '0 12px',
       }}
       onClick={(e) => { e.stopPropagation(); onCellClick(); setOpenCell(isOpen ? null : cellId); }}
@@ -538,12 +538,12 @@ export function CalendarTimeCell({ dateISO, time, cellId, openCell, setOpenCell,
       {dateISO ? (
         <>
           <span style={{ fontSize: 13, color: 'var(--color-text-primary)', whiteSpace: 'nowrap' }}>{isoToDisplay(dateISO)}</span>
-          <div style={{ width: 1, height: 14, background: '#D1D5DB', flexShrink: 0 }} />
+          <div style={{ width: 1, height: 14, background: 'var(--color-border-default)', flexShrink: 0 }} />
           <img src="/icon/Clock_selected.svg" alt="" style={{ width: 14, height: 14, flexShrink: 0 }} />
-          <span style={{ fontSize: 13, color: '#3C82F5', whiteSpace: 'nowrap' }}>{displayTime || '--:-- --'}</span>
+          <span style={{ fontSize: 13, color: 'var(--color-primary)', whiteSpace: 'nowrap' }}>{displayTime || '--:-- --'}</span>
         </>
       ) : (
-        <span style={{ fontSize: 13, color: '#B7BECA', whiteSpace: 'nowrap' }}>날짜/시간 선택</span>
+        <span style={{ fontSize: 13, color: 'var(--color-ink-faint)', whiteSpace: 'nowrap' }}>날짜/시간 선택</span>
       )}
       {isOpen && (
         <SmartOverlay triggerRef={triggerRef}>
@@ -553,10 +553,10 @@ export function CalendarTimeCell({ dateISO, time, cellId, openCell, setOpenCell,
             onSelect={(iso) => { onDateChange(iso); }}
             footer={
               <div className="ew-calendar-time-row" onClick={e => e.stopPropagation()}>
-                <span style={{ fontSize: 12, color: '#666E7D', fontFamily: 'var(--font-en)', flexShrink: 0 }}>시간</span>
+                <span style={{ fontSize: 12, color: 'var(--color-ink-soft)', fontFamily: 'var(--font-en)', flexShrink: 0 }}>시간</span>
                 <button
                   onClick={e => { e.stopPropagation(); setTempAmPm(p => p === 'AM' ? 'PM' : 'AM'); }}
-                  style={{ width: 39, height: 32, border: '1px solid #E4E6EA', borderRadius: 6, background: '#F5F7FA', fontSize: 12, fontFamily: 'var(--font-en)', color: '#1A1D23', cursor: 'pointer', flexShrink: 0 }}
+                  style={{ width: 39, height: 32, border: '1px solid var(--color-border-subtle)', borderRadius: 6, background: 'var(--color-bg-subtle)', fontSize: 12, fontFamily: 'var(--font-en)', color: 'var(--color-ink-strong)', cursor: 'pointer', flexShrink: 0 }}
                 >{tempAmPm}</button>
                 <input
                   type="text" className="ew-time-input" style={{ width: 39 }} placeholder="09" maxLength={2} value={tempHH}
@@ -572,7 +572,7 @@ export function CalendarTimeCell({ dateISO, time, cellId, openCell, setOpenCell,
                 <div style={{ flex: 1 }} />
                 <button
                   onClick={e => { e.stopPropagation(); applyTime(); }}
-                  style={{ width: 45, height: 32, background: '#3C82F5', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 500, color: '#fff', cursor: 'pointer', fontFamily: 'var(--font-en)', flexShrink: 0 }}
+                  style={{ width: 45, height: 32, background: 'var(--color-primary)', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 500, color: '#fff', cursor: 'pointer', fontFamily: 'var(--font-en)', flexShrink: 0 }}
                 >Apply</button>
               </div>
             }
@@ -596,14 +596,14 @@ export function CalendarCell({ dateISO, displayDate, cellId, openCell, setOpenCe
       ref={triggerRef}
       style={{
         display: 'flex', alignItems: 'center', gap: 6, height: '100%', cursor: 'pointer',
-        background: isOpen ? '#EEF3FD' : 'transparent',
-        borderBottom: isOpen ? '2px solid #2F6FED' : '2px solid transparent',
+        background: isOpen ? 'var(--color-primary-bg)' : 'transparent',
+        borderBottom: isOpen ? '2px solid var(--color-primary)' : '2px solid transparent',
         margin: '0 -12px', padding: '0 12px',
       }}
       onClick={(e) => { e.stopPropagation(); onCellClick(); setOpenCell(isOpen ? null : cellId); }}
     >
       <img src={isOpen ? '/icon/Calendar_selected.svg' : '/icon/Calendar.svg'} alt="" style={{ width: 14, height: 14, flexShrink: 0 }} />
-      <span style={{ fontSize: 13, color: displayDate ? 'var(--color-text-primary)' : '#B7BECA', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+      <span style={{ fontSize: 13, color: displayDate ? 'var(--color-text-primary)' : 'var(--color-ink-faint)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
         {displayDate || '날짜 선택'}
       </span>
       {isOpen && (
@@ -634,13 +634,13 @@ export function GenderCell({ value, cellId, openCell, setOpenCell, onChange, onC
       ref={triggerRef}
       style={{
         display: 'flex', alignItems: 'center', gap: 4, height: '100%', cursor: 'pointer',
-        background: isOpen ? '#EEF3FD' : 'transparent',
-        borderBottom: isOpen ? '2px solid #2F6FED' : '2px solid transparent',
+        background: isOpen ? 'var(--color-primary-bg)' : 'transparent',
+        borderBottom: isOpen ? '2px solid var(--color-primary)' : '2px solid transparent',
         margin: '0 -12px', padding: '0 12px',
       }}
       onClick={(e) => { e.stopPropagation(); onCellClick(); setOpenCell(isOpen ? null : cellId); }}
     >
-      <span style={{ fontSize: 13, color: value ? '#808080' : '#B7BECA', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+      <span style={{ fontSize: 13, color: value ? 'var(--color-ink-mute)' : 'var(--color-ink-faint)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
         {value || '선택'}
       </span>
       <img src={isOpen ? '/icon/arrowup.svg' : '/icon/arrowdown.svg'} alt="" style={{ width: 14, height: 14, flexShrink: 0 }} />
@@ -661,8 +661,8 @@ export function GenderCell({ value, cellId, openCell, setOpenCell, onChange, onC
 }
 
 // ── TagsCell ──────────────────────────────────────────────────────────────────
-const TAG_BG = ['#E0E9FE','#F0FDF4','#FFF7ED','#FEF2F2'];
-const TAG_CL = ['#3B82F6','#22C55E','#F59E0B','#EF4444'];
+const TAG_BG = ['var(--color-primary-light)','#F0FDF4','#FFF7ED','#FEF2F2'];
+const TAG_CL = ['var(--color-primary)','#22C55E','#F59E0B','#EF4444'];
 
 export function TagsCell({ values }: { values: string[] }) {
   return (
@@ -671,7 +671,7 @@ export function TagsCell({ values }: { values: string[] }) {
         <span key={v} className="ew-tag" style={{ background: TAG_BG[i % 4], color: TAG_CL[i % 4] }}>{v}</span>
       ))}
       {values.length > 3 && (
-        <span className="ew-tag" style={{ background: '#F3F4F6', color: '#6B7280' }}>+{values.length - 3}</span>
+        <span className="ew-tag" style={{ background: 'var(--color-bg-subtle)', color: 'var(--color-ink-soft)' }}>+{values.length - 3}</span>
       )}
     </div>
   );
@@ -680,8 +680,8 @@ export function TagsCell({ values }: { values: string[] }) {
 // ── StatusCell ────────────────────────────────────────────────────────────────
 const STATUS_STYLE: Record<string, { bg: string; color: string }> = {
   '진행중': { bg: 'var(--color-success-light)', color: 'var(--color-success)' },
-  '준비중': { bg: '#EEF3FD',                    color: '#2F6FED' },
-  '종료':   { bg: '#F3F4F6',                    color: '#6B7280' },
+  '준비중': { bg: 'var(--color-primary-bg)',                    color: 'var(--color-primary)' },
+  '종료':   { bg: 'var(--color-bg-subtle)',                    color: 'var(--color-ink-soft)' },
 };
 
 export function StatusCell({ value, options, cellId, openCell, setOpenCell, onChange, onCellClick, onEditDone }: {
@@ -690,7 +690,7 @@ export function StatusCell({ value, options, cellId, openCell, setOpenCell, onCh
   onChange: (v: string) => void; onCellClick: () => void; onEditDone: () => void;
 }) {
   const isOpen = openCell === cellId;
-  const style  = STATUS_STYLE[value] ?? { bg: '#F3F4F6', color: '#6B7280' };
+  const style  = STATUS_STYLE[value] ?? { bg: 'var(--color-bg-subtle)', color: 'var(--color-ink-soft)' };
   const triggerRef = useRef<HTMLDivElement>(null);
   return (
     <div
@@ -760,7 +760,7 @@ function CalendarRangeOverlay({ startISO, endISO, onSelect }: {
   }
 
   const navBtnStyle: React.CSSProperties = {
-    width: 28, height: 28, borderRadius: 6, background: '#F5F7FA',
+    width: 28, height: 28, borderRadius: 6, background: 'var(--color-bg-subtle)',
     border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
   };
 
@@ -780,14 +780,14 @@ function CalendarRangeOverlay({ startISO, endISO, onSelect }: {
 
       // wrapper: shows the range rectangle background
       const wrapBg = isStart && tempEnd
-        ? 'linear-gradient(to right, transparent 50%, #E0E9FE 50%)'
+        ? 'linear-gradient(to right, transparent 50%, var(--color-primary-light) 50%)'
         : isEnd
-        ? 'linear-gradient(to right, #E0E9FE 50%, transparent 50%)'
-        : inRange ? '#E0E9FE' : 'transparent';
+        ? 'linear-gradient(to right, var(--color-primary-light) 50%, transparent 50%)'
+        : inRange ? 'var(--color-primary-light)' : 'transparent';
 
       // button: shows circle or transparent
-      const btnBg    = (isStart || isEnd) ? '#3B82F6' : 'transparent';
-      const btnColor = (isStart || isEnd) ? '#fff' : '#1A1D23';
+      const btnBg    = (isStart || isEnd) ? 'var(--color-primary)' : 'transparent';
+      const btnColor = (isStart || isEnd) ? '#fff' : 'var(--color-ink-strong)';
       const btnWeight = (isStart || isEnd) ? 700 : 400;
 
       return (
@@ -801,7 +801,7 @@ function CalendarRangeOverlay({ startISO, endISO, onSelect }: {
               position: 'relative', zIndex: 1,
             }}
             onClick={e => { e.stopPropagation(); pick(iso); }}
-            onMouseEnter={e => { if (!isStart && !isEnd) (e.currentTarget as HTMLElement).style.background = '#F5F7FA'; }}
+            onMouseEnter={e => { if (!isStart && !isEnd) (e.currentTarget as HTMLElement).style.background = 'var(--color-bg-subtle)'; }}
             onMouseLeave={e => { if (!isStart && !isEnd) (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
           >
             {d}
@@ -817,7 +817,7 @@ function CalendarRangeOverlay({ startISO, endISO, onSelect }: {
         <div style={{ padding: '8px 8px 0' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 36px)', marginBottom: 4 }}>
             {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => (
-              <div key={d} style={{ height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 500, color: '#666E7D', fontFamily: 'var(--font-en)' }}>{d}</div>
+              <div key={d} style={{ height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 500, color: 'var(--color-ink-soft)', fontFamily: 'var(--font-en)' }}>{d}</div>
             ))}
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 36px)' }}>
@@ -835,14 +835,14 @@ function CalendarRangeOverlay({ startISO, endISO, onSelect }: {
         {/* Left panel */}
         <div style={{ minWidth: 284, position: 'relative' }}>
           {/* Header */}
-          <div style={{ display: 'flex', alignItems: 'center', height: 48, padding: '0 8px', borderBottom: '1px solid #E4E6EA' }}>
+          <div style={{ display: 'flex', alignItems: 'center', height: 48, padding: '0 8px', borderBottom: '1px solid var(--color-border-subtle)' }}>
             <button style={navBtnStyle} onClick={e => { e.stopPropagation(); prevMo(); }}>
               <img src="/icon/arrow_fill_left.svg" alt="" style={{ width: 12, height: 12 }} />
             </button>
             <button
-              style={{ flex: 1, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'center', fontSize: 14, fontWeight: 600, color: '#1A1D23', fontFamily: 'var(--font-en)', padding: '0 4px', borderRadius: 4 }}
+              style={{ flex: 1, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'center', fontSize: 14, fontWeight: 600, color: 'var(--color-ink-strong)', fontFamily: 'var(--font-en)', padding: '0 4px', borderRadius: 4 }}
               onClick={e => { e.stopPropagation(); setPickerSide(s => s === 'left' ? null : 'left'); }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#F5F7FA'; }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--color-bg-subtle)'; }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'none'; }}
             >
               {CAL_MONTHS[mo]} {yr}
@@ -860,17 +860,17 @@ function CalendarRangeOverlay({ startISO, endISO, onSelect }: {
         </div>
 
         {/* Divider */}
-        <div style={{ width: 1, background: '#E4E6EA', margin: '15px 0' }} />
+        <div style={{ width: 1, background: 'var(--color-border-subtle)', margin: '15px 0' }} />
 
         {/* Right panel */}
         <div style={{ minWidth: 284, position: 'relative' }}>
           {/* Header */}
-          <div style={{ display: 'flex', alignItems: 'center', height: 48, padding: '0 8px', borderBottom: '1px solid #E4E6EA' }}>
+          <div style={{ display: 'flex', alignItems: 'center', height: 48, padding: '0 8px', borderBottom: '1px solid var(--color-border-subtle)' }}>
             <div style={{ width: 28 }} />
             <button
-              style={{ flex: 1, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'center', fontSize: 14, fontWeight: 600, color: '#1A1D23', fontFamily: 'var(--font-en)', padding: '0 4px', borderRadius: 4 }}
+              style={{ flex: 1, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'center', fontSize: 14, fontWeight: 600, color: 'var(--color-ink-strong)', fontFamily: 'var(--font-en)', padding: '0 4px', borderRadius: 4 }}
               onClick={e => { e.stopPropagation(); setPickerSide(s => s === 'right' ? null : 'right'); }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#F5F7FA'; }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--color-bg-subtle)'; }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'none'; }}
             >
               {CAL_MONTHS[rightMo]} {rightYr}
@@ -898,7 +898,7 @@ function CalendarRangeOverlay({ startISO, endISO, onSelect }: {
       <div style={{ padding: '0 16px 17px' }}>
         <button
           style={{
-            width: '100%', height: 32, background: '#3B82F6', border: 'none', borderRadius: 6,
+            width: '100%', height: 32, background: 'var(--color-primary)', border: 'none', borderRadius: 6,
             color: '#fff', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'var(--font-en)',
           }}
           onClick={e => {
@@ -930,14 +930,14 @@ export function CalendarRangeCell({ value, cellId, openCell, setOpenCell, onSave
       ref={triggerRef}
       style={{
         display: 'flex', alignItems: 'center', gap: 6, height: '100%', cursor: 'pointer', position: 'relative',
-        background: isOpen ? '#EEF3FD' : 'transparent',
-        borderBottom: isOpen ? '2px solid #2F6FED' : '2px solid transparent',
+        background: isOpen ? 'var(--color-primary-bg)' : 'transparent',
+        borderBottom: isOpen ? '2px solid var(--color-primary)' : '2px solid transparent',
         margin: '0 -12px', padding: '0 12px',
       }}
       onClick={e => { e.stopPropagation(); onCellClick(); setOpenCell(isOpen ? null : cellId); }}
     >
       <img src={isOpen ? '/icon/Calendar_selected.svg' : '/icon/Calendar.svg'} alt="" style={{ width: 14, height: 14, flexShrink: 0 }} />
-      <span style={{ fontSize: 13, color: startISO ? 'var(--color-text-primary)' : '#B7BECA', whiteSpace: 'nowrap' }}>{display}</span>
+      <span style={{ fontSize: 13, color: startISO ? 'var(--color-text-primary)' : 'var(--color-ink-faint)', whiteSpace: 'nowrap' }}>{display}</span>
       {isOpen && (
         <SmartOverlay triggerRef={triggerRef}>
           <CalendarRangeOverlay
