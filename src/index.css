@@ -988,9 +988,11 @@ table { font-feature-settings: 'tnum' 1, 'cv11' 1; }
   background: var(--color-canvas);
   border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-lg);
-  overflow: hidden;
   box-shadow: var(--shadow-pop);
   min-width: 180px;
+  max-height: 240px;
+  overflow-y: auto;
+  padding: var(--space-1) 0;
 }
 .ew-filter-pill-item {
   height: 36px;

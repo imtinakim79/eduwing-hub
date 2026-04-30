@@ -13,6 +13,7 @@ import { useDirtyForm } from '../hooks/useDirtyForm';
 import StickySaveBar from '../components/StickySaveBar';
 import { useDirtyGuard } from '../hooks/useDirtyGuard';
 import Card from '../components/Card';
+import { DropdownCell } from '../components/board/cells';
 
 const LOCATIONS = ['나트랑', '다낭', '세부', '발리', '방콕', '싱가포르', '코타키나발루'];
 const STATUSES  = ['진행중', '준비중', '종료'];
@@ -66,13 +67,28 @@ function DisabledInput({ value, placeholder }: { value: string; placeholder?: st
   return <input style={disabledStyle} value={value} placeholder={placeholder} disabled readOnly />;
 }
 
-function SelectInput({ value, onChange, placeholder, options }: { value: string; onChange: (v: string) => void; placeholder?: string; options: string[] }) {
+function SelectInput({ value, onChange, placeholder, options, cellId, openCell, setOpenCell }: {
+  value: string; onChange: (v: string) => void; placeholder?: string; options: string[];
+  cellId: string;
+  openCell: string | null;
+  setOpenCell: (id: string | null) => void;
+}) {
   return (
-    <select style={{ ...inputStyle, color: value ? 'var(--color-text-primary)' : 'var(--color-ink-mute)', cursor: 'pointer' }}
-      value={value} onChange={e => onChange(e.target.value)}>
-      <option value="" disabled hidden>{placeholder}</option>
-      {options.map(o => <option key={o} value={o}>{o}</option>)}
-    </select>
+    <div className="ew-form-cell" style={{ height: 40, overflow: 'hidden' }}>
+      <DropdownCell
+        value={value}
+        options={options}
+        cellId={cellId}
+        openCell={openCell}
+        setOpenCell={setOpenCell}
+        onChange={onChange}
+        onCellClick={() => {}}
+        onEditDone={() => {}}
+      />
+      {!value && placeholder && (
+        <span aria-hidden style={{ display: 'none' }}>{placeholder}</span>
+      )}
+    </div>
   );
 }
 
@@ -96,6 +112,7 @@ export default function CampCreatePage({ camps, editCampId, allStudents = [], on
   const existingCamp = editCampId ? camps.find(c => c.id === editCampId) ?? null : null;
 
   const [draftId] = useState<string>(() => editCampId ?? `CAMP-${Date.now()}`);
+  const [openCell, setOpenCell] = useState<string | null>(null);
 
   const [classes,                setClasses]                = useState<ClassLevel[]>(() => loadClasses(editCampId ?? ''));
   const [activeTimetableClassId, setActiveTimetableClassId] = useState<string | null>(() => {
@@ -194,7 +211,7 @@ export default function CampCreatePage({ camps, editCampId, allStudents = [], on
               <TextInput value={form.code} onChange={set('code')} placeholder="캠프를 구분할 코드를 입력하세요. (ex. N26S)" />
             </Field>
             <Field label="지역" required dirty={isEdit && isFieldDirty('location')}>
-              <SelectInput value={form.location} onChange={set('location')} placeholder="캠프지역을 선택해주세요." options={LOCATIONS} />
+              <SelectInput value={form.location} onChange={set('location')} options={LOCATIONS} cellId="camp-location" openCell={openCell} setOpenCell={setOpenCell} />
             </Field>
             <Field label="기간">
               <DisabledInput
@@ -220,7 +237,7 @@ export default function CampCreatePage({ camps, editCampId, allStudents = [], on
               <DisabledInput value={form.staff} placeholder="스탭&강사 탭에서 자동 입력" />
             </Field>
             <Field label="상태" required dirty={isEdit && isFieldDirty('status')}>
-              <SelectInput value={form.status} onChange={set('status')} placeholder="현재 상태를 선택해주세요." options={STATUSES} />
+              <SelectInput value={form.status} onChange={set('status')} options={STATUSES} cellId="camp-status" openCell={openCell} setOpenCell={setOpenCell} />
             </Field>
             <div style={{ flex: 2 }} />
           </div>

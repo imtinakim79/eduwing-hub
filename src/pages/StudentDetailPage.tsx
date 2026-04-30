@@ -556,17 +556,22 @@ export default function StudentDetailPage({
                         onCellClick={() => {}} onEditDone={() => {}}
                       />
                     </CellBox>
-                    <CellBox style={{ flex: 1, background: extraBedDisabled ? 'var(--color-bg-subtle)' : '#fff' }}>
-                      <select
-                        value={extraBedDisabled ? '없음' : r.extraBed}
-                        disabled={extraBedDisabled}
-                        onChange={e => updateRoom(r.id, 'extraBed', e.target.value)}
-                        style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent', fontSize: 'var(--text-base)', fontFamily: 'var(--font-ko)', color: r.extraBed ? 'var(--color-ink-strong)' : 'var(--color-ink-faint)', cursor: extraBedDisabled ? 'not-allowed' : 'pointer' }}
-                      >
-                        <option value="" disabled>선택</option>
-                        {['있음', '없음'].map(o => <option key={o} value={o}>{o}</option>)}
-                      </select>
-                    </CellBox>
+                    {extraBedDisabled ? (
+                      <CellBox style={{ flex: 1, background: 'var(--color-bg-subtle)', cursor: 'not-allowed' }}>
+                        <span style={{ flex: 1, fontSize: 'var(--text-base)', color: 'var(--color-ink-mute)' }}>없음</span>
+                      </CellBox>
+                    ) : (
+                      <CellBox style={{ flex: 1 }}>
+                        <DropdownCell
+                          value={r.extraBed}
+                          options={['있음', '없음']}
+                          cellId={`room-extra-${r.id}`}
+                          openCell={openCell} setOpenCell={setOpenCell}
+                          onChange={v => updateRoom(r.id, 'extraBed', v)}
+                          onCellClick={() => {}} onEditDone={() => {}}
+                        />
+                      </CellBox>
+                    )}
                     <button
                       onClick={() => setRoomCount(rooms.length - 1)}
                       disabled={rooms.length === 1}
@@ -665,15 +670,17 @@ export default function StudentDetailPage({
                         />
                       </div>
                       {/* Pick&Drop */}
-                      <div style={{ ...cellBase, flex: 1, minWidth: 160, borderRight: 'none', padding: '0 10px', gap: 6 }}>
-                        <select
-                          value={row.pickDrop}
-                          onChange={e => onChange({ ...row, pickDrop: e.target.value, pickDropPlace: e.target.value === '없음' ? '' : row.pickDropPlace })}
-                          style={{ border: 'none', outline: 'none', background: 'transparent', fontSize: 'var(--text-sm)', fontFamily: 'var(--font-ko)', color: row.pickDrop ? 'var(--color-ink-strong)' : 'var(--color-ink-faint)', cursor: 'pointer', flexShrink: 0 }}
-                        >
-                          <option value="" disabled>선택</option>
-                          {(rowKey === 'dep' ? ['픽업', '없음'] : ['드랍', '없음']).map(o => <option key={o} value={o}>{o}</option>)}
-                        </select>
+                      <div style={{ ...cellBase, flex: 1, minWidth: 160, borderRight: 'none', padding: '0 12px', gap: 6, overflow: 'hidden' }}>
+                        <div style={{ width: row.pickDrop && row.pickDrop !== '없음' ? 70 : '100%', flexShrink: 0, height: '100%' }}>
+                          <DropdownCell
+                            value={row.pickDrop}
+                            options={rowKey === 'dep' ? ['픽업', '없음'] : ['드랍', '없음']}
+                            cellId={`${rowKey}-pickdrop`}
+                            openCell={ftOpenCell} setOpenCell={setFtOpenCell}
+                            onChange={v => onChange({ ...row, pickDrop: v, pickDropPlace: v === '없음' ? '' : row.pickDropPlace })}
+                            onCellClick={() => {}} onEditDone={() => {}}
+                          />
+                        </div>
                         {row.pickDrop && row.pickDrop !== '없음' && (
                           <>
                             <div style={{ width: 1, height: 14, background: 'var(--color-border-subtle)', flexShrink: 0 }} />

@@ -111,7 +111,7 @@ export function FilterPill({
         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {displayLabel}
         </span>
-        <img src="/icon/arrowup.svg" alt="" width={16} height={16} style={{ flexShrink: 0 }} />
+        <img src={open ? '/icon/arrowup.svg' : '/icon/arrowdown.svg'} alt="" width={16} height={16} style={{ flexShrink: 0, opacity: 0.65 }} />
       </button>
 
       {open && (
