@@ -192,7 +192,7 @@ export default function App() {
 
   return (
     <UndoToastProvider>
-    <div style={{ minHeight: '100vh', background: '#fff', overflowX: 'auto' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--color-paper)' }}>
       <TopNav activePage={page} onNavigate={(key) => navigate(key as Page, { editId: '', campId: '', studentId: '', tab: 'Students' })} />
 
       <main>
