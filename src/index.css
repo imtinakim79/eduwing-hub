@@ -1,70 +1,224 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700;900&family=Roboto:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css');
 @import "tailwindcss";
 
 /* ============================================================
    EduWing Hub — Design System Tokens & Global Styles
-   Based on Figma: EduWing-Hub (node 35:964)
+   Direction: Modern Minimal — charcoal/cream surfaces + teal accent.
+   기존 토큰명은 alias로 유지 (ew-* 컴포넌트들이 그대로 동작)
    ============================================================ */
 
 :root {
-  /* Primary */
-  --color-primary:        #3B82F6;
-  --color-primary-hover:  #2563EB;
-  --color-primary-light:  #E0E9FE;
-  --color-primary-bg:     #F0F5FF;
+  /* ── Surface ──────────────────────────────────────────────── */
+  --color-paper:          #FAFAF7;  /* page background — 살짝 따뜻한 크림 */
+  --color-canvas:         #FFFFFF;  /* card / panel surface */
+  --color-bg-subtle:      #F4F4EF;  /* hover, table head */
+  --color-bg-quiet:       #ECECE6;  /* disabled, muted block */
 
-  /* Semantic */
-  --color-error:          #EF4444;
-  --color-error-light:    #FEF2F2;
-  --color-error-border:   #FF7070;
-  --color-success:        #22C55E;
-  --color-success-light:  #F0FDF4;
-  --color-warning:        #F59E0B;
-  --color-warning-light:  #FFF7ED;
+  /* ── Ink (text) ───────────────────────────────────────────── */
+  --color-ink-strong:     #0F1115;
+  --color-ink:            #1F2228;
+  --color-ink-soft:       #525866;
+  --color-ink-mute:       #8B92A0;
+  --color-ink-faint:      #B5BAC5;
 
-  /* Neutrals */
-  --color-bg-white:       #FFFFFF;
-  --color-bg-gray:        #F5F7FA;
-  --color-bg-table-head:  #F8F9FB;
-  --color-bg-disabled:    #F3F4F6;
+  /* ── Primary (teal accent) ────────────────────────────────── */
+  --color-primary:        #0EA5A4;
+  --color-primary-hover:  #0B8989;
+  --color-primary-strong: #0A6A6A;
+  --color-primary-light:  #DDF2F1;
+  --color-primary-bg:     #ECF8F7;
 
-  /* Text */
-  --color-text-primary:   #1A1D23;
-  --color-text-dark:      #263238;
-  --color-text-medium:    #434446;
-  --color-text-sub:       #6B7280;
-  --color-text-muted:     #8C99AB;
-  --color-text-placeholder: #808080;
-  --color-text-nav:       #646E7D;
+  /* ── Status ───────────────────────────────────────────────── */
+  --color-error:          #C0392B;
+  --color-error-light:    #FBE9E7;
+  --color-success:        #16A66B;
+  --color-success-light:  #E5F4EC;
+  --color-warning:        #C97F1A;
+  --color-warning-light:  #FBEFDD;
 
-  /* Border */
-  --color-border-default: #D1D5DB;
-  --color-border-hover:   #9CA3AF;
-  --color-border-focus:   #3B82F6;
-  --color-border-table:   #E2E5EA;
-  --color-border-light:   #E5EAF0;
-  --color-border-divider: #E6EFF5;
+  /* ── Border ───────────────────────────────────────────────── */
+  --color-border-strong:  #C4C4BD;
+  --color-border-default: #DCDCD6;
+  --color-border-subtle:  #E8E8E3;
+  --color-border-faint:   #F1F1EC;
+  --color-border-focus:   var(--color-primary);
 
-  /* Shadow */
-  --shadow-filter: 0px 4px 8px 0px rgba(16,24,40,0.10), 0px 2px 4px 0px rgba(16,24,40,0.06);
-  --shadow-card:   0px 2px 8px 0px rgba(0,0,0,0.06);
+  /* ── Shadow (한 방향 강조 + hairline) ─────────────────────── */
+  --shadow-soft:    0 1px 2px rgba(15, 17, 21, 0.04), 0 0 0 1px rgba(15, 17, 21, 0.04);
+  --shadow-card:    0 2px 8px rgba(15, 17, 21, 0.06), 0 0 0 1px rgba(15, 17, 21, 0.04);
+  --shadow-pop:     0 8px 24px rgba(15, 17, 21, 0.10), 0 0 0 1px rgba(15, 17, 21, 0.06);
+  --shadow-focus-ring: 0 0 0 3px rgba(14, 165, 164, 0.18);
 
-  /* Typography */
-  --font-sans:  'Inter', 'Noto Sans KR', 'Roboto', sans-serif;
-  --font-ko:    'Noto Sans KR', sans-serif;
-  --font-en:    'Inter', sans-serif;
-  --font-input: 'Roboto', sans-serif;
+  /* ── Typography ───────────────────────────────────────────── */
+  --font-sans:    'Manrope', 'Pretendard Variable', 'Pretendard', system-ui, sans-serif;
+  --font-display: 'Manrope', 'Pretendard Variable', 'Pretendard', system-ui, sans-serif;
+  --font-ko:      'Pretendard Variable', 'Pretendard', 'Manrope', system-ui, sans-serif;
+  --font-en:      'Manrope', 'Pretendard Variable', system-ui, sans-serif;
+  --font-mono:    'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
+  --font-input:   'JetBrains Mono', 'Manrope', sans-serif;
+
+  /* ── Type scale (modular, 1.125 ratio around 14px base) ─── */
+  --text-2xs:    10px;
+  --text-xs:     11px;
+  --text-sm:     12px;
+  --text-base:   13px;
+  --text-md:     14px;
+  --text-lg:     16px;
+  --text-xl:     18px;
+  --text-2xl:    20px;
+  --text-3xl:    24px;
+  --text-4xl:    28px;
+  --text-5xl:    34px;
+
+  --leading-tight: 1.2;
+  --leading-snug:  1.35;
+  --leading-base:  1.5;
+  --leading-loose: 1.7;
+
+  --tracking-tight: -0.01em;
+  --tracking-base:  0;
+  --tracking-wide:  0.02em;
+
+  /* ── Spacing scale (4px base, 8-column rhythm) ──────────── */
+  --space-0:   0;
+  --space-1:   4px;
+  --space-2:   8px;
+  --space-3:   12px;
+  --space-4:   16px;
+  --space-5:   20px;
+  --space-6:   24px;
+  --space-7:   32px;
+  --space-8:   40px;
+  --space-9:   48px;
+  --space-10:  64px;
+  --space-11:  80px;
+  --space-12:  96px;
+
+  /* ── Radius ──────────────────────────────────────────────── */
+  --radius-xs:  3px;
+  --radius-sm:  4px;
+  --radius-md:  6px;
+  --radius-lg:  8px;
+  --radius-xl:  12px;
+  --radius-pill: 999px;
+
+  /* ── Layout & responsiveness ────────────────────────────── */
+  --container-max:     1440px;
+  --container-wide:    1280px;
+  --container-narrow:  1080px;
+  --container-content:  840px;
+
+  --page-px:           40px;
+  --page-px-tight:     24px;
+  --page-px-mobile:    16px;
+
+  --header-h:          56px;
+  --topnav-h:          64px;
+  --filter-bar-h:      52px;
+  --table-row-h:       48px;
+  --cell-h:            48px;
+  --field-h-sm:        32px;
+  --field-h-md:        40px;
+  --field-h-lg:        48px;
+
+  --tap-target:        40px;  /* 최소 터치/클릭 영역 */
+
+  /* ── Z-index scale ──────────────────────────────────────── */
+  --z-base:        0;
+  --z-raised:      10;
+  --z-dropdown:    50;
+  --z-sticky-bar:  60;
+  --z-toast:       70;
+  --z-modal:       80;
+  --z-overlay:     90;
+
+  /* ── Transition ─────────────────────────────────────────── */
+  --ease-out:     cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out:  cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring:  cubic-bezier(0.32, 0.72, 0.35, 1);
+  --dur-fast:     120ms;
+  --dur-base:     180ms;
+  --dur-slow:     240ms;
+
+  /* ───────────────────────────────────────────────────────────
+     Legacy alias — 기존 ew-* 컴포넌트가 참조하던 토큰명을 매핑
+     (점진 마이그레이션을 위해 유지. 새 코드는 위쪽 토큰 사용)
+     ─────────────────────────────────────────────────────────── */
+  --color-bg-white:        var(--color-canvas);
+  --color-bg-gray:         var(--color-paper);
+  --color-bg-table-head:   var(--color-bg-subtle);
+  --color-bg-disabled:     var(--color-bg-quiet);
+
+  --color-text-primary:    var(--color-ink-strong);
+  --color-text-dark:       var(--color-ink);
+  --color-text-medium:     var(--color-ink);
+  --color-text-sub:        var(--color-ink-soft);
+  --color-text-muted:      var(--color-ink-mute);
+  --color-text-placeholder: var(--color-ink-faint);
+  --color-text-nav:        var(--color-ink-soft);
+
+  --color-border-hover:    var(--color-ink-mute);
+  --color-border-table:    var(--color-border-subtle);
+  --color-border-light:    var(--color-border-faint);
+  --color-border-divider:  var(--color-border-faint);
+
+  --color-error-border:    var(--color-error);
+
+  --shadow-filter:         var(--shadow-pop);
 }
 
 * { box-sizing: border-box; }
 
+html { color-scheme: light; }
+
 body {
   font-family: var(--font-sans);
-  background: var(--color-bg-white);
-  color: var(--color-text-primary);
+  font-size: var(--text-base);
+  line-height: var(--leading-base);
+  letter-spacing: var(--tracking-tight);
+  background: var(--color-paper);
+  color: var(--color-ink-strong);
   margin: 0;
   padding: 0;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* 입력 요소가 폰트를 상속하도록 (브라우저 기본 무시) */
+input, button, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+}
+
+/* 숫자/날짜는 모노로 — 보드 셀 가독성 */
+input[type="number"],
+input[type="tel"],
+input[type="date"],
+.ew-mono,
+.ew-input--num {
+  font-family: var(--font-mono);
+  letter-spacing: var(--tracking-base);
+  font-feature-settings: 'tnum' 1;
+}
+
+/* 표 안의 숫자 정렬을 위한 tabular figures */
+table { font-feature-settings: 'tnum' 1, 'cv11' 1; }
+
+/* 키보드 포커스 강조 — 스크린리더/접근성 */
+:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus-ring);
+  border-radius: var(--radius-sm);
+}
+
+/* 텍스트 선택 */
+::selection {
+  background: var(--color-primary-light);
+  color: var(--color-ink-strong);
 }
 
 #root {
