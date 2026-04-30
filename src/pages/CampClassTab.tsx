@@ -61,8 +61,7 @@ function StudentRow({
   const name = student.name_ko || student.name_en || '-';
   return (
     <label style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 0', cursor: 'pointer', borderBottom: '1px solid var(--color-border-faint)' }}>
-      <input type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)}
-        style={{ width: 15, height: 15, cursor: 'pointer', accentColor: 'var(--color-primary)' }} />
+      <input type="checkbox" className="ew-checkbox" checked={checked} onChange={e => onChange(e.target.checked)} />
       <span style={{ fontSize: 'var(--text-base)', fontFamily: 'var(--font-ko)', color: 'var(--color-text-primary)' }}>{name}</span>
       {student.name_en && student.name_ko && (
         <span style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)', fontFamily: 'var(--font-en)' }}>{student.name_en}</span>

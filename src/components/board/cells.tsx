@@ -126,19 +126,8 @@ function DropdownItem({ label, selected, onClick }: {
       className={`ew-dropdown-item${selected ? ' selected' : ''}`}
       onClick={onClick}
     >
-      {/* custom checkbox visual */}
-      <div style={{
-        width: 16, height: 16, flexShrink: 0, borderRadius: 2,
-        border: selected ? 'none' : '1px solid var(--color-ink-mute)',
-        background: selected ? 'var(--color-primary)' : '#fff',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-      }}>
-        {selected && (
-          <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-            <path d="M1 3.5L3.8 6.5L9 1" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        )}
-      </div>
+      {/* 표시 전용 체크박스 — ew-checkbox.is-checked로 디자인 시스템 통일 */}
+      <span className={`ew-checkbox${selected ? ' is-checked' : ''}`} aria-hidden style={{ pointerEvents: 'none' }} />
       <span>{label}</span>
     </div>
   );
@@ -233,18 +222,7 @@ export function MultiDropdownCell({ values, options, cellId, openCell, setOpenCe
         <SmartOverlay triggerRef={triggerRef} onOutsideClick={() => setOpenCell(null)}>
           <div className="ew-dropdown-multi-overlay" onClick={e => e.stopPropagation()}>
             <div className={`ew-dropdown-item${allSelected ? ' selected' : ''}`} onClick={e => { e.stopPropagation(); toggleAll(); }}>
-              <div style={{
-                width: 16, height: 16, flexShrink: 0, borderRadius: 2,
-                border: allSelected ? 'none' : '1px solid var(--color-ink-mute)',
-                background: allSelected ? 'var(--color-primary)' : '#fff',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                {allSelected && (
-                  <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                    <path d="M1 3.5L3.8 6.5L9 1" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                )}
-              </div>
+              <span className={`ew-checkbox${allSelected ? ' is-checked' : ''}`} aria-hidden style={{ pointerEvents: 'none' }} />
               <span>All</span>
             </div>
             {options.map(opt => (

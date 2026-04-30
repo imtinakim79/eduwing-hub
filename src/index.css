@@ -362,9 +362,12 @@ table { font-feature-settings: 'tnum' 1, 'cv11' 1; }
    CHECKBOX
    ============================================================ */
 
+/* ew-checkbox — 어드민 전체 체크박스 단일 패턴
+   input[type=checkbox] 또는 div 등 표시 전용 element에 모두 적용 가능.
+   표시 전용은 .ew-checkbox.is-checked 로 체크 상태 흉내. */
 .ew-checkbox {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
   border: 1px solid var(--color-ink-mute);
   border-radius: 2px;
   appearance: none;
@@ -373,22 +376,44 @@ table { font-feature-settings: 'tnum' 1, 'cv11' 1; }
   background: var(--color-canvas);
   position: relative;
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition: background var(--dur-fast) var(--ease-out),
               border-color var(--dur-fast) var(--ease-out);
 }
 .ew-checkbox:hover:not(:disabled) { border-color: var(--color-primary); }
-.ew-checkbox:checked { background: var(--color-primary); border-color: var(--color-primary); }
-.ew-checkbox:checked:hover:not(:disabled) { background: var(--color-primary-hover); border-color: var(--color-primary-hover); }
-.ew-checkbox:checked::after {
+
+.ew-checkbox:checked,
+.ew-checkbox.is-checked {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+.ew-checkbox:checked:hover:not(:disabled),
+.ew-checkbox.is-checked:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+}
+
+/* check mark — DropdownItem의 svg와 같은 곡선
+   path: M3 8.5 L6.8 11.5 L13 5 (16x16 viewBox 기준)
+   CSS pseudo로 같은 시각 만들기: 회전한 ㄴ자 */
+.ew-checkbox:checked::after,
+.ew-checkbox.is-checked::after {
   content: '';
   position: absolute;
-  left: 2px; top: 1px;
-  width: 7px; height: 4px;
-  border-left: 1.5px solid #fff;
-  border-bottom: 1.5px solid #fff;
+  left: 4px;
+  top: 3px;
+  width: 8px;
+  height: 4.5px;
+  border-left: 1.6px solid #fff;
+  border-bottom: 1.6px solid #fff;
   transform: rotate(-45deg);
+  border-bottom-left-radius: 1px;
 }
-.ew-checkbox:disabled {
+
+.ew-checkbox:disabled,
+.ew-checkbox.is-disabled {
   background: var(--color-bg-quiet);
   border-color: var(--color-border-default);
   cursor: not-allowed;
