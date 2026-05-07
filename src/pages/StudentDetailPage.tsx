@@ -9,7 +9,7 @@ import { useDirtyForm } from '../hooks/useDirtyForm';
 import { useDirtyGuard } from '../hooks/useDirtyGuard';
 import Card from '../components/Card';
 
-interface FamilyMember { id: string; name: string; relation: string; relationCustom?: string; }
+interface FamilyMember { id: string; name: string; relation: string; relationCustom?: string; isGuardian?: boolean; contact?: string; email?: string; }
 interface RoomEntry { id: string; roomType: string; extraBed: string; }
 interface FlightRow {
   flightNo: string;
@@ -156,7 +156,7 @@ export default function StudentDetailPage({
 
   const emptyFlight: FlightRow = { flightNo: '', dateEntry: '', timeEntry: '', dateReturn: '', timeReturn: '', pickDrop: '', pickDropPlace: '' };
   const defaultRooms: RoomEntry[] = [{ id: 'r1', roomType: '', extraBed: '' }];
-  const defaultFamily: FamilyMember[] = [{ id: 'guardian', name: student.guardian.name, relation: relLabel(student.guardian.relation) }];
+  const defaultFamily: FamilyMember[] = [{ id: 'guardian', name: student.guardian.name, relation: relLabel(student.guardian.relation), isGuardian: true, contact: student.guardian.contact, email: student.guardian.email }];
 
   function updateCampRecord(campId: string, patch: Partial<Omit<CampRecord, 'camp_id'>>): Student {
     const existing = student.camp_records.find(r => r.camp_id === campId);
@@ -170,7 +170,16 @@ export default function StudentDetailPage({
   function loadFamily() {
     try {
       const raw = localStorage.getItem(familyKey);
-      return raw ? JSON.parse(raw) : null;
+      if (!raw) return null;
+      const data: FamilyMember[] = JSON.parse(raw);
+      // 마이그레이션: isGuardian 플래그 없는 구버전 데이터 처리
+      if (!data.some(m => m.isGuardian)) {
+        return data.map(m => m.id === 'guardian'
+          ? { ...m, isGuardian: true, contact: m.contact ?? student.guardian.contact, email: m.email ?? student.guardian.email }
+          : m
+        );
+      }
+      return data;
     } catch { return null; }
   }
 
@@ -285,11 +294,16 @@ export default function StudentDetailPage({
     localStorage.setItem(familyKey, JSON.stringify(draft.members));
     familyForm.sync(draft);
     clearFamilyGuard();
+    // 보호자 변경 시 student.guardian 동기화
+    const gm = draft.members.find(m => m.isGuardian);
+    if (gm && onStudentUpdate) {
+      onStudentUpdate({ ...student, guardian: { name: gm.name, relation: gm.relation, contact: gm.contact ?? '', email: gm.email ?? '' } });
+    }
   }
   function resetFamily() {
-    familyForm.setDraft({ members: defaultFamily });
+    familyForm.setDraft({ members: loadFamily() ?? defaultFamily });
   }
-  function updateFamily(id: string, field: 'name' | 'relation' | 'relationCustom', val: string) {
+  function updateFamily(id: string, field: 'name' | 'relation' | 'relationCustom' | 'contact' | 'email', val: string) {
     setFamilyMembers(p => p.map(m => m.id === id ? { ...m, [field]: val } : m));
   }
   function addFamily() {
@@ -297,6 +311,32 @@ export default function StudentDetailPage({
   }
   function removeFamily(id: string) {
     setFamilyMembers(p => p.filter(m => m.id !== id));
+  }
+  // 보호자 지정 상태
+  const [assigningId, setAssigningId] = useState<string | null>(null);
+  const [assignContact, setAssignContact] = useState('');
+  const [assignEmail, setAssignEmail] = useState('');
+  function startAssign(id: string) {
+    const m = familyMembers.find(f => f.id === id);
+    if (!m) return;
+    if (m.contact && m.email) {
+      setFamilyMembers(p => p.map(f => ({ ...f, isGuardian: f.id === id })));
+      return;
+    }
+    setAssigningId(id);
+    setAssignContact(m.contact ?? '');
+    setAssignEmail(m.email ?? '');
+  }
+  function confirmAssign() {
+    if (!assigningId) return;
+    setFamilyMembers(p => p.map(f =>
+      f.id === assigningId
+        ? { ...f, isGuardian: true, contact: assignContact, email: assignEmail }
+        : { ...f, isGuardian: false }
+    ));
+    setAssigningId(null);
+    setAssignContact('');
+    setAssignEmail('');
   }
 
   // ── FlightTable rows (inline to avoid nested-component remount issue) ───────
@@ -711,71 +751,173 @@ export default function StudentDetailPage({
             onCancel={familyForm.reset}
             dirty={familyForm.isDirty}
           >
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center', paddingBottom: 4 }}>
-                <span style={{ width: 40, fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--color-ink-soft)', letterSpacing: 'var(--tracking-wide)', textTransform: 'uppercase' }}>No.</span>
-                <span style={{ flex: 1, fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--color-ink-soft)', letterSpacing: 'var(--tracking-wide)' }}>이름</span>
-                <span style={{ flex: 1, fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--color-ink-soft)', letterSpacing: 'var(--tracking-wide)' }}>관계</span>
-                <div style={{ width: 32 }} />
-              </div>
-              <div style={{ height: 1, background: 'var(--color-border-subtle)' }} />
-              {familyMembers.map((m, i) => (
-                <div key={m.id} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                  <span style={{ width: 40, fontSize: 'var(--text-base)', color: 'var(--color-ink-mute)', fontFamily: 'var(--font-en)', textAlign: 'center', flexShrink: 0 }}>{i + 1}</span>
-                  <div style={{ flex: 1 }}>
-                    <TextFieldCell placeholder="이름을 입력하세요." value={m.name} onChange={v => updateFamily(m.id, 'name', v)} />
-                  </div>
-                  <div style={{ flex: 1, display: 'flex', gap: 0 }}>
-                    <CellBox style={{ flex: 1 }}>
-                      <DropdownCell
-                        value={m.relation} options={RELATION_OPTIONS}
-                        cellId={`fam-${m.id}-rel`}
-                        openCell={openCell} setOpenCell={setOpenCell}
-                        onChange={v => { updateFamily(m.id, 'relation', v); if (v !== '기타') updateFamily(m.id, 'relationCustom', ''); }}
-                        onCellClick={() => {}} onEditDone={() => {}}
-                      />
-                    </CellBox>
-                    {m.relation === '기타' && (
-                      <input
-                        placeholder="직접 입력"
-                        value={m.relationCustom ?? ''}
-                        onChange={e => updateFamily(m.id, 'relationCustom', e.target.value)}
-                        style={{
-                          width: 110, height: CELL_H, flexShrink: 0,
-                          borderBottom: '1px solid var(--color-border-subtle)', borderRight: '1px solid var(--color-border-subtle)',
-                          borderTop: 'none', borderLeft: '1px solid var(--color-border-subtle)',
-                          outline: 'none', padding: '0 10px',
-                          fontSize: 'var(--text-base)', fontFamily: 'var(--font-ko)',
-                          color: 'var(--color-text-primary)', background: 'var(--color-canvas)',
-                        }}
-                      />
-                    )}
-                  </div>
-                  <button
-                    onClick={() => removeFamily(m.id)}
-                    disabled={m.id === 'guardian'}
-                    style={{
-                      width: 32, height: 32, borderRadius: 6, border: '1px solid var(--color-border-subtle)',
-                      background: m.id === 'guardian' ? 'var(--color-bg-subtle)' : '#fff',
-                      color: m.id === 'guardian' ? 'var(--color-border-default)' : 'var(--color-error)',
-                      cursor: m.id === 'guardian' ? 'not-allowed' : 'pointer',
-                      fontSize: 'var(--text-lg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                    }}
-                  >×</button>
+            {(() => {
+              const guardian = familyMembers.find(m => m.isGuardian);
+              const others   = familyMembers.filter(m => !m.isGuardian);
+
+              const subLabel: React.CSSProperties = {
+                fontSize: 'var(--text-xs)', fontWeight: 700, color: 'var(--color-ink-soft)',
+                letterSpacing: 'var(--tracking-wide)', textTransform: 'uppercase',
+                fontFamily: 'var(--font-ko)', whiteSpace: 'nowrap',
+                marginBottom: 2,
+              };
+              const colHd: React.CSSProperties = {
+                fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--color-ink-soft)',
+                letterSpacing: 'var(--tracking-wide)',
+              };
+              const relationInput = (m: FamilyMember) => (
+                <div style={{ flex: 1, display: 'flex', gap: 0 }}>
+                  <CellBox style={{ flex: 1 }}>
+                    <DropdownCell
+                      value={m.relation} options={RELATION_OPTIONS}
+                      cellId={`fam-${m.id}-rel`}
+                      openCell={openCell} setOpenCell={setOpenCell}
+                      onChange={v => { updateFamily(m.id, 'relation', v); if (v !== '기타') updateFamily(m.id, 'relationCustom', ''); }}
+                      onCellClick={() => {}} onEditDone={() => {}}
+                    />
+                  </CellBox>
+                  {m.relation === '기타' && (
+                    <input
+                      placeholder="직접 입력"
+                      value={m.relationCustom ?? ''}
+                      onChange={e => updateFamily(m.id, 'relationCustom', e.target.value)}
+                      style={{
+                        width: 110, height: CELL_H, flexShrink: 0,
+                        borderBottom: '1px solid var(--color-border-subtle)', borderRight: '1px solid var(--color-border-subtle)',
+                        borderTop: 'none', borderLeft: '1px solid var(--color-border-subtle)',
+                        outline: 'none', padding: '0 10px',
+                        fontSize: 'var(--text-base)', fontFamily: 'var(--font-ko)',
+                        color: 'var(--color-text-primary)', background: 'var(--color-canvas)',
+                      }}
+                    />
+                  )}
                 </div>
-              ))}
-              <button
-                onClick={addFamily}
-                style={{
-                  marginTop: 4, height: 36, border: '1px dashed var(--color-border-default)', borderRadius: 6,
-                  background: 'var(--color-bg-subtle)', cursor: 'pointer', fontSize: 'var(--text-base)', fontWeight: 500,
-                  color: 'var(--color-ink-soft)', fontFamily: 'var(--font-ko)', display: 'flex',
-                  alignItems: 'center', justifyContent: 'center', gap: 6,
-                }}
-              >
-                <span style={{ fontSize: 'var(--text-lg)' }}>+</span> 인원 추가
-              </button>
-            </div>
+              );
+
+              return (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+
+                  {/* ── 보호자 소섹션 ── */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    <span style={subLabel}>보호자</span>
+                    {/* Guardian content — light blue background card */}
+                    <div style={{ background: 'var(--color-bg-subtle)', borderRadius: 10, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                      {/* Column header */}
+                      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                        <span style={{ width: 40, ...colHd, textTransform: 'uppercase' }}>No.</span>
+                        <span style={{ flex: 1, ...colHd }}>이름</span>
+                        <span style={{ flex: 1, ...colHd }}>관계</span>
+                        <div style={{ width: 32 }} />
+                      </div>
+                      <div style={{ height: 1, background: 'rgba(0,0,0,0.06)' }} />
+                      {guardian && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                          {/* Name + relation row */}
+                          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                            <span style={{ width: 40, fontSize: 'var(--text-base)', color: 'var(--color-ink-mute)', fontFamily: 'var(--font-en)', textAlign: 'center', flexShrink: 0 }}>1</span>
+                            <div style={{ flex: 1 }}>
+                              <TextFieldCell placeholder="이름을 입력하세요." value={guardian.name} onChange={v => updateFamily(guardian.id, 'name', v)} />
+                            </div>
+                            {relationInput(guardian)}
+                            <button
+                              disabled
+                              style={{ width: 32, height: 32, borderRadius: 6, border: '1px solid var(--color-border-subtle)', background: 'rgba(0,0,0,0.04)', color: 'var(--color-border-default)', cursor: 'not-allowed', fontSize: 'var(--text-lg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                            >×</button>
+                          </div>
+                          {/* Contact + email row */}
+                          <div style={{ marginLeft: 48, display: 'flex', gap: 8 }}>
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                              <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-ink-soft)', fontFamily: 'var(--font-ko)', paddingLeft: 2 }}>연락처</span>
+                              <TextFieldCell placeholder="010-0000-0000" value={guardian.contact ?? ''} onChange={v => updateFamily(guardian.id, 'contact', v)} />
+                            </div>
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                              <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-ink-soft)', fontFamily: 'var(--font-en)', paddingLeft: 2 }}>Email</span>
+                              <TextFieldCell placeholder="example@email.com" value={guardian.email ?? ''} onChange={v => updateFamily(guardian.id, 'email', v)} />
+                            </div>
+                            <div style={{ width: 32, flexShrink: 0 }} />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* ── 가족 구성원 소섹션 ── */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    <span style={subLabel}>가족 구성원</span>
+                    {/* Column header */}
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                      <span style={{ width: 40, ...colHd, textTransform: 'uppercase' }}>No.</span>
+                      <span style={{ flex: 1, ...colHd }}>이름</span>
+                      <span style={{ flex: 1, ...colHd }}>관계</span>
+                      <div style={{ width: 90 }} />
+                      <div style={{ width: 32 }} />
+                    </div>
+                    <div style={{ height: 1, background: 'var(--color-border-subtle)' }} />
+                    {others.length === 0 && (
+                      <div style={{ height: 40, display: 'flex', alignItems: 'center', paddingLeft: 48, fontSize: 'var(--text-sm)', color: 'var(--color-ink-faint)', fontFamily: 'var(--font-ko)' }}>
+                        등록된 가족 구성원이 없습니다.
+                      </div>
+                    )}
+                    {others.map((m, i) => (
+                      <div key={m.id} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                          <span style={{ width: 40, fontSize: 'var(--text-base)', color: 'var(--color-ink-mute)', fontFamily: 'var(--font-en)', textAlign: 'center', flexShrink: 0 }}>{i + 1}</span>
+                          <div style={{ flex: 1 }}>
+                            <TextFieldCell placeholder="이름을 입력하세요." value={m.name} onChange={v => updateFamily(m.id, 'name', v)} />
+                          </div>
+                          {relationInput(m)}
+                          <button
+                            onClick={() => startAssign(m.id)}
+                            style={{
+                              width: 90, height: 28, flexShrink: 0, borderRadius: 100,
+                              border: '1px solid var(--color-border-default)', background: 'var(--color-canvas)',
+                              color: 'var(--color-ink-soft)', fontSize: 'var(--text-xs)', fontWeight: 500,
+                              fontFamily: 'var(--font-ko)', cursor: 'pointer',
+                            }}
+                          >보호자 지정</button>
+                          <button
+                            onClick={() => removeFamily(m.id)}
+                            style={{ width: 32, height: 32, borderRadius: 6, border: '1px solid var(--color-border-subtle)', background: '#fff', color: 'var(--color-error)', cursor: 'pointer', fontSize: 'var(--text-lg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                          >×</button>
+                        </div>
+                        {/* Assign inline form */}
+                        {assigningId === m.id && (
+                          <div style={{ marginLeft: 48, display: 'flex', gap: 8, alignItems: 'center', padding: '10px 12px', background: 'var(--color-bg-subtle)', borderRadius: 8, border: '1px solid var(--color-border-subtle)' }}>
+                            <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-ink-soft)', fontFamily: 'var(--font-ko)', whiteSpace: 'nowrap' }}>연락처·이메일 필요:</span>
+                            <input
+                              placeholder="연락처"
+                              value={assignContact}
+                              onChange={e => setAssignContact(e.target.value)}
+                              style={{ flex: 1, height: 32, border: '1px solid var(--color-border-subtle)', borderRadius: 6, outline: 'none', padding: '0 10px', fontSize: 'var(--text-sm)', fontFamily: 'var(--font-ko)', background: 'var(--color-canvas)' }}
+                            />
+                            <input
+                              placeholder="이메일"
+                              value={assignEmail}
+                              onChange={e => setAssignEmail(e.target.value)}
+                              style={{ flex: 1, height: 32, border: '1px solid var(--color-border-subtle)', borderRadius: 6, outline: 'none', padding: '0 10px', fontSize: 'var(--text-sm)', fontFamily: 'var(--font-en)', background: 'var(--color-canvas)' }}
+                            />
+                            <button onClick={confirmAssign} disabled={!assignContact.trim() || !assignEmail.trim()} className="ew-btn ew-btn--primary ew-btn--xsm">확인</button>
+                            <button onClick={() => setAssigningId(null)} className="ew-btn ew-btn--secondary ew-btn--xsm">취소</button>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    <button
+                      onClick={addFamily}
+                      style={{
+                        marginTop: 4, height: 36, border: '1px dashed var(--color-border-default)', borderRadius: 6,
+                        background: 'var(--color-bg-subtle)', cursor: 'pointer', fontSize: 'var(--text-base)', fontWeight: 500,
+                        color: 'var(--color-ink-soft)', fontFamily: 'var(--font-ko)', display: 'flex',
+                        alignItems: 'center', justifyContent: 'center', gap: 6,
+                      }}
+                    >
+                      <span style={{ fontSize: 'var(--text-lg)' }}>+</span> 인원 추가
+                    </button>
+                  </div>
+
+                </div>
+              );
+            })()}
           </SectionCard>
 
         </div>

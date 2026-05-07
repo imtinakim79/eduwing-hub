@@ -182,6 +182,20 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
       },
       camp_records: editStudent?.camp_records ?? [],
     };
+    const familyKey = `ew-family-${student.id}`;
+    try {
+      type FM = { id: string; name: string; relation: string; isGuardian?: boolean; contact?: string; email?: string };
+      const existing = JSON.parse(localStorage.getItem(familyKey) || 'null') as FM[] | null;
+      const guardianEntry: FM = { id: 'guardian', name: form.guardian_name, relation: relationValue, isGuardian: true, contact: form.contact, email: form.email };
+      if (!existing) {
+        localStorage.setItem(familyKey, JSON.stringify([guardianEntry]));
+      } else {
+        const updated = existing.some(m => m.isGuardian || m.id === 'guardian')
+          ? existing.map(m => (m.isGuardian || m.id === 'guardian') ? { ...m, ...guardianEntry } : m)
+          : [guardianEntry, ...existing];
+        localStorage.setItem(familyKey, JSON.stringify(updated));
+      }
+    } catch {}
     sync(form);
     clearGuard();
     onSave(student);

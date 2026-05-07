@@ -1878,3 +1878,30 @@ table { font-feature-settings: 'tnum' 1, 'cv11' 1; }
   background: var(--color-primary);
   transition: width 50ms linear;
 }
+
+/* ── TipTap / ProseMirror ─────────────────────────────────────── */
+.ProseMirror {
+  outline: none;
+  min-height: 280px;
+  font-family: var(--font-ko);
+  font-size: var(--text-base);
+  color: var(--color-ink-strong);
+  line-height: 1.75;
+  caret-color: var(--color-primary);
+}
+.ProseMirror p { margin: 0 0 6px 0; }
+.ProseMirror h1 { font-size: 1.5em; font-weight: 700; margin: 16px 0 8px; color: var(--color-ink-strong); }
+.ProseMirror h2 { font-size: 1.2em; font-weight: 600; margin: 12px 0 6px; color: var(--color-ink-strong); }
+.ProseMirror h3 { font-size: 1.05em; font-weight: 600; margin: 10px 0 4px; color: var(--color-ink-strong); }
+.ProseMirror ul, .ProseMirror ol { padding-left: 22px; margin: 6px 0; }
+.ProseMirror li { margin: 3px 0; }
+.ProseMirror strong { font-weight: 700; }
+.ProseMirror em { font-style: italic; }
+.ProseMirror u { text-decoration: underline; }
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: var(--color-ink-faint);
+  pointer-events: none;
+  float: left;
+  height: 0;
+}

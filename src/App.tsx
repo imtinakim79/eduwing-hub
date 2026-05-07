@@ -7,6 +7,7 @@ import AddStudentPage from './pages/AddStudentPage';
 import StudentDetailPage from './pages/StudentDetailPage';
 import CampCreatePage from './pages/CampCreatePage';
 import AgentBoardPage, { type Agent } from './pages/AgentBoardPage';
+import NoticeBoardPage, { type Notice } from './pages/NoticeBoardPage';
 import DashboardPage from './pages/DashboardPage';
 import SettingsPage from './pages/SettingsPage';
 import rawCamps from './data/camps.json';
@@ -163,6 +164,16 @@ export default function App() {
     setCamps(next);
     try { localStorage.setItem('ew-camps', JSON.stringify(next)); } catch {}
     navigate('campDetail', { campId: camp.id, tab: 'Students' });
+  }
+
+  const [notices, setNotices] = useState<Notice[]>(() => {
+    try { const r = localStorage.getItem('ew-notices'); return r ? JSON.parse(r) : []; }
+    catch { return []; }
+  });
+
+  function saveNotices(next: Notice[]) {
+    setNotices(next);
+    try { localStorage.setItem('ew-notices', JSON.stringify(next)); } catch {}
   }
 
   const [trashedStudents, setTrashedStudents] = useState<(Student & { deletedAt: string })[]>(() => {
@@ -376,6 +387,15 @@ export default function App() {
             }}
           />
         )}
+        {page === 'board' && (
+          <NoticeBoardPage
+            notices={notices}
+            camps={camps}
+            onNoticeAdd={n => saveNotices([...notices, n])}
+            onNoticeUpdate={n => saveNotices(notices.map(x => x.id === n.id ? n : x))}
+            onNoticeDelete={ids => saveNotices(notices.filter(n => !ids.includes(n.id)))}
+          />
+        )}
         {page === 'dashboard' && (
           <DashboardPage
             students={students}
@@ -395,8 +415,8 @@ export default function App() {
             onPermanentDelete={ids => saveTrashed(trashedStudents.filter(s => !ids.includes(s.id)))}
           />
         )}
-        {page !== 'students' && page !== 'addStudent' && page !== 'studentDetail' && page !== 'camps' && page !== 'campDetail' && page !== 'campCreate' && page !== 'agent' && page !== 'dashboard' && page !== 'account' && (
-          <ComingSoon label="게시판" />
+        {page !== 'students' && page !== 'addStudent' && page !== 'studentDetail' && page !== 'camps' && page !== 'campDetail' && page !== 'campCreate' && page !== 'agent' && page !== 'board' && page !== 'dashboard' && page !== 'account' && (
+          <ComingSoon label="페이지" />
         )}
       </main>
     </div>

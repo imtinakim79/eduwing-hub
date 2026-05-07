@@ -376,8 +376,11 @@ export default function StudentBoardPage({
         </div>
       </div>
 
+      {/* Content */}
+      <div style={{ padding: '0 var(--page-px)' }}>
+
       {/* Action bar */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-2)', padding: 'var(--space-2) var(--page-px)', borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-canvas)', justifyContent: 'flex-end'}}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', flexWrap: 'wrap', gap: 'var(--space-2)', padding: 'var(--space-2) var(--space-3)', justifyContent: 'flex-end'}}>
         <span style={{ flex: 1, fontSize: 12, color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)', lineHeight: '26px' }}>
           {selected.size > 0 ? `${selected.size}명 선택됨` : ''}
         </span>
@@ -423,6 +426,7 @@ export default function StudentBoardPage({
           onPageChange={setPage}
           onPerPageChange={setPerPage}
         />
+      </div>
       </div>
     </div>
   );
