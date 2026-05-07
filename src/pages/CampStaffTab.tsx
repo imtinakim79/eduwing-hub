@@ -111,7 +111,7 @@ function MemberPanel({
       <div ref={panelRef} style={{ position: 'relative', display: 'inline-block' }}>
         <button
           className="ew-btn ew-btn--ghost ew-btn--xsm"
-          onClick={() => { setOpen(v => !v); setTimeout(() => inputRef.current?.focus(), 60); }}
+          onClick={() => { setOpen(v => !v); setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 60); }}
         >
           + 스탭 추가
         </button>
