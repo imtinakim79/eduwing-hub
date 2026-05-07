@@ -53,28 +53,17 @@ function MemberPanel({
 }) {
   const [open,    setOpen]    = useState(false);
   const [newName, setNewName] = useState('');
-  const inputRef  = useRef<HTMLInputElement>(null);
-  const panelRef  = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function onClickOutside(e: MouseEvent) {
-      if (panelRef.current && !panelRef.current.contains(e.target as Node)) setOpen(false);
-    }
-    document.addEventListener('mousedown', onClickOutside);
-    return () => document.removeEventListener('mousedown', onClickOutside);
-  }, []);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const assigned   = masterList.filter(m => assignedIds.includes(m.id));
   const unassigned = masterList.filter(m => !assignedIds.includes(m.id));
 
   function assign(id: string) {
     setAssignedIds([...assignedIds, id]);
-    setOpen(false);
   }
 
   function unassign(id: string) {
     setAssignedIds(assignedIds.filter(x => x !== id));
-    // 이번 세션에 새로 추가한 멤버라면 전체 명단에서도 함께 제거
     if (isNewlyAdded(id)) {
       setMasterList(masterList.filter(m => m.id !== id));
     }
@@ -84,17 +73,25 @@ function MemberPanel({
     const name = newName.trim();
     if (!name) return;
     const m: Member = { id: uid(), name };
-    const updated = [...masterList, m];
-    setMasterList(updated);
+    setMasterList([...masterList, m]);
     setAssignedIds([...assignedIds, m.id]);
     setNewName('');
-    setOpen(false);
+    inputRef.current?.focus();
   }
 
   function deleteFromMaster(id: string) {
-    const updated = masterList.filter(m => m.id !== id);
-    setMasterList(updated);
+    setMasterList(masterList.filter(m => m.id !== id));
     setAssignedIds(assignedIds.filter(x => x !== id));
+  }
+
+  function handleOpen() {
+    setOpen(true);
+    setTimeout(() => inputRef.current?.focus(), 30);
+  }
+
+  function handleClose() {
+    setOpen(false);
+    setNewName('');
   }
 
   return (
@@ -108,59 +105,54 @@ function MemberPanel({
         }
       </div>
 
-      <div ref={panelRef} style={{ position: 'relative', display: 'inline-block' }}>
-        <button
-          className="ew-btn ew-btn--ghost ew-btn--xsm"
-          onClick={() => { setOpen(v => !v); setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 60); }}
-        >
+      {!open ? (
+        <button className="ew-btn ew-btn--ghost ew-btn--xsm" onClick={handleOpen}>
           + 스탭 추가
         </button>
-
-        {open && (
-          <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, zIndex: 200, background: 'var(--color-canvas)', border: '1px solid var(--color-border-table)', borderRadius: 8, boxShadow: '0 4px 16px rgba(0,0,0,0.1)', minWidth: 220, overflow: 'hidden' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', borderBottom: '1px solid var(--color-border-faint)' }}>
-              <input
-                ref={inputRef}
-                value={newName}
-                onChange={e => setNewName(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') addToMaster(); if (e.key === 'Escape') setOpen(false); }}
-                placeholder="이름 입력 후 Enter"
-                style={{ flex: 1, border: 'none', outline: 'none', fontSize: 'var(--text-base)', fontFamily: 'var(--font-ko)' }}
-              />
-              <button className="ew-btn ew-btn--primary ew-btn--xsm" onClick={addToMaster}>추가</button>
-            </div>
-
-            {unassigned.length > 0 ? (
-              <div style={{ maxHeight: 200, overflowY: 'auto' }}>
-                {unassigned.map(m => (
-                  <div
-                    key={m.id}
-                    style={{ display: 'flex', alignItems: 'center', padding: '7px 10px', gap: 6 }}
-                    onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-bg-subtle)')}
-                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                  >
-                    <span
-                      onClick={() => assign(m.id)}
-                      style={{ flex: 1, fontSize: 'var(--text-base)', fontFamily: 'var(--font-ko)', color: 'var(--color-text-primary)', cursor: 'pointer' }}
-                    >
-                      {m.name}
-                    </span>
-                    <button
-                      onClick={() => deleteFromMaster(m.id)}
-                      title="전체 명단에서 삭제"
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-border-default)', fontSize: 'var(--text-base)', padding: '0 2px', lineHeight: 1 }}
-                    >✕</button>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div style={{ padding: '10px 12px', fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)' }}>
-                {masterList.length === 0 ? '전체 명단이 비어있습니다.' : '모두 배정됨'}
-              </div>
-            )}
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {/* 이름 입력 행 */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <input
+              ref={inputRef}
+              value={newName}
+              onChange={e => setNewName(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') addToMaster(); if (e.key === 'Escape') handleClose(); }}
+              placeholder="이름 입력 후 Enter"
+              style={{
+                width: 180, height: 34,
+                border: '1px solid var(--color-border-subtle)', borderRadius: 6,
+                outline: 'none', padding: '0 10px',
+                fontSize: 'var(--text-base)', fontFamily: 'var(--font-ko)',
+                color: 'var(--color-ink-strong)', background: 'var(--color-canvas)',
+              }}
+            />
+            <button className="ew-btn ew-btn--primary ew-btn--xsm" onClick={addToMaster}>추가</button>
+            <button className="ew-btn ew-btn--ghost ew-btn--xsm" onClick={handleClose}>취소</button>
           </div>
-        )}
-      </div>
+          {/* 기존 명단에서 선택 */}
+          {unassigned.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, paddingTop: 4 }}>
+              <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-ink-faint)', fontFamily: 'var(--font-ko)', alignSelf: 'center', whiteSpace: 'nowrap' }}>기존 명단:</span>
+              {unassigned.map(m => (
+                <button
+                  key={m.id}
+                  onClick={() => assign(m.id)}
+                  style={{
+                    height: 26, padding: '0 10px', borderRadius: 100,
+                    border: '1px solid var(--color-border-subtle)',
+                    background: 'var(--color-canvas)',
+                    fontSize: 'var(--text-xs)', fontFamily: 'var(--font-ko)',
+                    color: 'var(--color-ink-soft)', cursor: 'pointer',
+                  }}
+                >
+                  {m.name}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {masterList.length > 0 && (
         <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px dashed var(--color-border-subtle)' }}>
