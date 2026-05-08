@@ -390,6 +390,7 @@ export default function StudentDetailPage({
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', fontSize: 'var(--text-sm)', color: 'var(--color-ink-soft)' }}>
               <span><span style={{ fontFamily: 'var(--font-mono)', fontFeatureSettings: '"tnum" 1' }}>{student.age}</span>세</span>
+              {student.grade && (<><span style={{ color: 'var(--color-ink-faint)' }}>·</span><span>{student.grade}</span></>)}
               <span style={{ color: 'var(--color-ink-faint)' }}>·</span>
               <span>{student.gender}</span>
               <span style={{ color: 'var(--color-ink-faint)' }}>·</span>

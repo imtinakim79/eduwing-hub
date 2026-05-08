@@ -223,6 +223,23 @@ export default function App() {
               saveStudents(next);
             }}
             onStudentUpdate={updated => saveStudents(students.map(s => s.id === updated.id ? updated : s))}
+            onCampCreate={(camp, className, studentIds) => {
+              // 캠프 저장
+              const nextCamps = [...camps, camp];
+              setCamps(nextCamps);
+              try { localStorage.setItem('ew-camps', JSON.stringify(nextCamps)); } catch {}
+              // 클래스 생성
+              const classId = `CLS-${Date.now()}`;
+              const classData = [{ id: classId, name: className, teacher: '', studentIds }];
+              try { localStorage.setItem(`ew-classes-${camp.id}`, JSON.stringify(classData)); } catch {}
+              // 학생 캠프 배정 + program_start/end 초기화
+              const nextStudents = students.map(s =>
+                studentIds.includes(s.id)
+                  ? { ...s, history: { ...s.history, current_camp_id: camp.id }, program_start: undefined, program_end: undefined }
+                  : s
+              );
+              saveStudents(nextStudents);
+            }}
             onStudentDelete={(ids: string[]) => {
               ids.forEach(id => {
                 try { localStorage.removeItem(`ew-family-${id}`); } catch {}

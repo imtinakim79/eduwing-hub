@@ -37,12 +37,14 @@ export interface CampRecord {
 export interface Student {
   id: string; profile_img_url: string | null;
   name_ko: string; name_en: string; gender: 'Male' | 'Female';
-  birth_date: string; age: number;
+  birth_date: string; age: number; grade?: string;
+  program_start?: string; program_end?: string;
   guardian: { name: string; relation: string; contact: string; email: string };
   history: { joined_date: string; agent_id: string; current_camp_id: string };
   camp_records: CampRecord[];
+  duplicate_suspect?: boolean;
 }
-interface Camp { id: string; name: string; status?: string; start_date?: string; end_date?: string; }
+interface Camp { id: string; name: string; location: string; country: string; accommodation: string; capacity: number; status: string; start_date: string; end_date: string; staff: string[]; enrolledCount?: number; }
 
 export const defaultStudents = rawStudents as Student[];
 const allCamps = rawCamps as Camp[];
@@ -58,6 +60,13 @@ function relLabel(r: string) {
 // ── Column Config ─────────────────────────────────────────────────────────────
 const studentColumns: ColumnDef<Student>[] = [
   {
+    key: '_dup', label: '', width: 28, type: 'custom' as const,
+    getValue: () => '',
+    render: ({ row }: { row: Student }) => row.duplicate_suspect
+      ? <span title="중복 의심" style={{ color: 'var(--color-warning)', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>⚠</span>
+      : null,
+  },
+  {
     key: 'name', label: '학생', width: 160, sortKey: 'name', type: 'thumbnail',
     getValue: (r, e) => e['name_ko'] ?? r.name_ko,
   },
@@ -71,6 +80,10 @@ const studentColumns: ColumnDef<Student>[] = [
     options: Array.from({ length: 20 }, (_, i) => `${i + 1}세`),
     getValue: (r, e) => e['age'] ?? `${r.age}세`,
     setValue: (_, v) => ({ field: 'age', value: v }),
+  },
+  {
+    key: 'grade', label: '학년', width: 100, type: 'readonly',
+    getValue: (r) => r.grade ?? '',
   },
   {
     key: 'birth_date', label: '생일', width: 109, sortKey: 'birth', type: 'calendar',
@@ -132,6 +145,7 @@ function applyEditsToStudent(s: Student, edits: Record<string, string>): Student
       case 'gender':       result.gender = value as Student['gender']; break;
       case 'age':          result.age = parseInt(value, 10) || s.age; break;
       case 'birth_date':   result.birth_date = value; break;
+      case 'grade':        result.grade = value; break;
       case 'contact':      result.guardian.contact = value; break;
       case 'email':        result.guardian.email = value; break;
       case 'joined_date':  result.history.joined_date = value; break;
@@ -150,7 +164,10 @@ function studentsToRows(list: Student[]) {
     '이름(영문)':      s.name_en,
     '성별':           s.gender,
     '나이':           s.age,
+    '학년':           s.grade ?? '',
     '생일':           s.birth_date,
+    '프로그램 시작일': s.program_start ?? '',
+    '프로그램 종료일': s.program_end ?? '',
     '보호자 이름':     s.guardian.name,
     '보호자 관계':     s.guardian.relation,
     '연락처':         s.guardian.contact,
@@ -173,7 +190,10 @@ function rowsToStudents(rows: Record<string, string>[]): Student[] {
       name_en:         toStr(r['이름(영문)']),
       gender:          (toStr(r['성별']) === 'Female' ? 'Female' : 'Male') as Student['gender'],
       age:             parseInt(toStr(r['나이']), 10) || 0,
+      grade:           toStr(r['학년']),
       birth_date:      toStr(r['생일']),
+      program_start:   toStr(r['프로그램 시작일']),
+      program_end:     toStr(r['프로그램 종료일']),
       guardian: {
         name:     toStr(r['보호자 이름']),
         relation: toStr(r['보호자 관계']),
@@ -199,6 +219,7 @@ export default function StudentBoardPage({
   onStudentsImport,
   onStudentUpdate,
   onStudentDelete,
+  onCampCreate,
 }: {
   students?: Student[];
   agents?: Agent[];
@@ -208,17 +229,22 @@ export default function StudentBoardPage({
   onStudentsImport?: (imported: Student[]) => void;
   onStudentUpdate?: (updated: Student) => void;
   onStudentDelete?: (ids: string[]) => void;
+  onCampCreate?: (camp: Camp, className: string, studentIds: string[]) => void;
 }) {
   const { showUndo } = useUndoToast();
-  const [query,       setQuery]       = useState('');
-  const [agentFilter, setAgentFilter] = useState('');
-  const [campFilter,  setCampFilter]  = useState<string[]>([]);
-  const [selected,    setSelected]    = useState<Set<string>>(new Set());
-  const [page,        setPage]        = useState(1);
-  const [perPage,     setPerPage]     = useState(10);
-  const [sortKey,     setSortKey]     = useState<string | null>(null);
-  const [sortDir,     setSortDir]     = useState<'asc' | 'desc'>('asc');
-  const [localEdits,  setLocalEdits]  = useState<Record<string, Record<string, string>>>({});
+  const [query,        setQuery]        = useState('');
+  const [agentFilter,  setAgentFilter]  = useState('');
+  const [campFilter,   setCampFilter]   = useState<string[]>([]);
+  const [dupFilter,    setDupFilter]    = useState(false);
+  const [unassignFilter, setUnassignFilter] = useState(false);
+  const [selected,     setSelected]     = useState<Set<string>>(new Set());
+  const [page,         setPage]         = useState(1);
+  const [perPage,      setPerPage]      = useState(10);
+  const [sortKey,      setSortKey]      = useState<string | null>(null);
+  const [sortDir,      setSortDir]      = useState<'asc' | 'desc'>('asc');
+  const [localEdits,   setLocalEdits]   = useState<Record<string, Record<string, string>>>({});
+  const [uploadSummary, setUploadSummary] = useState<{ added: number; updated: number; duplicate: number } | null>(null);
+  const [classModal,   setClassModal]   = useState<{ campName: string; className: string; startDate: string; endDate: string } | null>(null);
   const uploadRef = useRef<HTMLInputElement>(null);
 
   function handleDownload() {
@@ -238,8 +264,27 @@ export default function StudentBoardPage({
       const wb   = XLSX.read(data, { type: 'array', cellDates: true });
       const ws   = wb.Sheets[wb.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json<Record<string, string>>(ws, { raw: false });
-      const imported = rowsToStudents(rows);
-      if (imported.length > 0) onStudentsImport?.(imported);
+      const rawImported = rowsToStudents(rows);
+      if (rawImported.length === 0) return;
+
+      const existingById = new Map(students.map(s => [s.id, s]));
+      let added = 0, updated = 0, duplicate = 0;
+
+      const processed = rawImported.map(s => {
+        if (s.id && existingById.has(s.id)) { updated++; return s; }
+        const nameMatch = s.name_ko && s.birth_date
+          ? students.find(e => e.name_ko === s.name_ko && e.birth_date === s.birth_date)
+          : null;
+        if (nameMatch) {
+          duplicate++;
+          return { ...s, id: nameMatch.id, duplicate_suspect: true };
+        }
+        added++;
+        return s;
+      });
+
+      onStudentsImport?.(processed);
+      setUploadSummary({ added, updated, duplicate });
     };
     reader.readAsArrayBuffer(file);
   }
@@ -330,7 +375,11 @@ export default function StudentBoardPage({
     }
     if (agentFilter) list = list.filter(s => s.history.agent_id === agentFilter);
     if (campFilter.length > 0) list = list.filter(s => campFilter.includes(s.history.current_camp_id));
-    if (sortKey) {
+    if (dupFilter) list = list.filter(s => s.duplicate_suspect);
+    if (unassignFilter) list = list.filter(s => !s.history.current_camp_id);
+    if (unassignFilter && !sortKey) {
+      list.sort((a, b) => (b.program_start ?? '').localeCompare(a.program_start ?? ''));
+    } else if (sortKey) {
       list.sort((a, b) => {
         const va = sortKey==='name' ? a.name_ko : sortKey==='age' ? String(a.age)
           : sortKey==='joined' ? a.history.joined_date : sortKey==='birth' ? a.birth_date
@@ -342,7 +391,7 @@ export default function StudentBoardPage({
       });
     }
     return list;
-  }, [students, query, agentFilter, campFilter, sortKey, sortDir]);
+  }, [students, query, agentFilter, campFilter, dupFilter, unassignFilter, sortKey, sortDir]);
 
   const pageData = filtered.slice((page - 1) * perPage, page * perPage);
 
@@ -373,6 +422,28 @@ export default function StudentBoardPage({
             withCheckbox
             onChange={vs => { setCampFilter(vs); setPage(1); }}
           />
+          <button
+            onClick={() => { setUnassignFilter(v => !v); setDupFilter(false); setPage(1); }}
+            style={{
+              height: 32, padding: '0 12px', borderRadius: 100, fontSize: 'var(--text-sm)', fontFamily: 'var(--font-ko)',
+              border: `1px solid ${unassignFilter ? 'var(--color-primary)' : 'var(--color-border-subtle)'}`,
+              background: unassignFilter ? 'var(--color-primary-bg)' : 'var(--color-canvas)',
+              color: unassignFilter ? 'var(--color-primary)' : 'var(--color-ink-soft)',
+              cursor: 'pointer', fontWeight: unassignFilter ? 600 : 400,
+            }}
+          >미배정</button>
+          {students.some(s => s.duplicate_suspect) && (
+            <button
+              onClick={() => { setDupFilter(v => !v); setUnassignFilter(false); setPage(1); }}
+              style={{
+                height: 32, padding: '0 12px', borderRadius: 100, fontSize: 'var(--text-sm)', fontFamily: 'var(--font-ko)',
+                border: `1px solid ${dupFilter ? '#F59E0B' : 'var(--color-border-subtle)'}`,
+                background: dupFilter ? '#FFFBEB' : 'var(--color-canvas)',
+                color: dupFilter ? '#B45309' : 'var(--color-ink-soft)',
+                cursor: 'pointer', fontWeight: dupFilter ? 600 : 400,
+              }}
+            >⚠ 중복의심 {students.filter(s => s.duplicate_suspect).length}</button>
+          )}
         </div>
       </div>
 
@@ -385,6 +456,34 @@ export default function StudentBoardPage({
           {selected.size > 0 ? `${selected.size}명 선택됨` : ''}
         </span>
         <button className="ew-btn ew-btn--primary ew-btn--xsm" onClick={onAdd}>학생 추가</button>
+        {/* 클래스 생성: 2명 이상 선택 + 모두 미배정인 경우 */}
+        {selected.size >= 2 && [...selected].every(id => {
+          const s = students.find(x => x.id === id);
+          return s && !s.history.current_camp_id;
+        }) && onCampCreate && (
+          <button className="ew-btn ew-btn--primary ew-btn--xsm" onClick={() => {
+            const selStudents = students.filter(s => selected.has(s.id));
+            const dates = selStudents.map(s => ({ start: s.program_start ?? '', end: s.program_end ?? '' }));
+            const sameStart = dates.every(d => d.start === dates[0].start);
+            const sameEnd   = dates.every(d => d.end === dates[0].end);
+            setClassModal({
+              campName: '',
+              className: '',
+              startDate: sameStart ? dates[0].start : '',
+              endDate:   sameEnd   ? dates[0].end   : '',
+            });
+          }}>클래스 생성</button>
+        )}
+        {/* 플래그 해제: 선택 중 중복의심 있을 때 */}
+        {selected.size > 0 && [...selected].some(id => students.find(s => s.id === id)?.duplicate_suspect) && onStudentUpdate && (
+          <button className="ew-btn ew-btn--secondary ew-btn--xsm" onClick={() => {
+            [...selected].forEach(id => {
+              const s = students.find(x => x.id === id);
+              if (s?.duplicate_suspect) onStudentUpdate({ ...s, duplicate_suspect: false });
+            });
+            setSelected(new Set());
+          }}>⚠ 플래그 해제</button>
+        )}
         {selected.size > 0 && onStudentDelete && (
           <button className="ew-btn ew-btn--danger ew-btn--xsm" onClick={() => {
             const targets = students.filter(s => selected.has(s.id));
@@ -428,6 +527,77 @@ export default function StudentBoardPage({
         />
       </div>
       </div>
+
+      {/* 업로드 결과 요약 팝업 */}
+      {uploadSummary && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: 'var(--color-canvas)', borderRadius: 12, padding: '28px 32px', minWidth: 320, boxShadow: '0 8px 32px rgba(0,0,0,0.18)', display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ fontSize: 'var(--text-lg)', fontWeight: 700, color: 'var(--color-ink-strong)', fontFamily: 'var(--font-ko)' }}>업로드 완료</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {[
+                { label: '신규 추가', value: uploadSummary.added, color: 'var(--color-success)' },
+                { label: '수정 (ID 일치)', value: uploadSummary.updated, color: 'var(--color-primary)' },
+                { label: '중복 의심 ⚠', value: uploadSummary.duplicate, color: '#B45309' },
+              ].map(({ label, value, color }) => (
+                <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: '1px solid var(--color-border-faint)' }}>
+                  <span style={{ fontSize: 'var(--text-base)', fontFamily: 'var(--font-ko)', color: 'var(--color-ink-soft)' }}>{label}</span>
+                  <span style={{ fontSize: 'var(--text-md)', fontWeight: 700, fontFamily: 'var(--font-mono)', color }}>{value}명</span>
+                </div>
+              ))}
+            </div>
+            {uploadSummary.duplicate > 0 && (
+              <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-ink-mute)', fontFamily: 'var(--font-ko)', margin: 0 }}>
+                중복 의심 학생은 ⚠ 표시됩니다. 필터에서 확인 후 직접 정리하세요.
+              </p>
+            )}
+            <button className="ew-btn ew-btn--primary ew-btn--sm" onClick={() => setUploadSummary(null)} style={{ alignSelf: 'flex-end' }}>확인</button>
+          </div>
+        </div>
+      )}
+
+      {/* 클래스 생성 모달 */}
+      {classModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: 'var(--color-canvas)', borderRadius: 12, padding: '28px 32px', minWidth: 380, boxShadow: '0 8px 32px rgba(0,0,0,0.18)', display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ fontSize: 'var(--text-lg)', fontWeight: 700, color: 'var(--color-ink-strong)', fontFamily: 'var(--font-ko)' }}>캠프 & 클래스 생성</div>
+            <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-ink-mute)', fontFamily: 'var(--font-ko)', margin: 0 }}>
+              선택한 학생 {selected.size}명을 배정할 캠프와 클래스를 만듭니다.
+            </p>
+            {[
+              { label: '캠프명', key: 'campName' as const, placeholder: '캠프 이름을 입력하세요' },
+              { label: '클래스명', key: 'className' as const, placeholder: '클래스 이름을 입력하세요' },
+              { label: '시작일', key: 'startDate' as const, placeholder: 'YYYY-MM-DD' },
+              { label: '종료일', key: 'endDate' as const, placeholder: 'YYYY-MM-DD' },
+            ].map(({ label, key, placeholder }) => (
+              <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <span style={{ fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--color-ink-soft)', fontFamily: 'var(--font-ko)' }}>{label}</span>
+                <input
+                  value={classModal[key]}
+                  onChange={e => setClassModal(prev => prev ? { ...prev, [key]: e.target.value } : prev)}
+                  placeholder={placeholder}
+                  style={{ height: 38, border: '1px solid var(--color-border-subtle)', borderRadius: 6, padding: '0 12px', fontSize: 'var(--text-base)', fontFamily: 'var(--font-ko)', outline: 'none', color: 'var(--color-ink-strong)', background: 'var(--color-canvas)' }}
+                />
+              </div>
+            ))}
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 4 }}>
+              <button className="ew-btn ew-btn--ghost ew-btn--sm" onClick={() => setClassModal(null)}>취소</button>
+              <button className="ew-btn ew-btn--primary ew-btn--sm" onClick={() => {
+                if (!classModal.campName.trim() || !classModal.className.trim()) return;
+                const campId = `CAMP-${Date.now()}`;
+                const newCamp: Camp = {
+                  id: campId, name: classModal.campName.trim(),
+                  location: '', country: '', accommodation: '',
+                  capacity: 0, status: '준비중',
+                  start_date: classModal.startDate, end_date: classModal.endDate, staff: [],
+                };
+                onCampCreate?.(newCamp, classModal.className.trim(), [...selected]);
+                setClassModal(null);
+                setSelected(new Set());
+              }}>생성</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

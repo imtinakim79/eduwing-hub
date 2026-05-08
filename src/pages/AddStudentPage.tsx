@@ -126,6 +126,7 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
     name_en:  editStudent?.name_en  ?? '',
     gender:   editStudent?.gender   ?? '',
     age:      editStudent?.age      ? String(editStudent.age) : '',
+    grade:    editStudent?.grade    ?? '',
     birth_date: editStudent?.birth_date ?? '',
     guardian_name:           editStudent?.guardian.name    ?? '',
     guardian_relation:       initRelation,
@@ -169,6 +170,7 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
       gender:          (form.gender as Student['gender']) || 'Male',
       birth_date:      form.birth_date,
       age:             form.age ? parseInt(form.age, 10) : 0,
+      grade:           form.grade,
       guardian: {
         name:     form.guardian_name,
         relation: relationValue,
@@ -340,6 +342,11 @@ export default function AddStudentPage({ onBack, onSave, editStudent, agents = [
           <div style={{ height: 10 }} />
           <FieldRow label="나이" dirty={isEdit && isFieldDirty('age')}>
             <TextFieldCell placeholder="나이를 입력하세요." value={form.age} onChange={v => set('age', v)} type="number" />
+          </FieldRow>
+
+          <div style={{ height: 10 }} />
+          <FieldRow label="학년" dirty={isEdit && isFieldDirty('grade')}>
+            <TextFieldCell placeholder="예: 초6, 중2, Grade 5" value={form.grade} onChange={v => set('grade', v)} />
           </FieldRow>
 
           <div style={{ height: 10 }} />
