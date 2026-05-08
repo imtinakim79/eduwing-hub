@@ -7,6 +7,7 @@ import rawCamps from '../data/camps.json';
 import type { Agent } from './AgentBoardPage';
 import Pagination from '../components/Pagination';
 import BoardTable from '../components/board/BoardTable';
+import { ThumbnailCell } from '../components/board/cells';
 import { FilterPill } from '../components/FilterPill';
 import type { ColumnDef } from '../components/board/types';
 import { useUndoToast } from '../hooks/useUndoToast';
@@ -60,15 +61,16 @@ function relLabel(r: string) {
 // ── Column Config ─────────────────────────────────────────────────────────────
 const studentColumns: ColumnDef<Student>[] = [
   {
-    key: '_dup', label: '', width: 28, type: 'custom' as const,
-    getValue: () => '',
-    render: ({ row }: { row: Student }) => row.duplicate_suspect
-      ? <span title="중복 의심" style={{ color: 'var(--color-warning)', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>⚠</span>
-      : null,
-  },
-  {
-    key: 'name', label: '학생', width: 160, sortKey: 'name', type: 'thumbnail',
+    key: 'name', label: '학생', width: 160, sortKey: 'name', type: 'custom' as const,
     getValue: (r, e) => e['name_ko'] ?? r.name_ko,
+    render: ({ row }: { row: Student }) => (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, overflow: 'hidden' }}>
+        <ThumbnailCell nameKo={row.name_ko} nameEn={row.name_en} profileImgUrl={row.profile_img_url} />
+        {row.duplicate_suspect && (
+          <span title="중복 의심" style={{ fontSize: 13, color: '#B45309', flexShrink: 0 }}>⚠</span>
+        )}
+      </div>
+    ),
   },
   {
     key: 'gender', label: '성별', width: 100, sortKey: 'gender', type: 'gender',
@@ -332,6 +334,20 @@ export default function StudentBoardPage({
   };
 
   const columns = useMemo(() => studentColumns.map(col => {
+    if (col.key === 'name') return {
+      ...col,
+      render: ({ row }: { row: Student }) => (
+        <div
+          style={{ display: 'flex', alignItems: 'center', gap: 8, overflow: 'hidden', cursor: onStudentSelect ? 'pointer' : 'default', width: '100%' }}
+          onClick={onStudentSelect ? e => { e.stopPropagation(); onStudentSelect(row.id); } : undefined}
+        >
+          <ThumbnailCell nameKo={row.name_ko} nameEn={row.name_en} profileImgUrl={row.profile_img_url} />
+          {row.duplicate_suspect && (
+            <span title="중복 의심" style={{ fontSize: 13, color: '#B45309', flexShrink: 0 }}>⚠</span>
+          )}
+        </div>
+      ),
+    };
     if (col.key === 'agent_id') return {
       ...col,
       options: agentOpts,
