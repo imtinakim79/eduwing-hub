@@ -84,8 +84,9 @@ const studentColumns: ColumnDef<Student>[] = [
     setValue: (_, v) => ({ field: 'age', value: v }),
   },
   {
-    key: 'grade', label: '학년', width: 100, type: 'readonly',
-    getValue: (r) => r.grade ?? '',
+    key: 'grade', label: '학년', width: 100, type: 'text',
+    getValue: (r, e) => e['grade'] ?? r.grade ?? '',
+    setValue: (_, v) => ({ field: 'grade', value: v }),
   },
   {
     key: 'birth_date', label: '생일', width: 109, sortKey: 'birth', type: 'calendar',
@@ -333,6 +334,12 @@ export default function StudentBoardPage({
     '준비중': { bg: '#EEF3FD', color: '#2F6FED' },
   };
 
+  const isEffectivelyUnassigned = (s: Student) => {
+    if (!s.history.current_camp_id) return true;
+    const camp = liveCampMap[s.history.current_camp_id];
+    return !camp || !CAMP_BADGE[camp.status ?? ''];
+  };
+
   const columns = useMemo(() => studentColumns.map(col => {
     if (col.key === 'name') return {
       ...col,
@@ -392,7 +399,7 @@ export default function StudentBoardPage({
     if (agentFilter) list = list.filter(s => s.history.agent_id === agentFilter);
     if (campFilter.length > 0) list = list.filter(s => campFilter.includes(s.history.current_camp_id));
     if (dupFilter) list = list.filter(s => s.duplicate_suspect);
-    if (unassignFilter) list = list.filter(s => !s.history.current_camp_id);
+    if (unassignFilter) list = list.filter(s => isEffectivelyUnassigned(s));
     if (unassignFilter && !sortKey) {
       list.sort((a, b) => (b.program_start ?? '').localeCompare(a.program_start ?? ''));
     } else if (sortKey) {
@@ -439,25 +446,13 @@ export default function StudentBoardPage({
             onChange={vs => { setCampFilter(vs); setPage(1); }}
           />
           <button
+            className={`ew-filter-pill${unassignFilter ? ' open' : ''}`}
             onClick={() => { setUnassignFilter(v => !v); setDupFilter(false); setPage(1); }}
-            style={{
-              height: 32, padding: '0 12px', borderRadius: 100, fontSize: 'var(--text-sm)', fontFamily: 'var(--font-ko)',
-              border: `1px solid ${unassignFilter ? 'var(--color-primary)' : 'var(--color-border-subtle)'}`,
-              background: unassignFilter ? 'var(--color-primary-bg)' : 'var(--color-canvas)',
-              color: unassignFilter ? 'var(--color-primary)' : 'var(--color-ink-soft)',
-              cursor: 'pointer', fontWeight: unassignFilter ? 600 : 400,
-            }}
           >미배정</button>
           {students.some(s => s.duplicate_suspect) && (
             <button
+              className={`ew-filter-pill${dupFilter ? ' open' : ''}`}
               onClick={() => { setDupFilter(v => !v); setUnassignFilter(false); setPage(1); }}
-              style={{
-                height: 32, padding: '0 12px', borderRadius: 100, fontSize: 'var(--text-sm)', fontFamily: 'var(--font-ko)',
-                border: `1px solid ${dupFilter ? '#F59E0B' : 'var(--color-border-subtle)'}`,
-                background: dupFilter ? '#FFFBEB' : 'var(--color-canvas)',
-                color: dupFilter ? '#B45309' : 'var(--color-ink-soft)',
-                cursor: 'pointer', fontWeight: dupFilter ? 600 : 400,
-              }}
             >⚠ 중복의심 {students.filter(s => s.duplicate_suspect).length}</button>
           )}
         </div>
@@ -475,7 +470,7 @@ export default function StudentBoardPage({
         {/* 클래스 생성: 2명 이상 선택 + 모두 미배정인 경우 */}
         {selected.size >= 2 && [...selected].every(id => {
           const s = students.find(x => x.id === id);
-          return s && !s.history.current_camp_id;
+          return s && isEffectivelyUnassigned(s);
         }) && onCampCreate && (
           <button className="ew-btn ew-btn--primary ew-btn--xsm" onClick={() => {
             const selStudents = students.filter(s => selected.has(s.id));

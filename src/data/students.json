@@ -7,6 +7,7 @@
     "gender": "Male",
     "birth_date": "2010-03-15",
     "age": 16,
+    "grade": "고1",
     "guardian": {
       "name": "김성호",
       "relation": "Father",
@@ -59,6 +60,7 @@
     "gender": "Female",
     "birth_date": "2012-07-22",
     "age": 14,
+    "grade": "중2",
     "guardian": {
       "name": "이지혜",
       "relation": "Mother",
@@ -96,6 +98,7 @@
     "gender": "Male",
     "birth_date": "2011-11-08",
     "age": 15,
+    "grade": "중3",
     "guardian": {
       "name": "박현우",
       "relation": "Father",
@@ -148,6 +151,7 @@
     "gender": "Female",
     "birth_date": "2010-05-30",
     "age": 16,
+    "grade": "고1",
     "guardian": {
       "name": "최성진",
       "relation": "Etc",
@@ -200,6 +204,7 @@
     "gender": "Male",
     "birth_date": "2010-09-14",
     "age": 16,
+    "grade": "고1",
     "guardian": {
       "name": "정은혜",
       "relation": "Etc",
@@ -237,6 +242,7 @@
     "gender": "Female",
     "birth_date": "2013-02-19",
     "age": 13,
+    "grade": "중1",
     "guardian": {
       "name": "한미라",
       "relation": "Mother",
@@ -274,6 +280,7 @@
     "gender": "Male",
     "birth_date": "2009-12-03",
     "age": 17,
+    "grade": "고2",
     "guardian": {
       "name": "오기현",
       "relation": "Father",
@@ -311,6 +318,7 @@
     "gender": "Female",
     "birth_date": "2011-06-27",
     "age": 15,
+    "grade": "중3",
     "guardian": {
       "name": "신도훈",
       "relation": "Father",
