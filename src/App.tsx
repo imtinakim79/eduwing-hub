@@ -55,7 +55,7 @@ export default function App() {
       const parsed = JSON.parse(stored) as Student[];
       if (parsed.length === 0) return defaultStudents;
       const map = new Map(defaultStudents.map(s => [s.id, s]));
-      parsed.forEach(s => map.set(s.id, s));
+      parsed.forEach(s => map.set(s.id, { ...map.get(s.id), ...s }));
       return Array.from(map.values());
     } catch { return defaultStudents; }
   });
@@ -224,21 +224,44 @@ export default function App() {
             }}
             onStudentUpdate={updated => saveStudents(students.map(s => s.id === updated.id ? updated : s))}
             onCampCreate={(camp, className, studentIds) => {
-              // 캠프 저장
               const nextCamps = [...camps, camp];
               setCamps(nextCamps);
               try { localStorage.setItem('ew-camps', JSON.stringify(nextCamps)); } catch {}
-              // 클래스 생성
               const classId = `CLS-${Date.now()}`;
-              const classData = [{ id: classId, name: className, teacher: '', studentIds }];
-              try { localStorage.setItem(`ew-classes-${camp.id}`, JSON.stringify(classData)); } catch {}
-              // 학생 캠프 배정 + program_start/end 초기화
-              const nextStudents = students.map(s =>
+              try { localStorage.setItem(`ew-classes-${camp.id}`, JSON.stringify([{ id: classId, name: className, teacher: '', studentIds }])); } catch {}
+              saveStudents(students.map(s =>
                 studentIds.includes(s.id)
-                  ? { ...s, history: { ...s.history, current_camp_id: camp.id }, program_start: undefined, program_end: undefined }
+                  ? {
+                      ...s,
+                      history: { ...s.history, current_camp_id: camp.id },
+                      program_start: undefined,
+                      program_end: undefined,
+                      camp_records: [
+                        ...(s.camp_records ?? []).filter(r => r.camp_id !== camp.id),
+                        { camp_id: camp.id },
+                      ],
+                    }
                   : s
-              );
-              saveStudents(nextStudents);
+              ));
+            }}
+            onClassCreate={(campId, className, studentIds) => {
+              const classId = `CLS-${Date.now()}`;
+              const existing = (() => { try { return JSON.parse(localStorage.getItem(`ew-classes-${campId}`) ?? '[]'); } catch { return []; } })();
+              try { localStorage.setItem(`ew-classes-${campId}`, JSON.stringify([...existing, { id: classId, name: className, teacher: '', studentIds }])); } catch {}
+              saveStudents(students.map(s =>
+                studentIds.includes(s.id)
+                  ? {
+                      ...s,
+                      history: { ...s.history, current_camp_id: campId },
+                      program_start: undefined,
+                      program_end: undefined,
+                      camp_records: [
+                        ...(s.camp_records ?? []).filter(r => r.camp_id !== campId),
+                        { camp_id: campId },
+                      ],
+                    }
+                  : s
+              ));
             }}
             onStudentDelete={(ids: string[]) => {
               ids.forEach(id => {

@@ -1,13 +1,14 @@
 // 학생관리 리스트 페이지
 // 피그마 node 49:5613 기반 + FieldCell Library (167:1305) 반영
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import * as XLSX from 'xlsx';
 import rawStudents from '../data/students.json';
 import rawCamps from '../data/camps.json';
 import type { Agent } from './AgentBoardPage';
 import Pagination from '../components/Pagination';
 import BoardTable from '../components/board/BoardTable';
-import { ThumbnailCell } from '../components/board/cells';
+import { ThumbnailCell, CalendarRangeOverlay, CalendarRangeCell } from '../components/board/cells';
 import { FilterPill } from '../components/FilterPill';
 import type { ColumnDef } from '../components/board/types';
 import { useUndoToast } from '../hooks/useUndoToast';
@@ -37,7 +38,7 @@ export interface CampRecord {
 
 export interface Student {
   id: string; profile_img_url: string | null;
-  name_ko: string; name_en: string; gender: 'Male' | 'Female';
+  name_ko: string; name_en: string; gender: 'Male' | 'Female' | 'Other' | 'Prefer not to say';
   birth_date: string; age: number; grade?: string;
   program_start?: string; program_end?: string;
   guardian: { name: string; relation: string; contact: string; email: string };
@@ -95,15 +96,21 @@ const studentColumns: ColumnDef<Student>[] = [
   },
   {
     key: 'guardian', label: '보호자', width: 120, type: 'readonly',
-    getValue: (r) => `${r.guardian.name}(${relLabel(r.guardian.relation)})`,
+    getValue: (r, e) => {
+      const name = e['guardian_name'] ?? r.guardian.name;
+      const rel  = e['guardian_relation'] ?? r.guardian.relation;
+      return `${name}(${relLabel(rel)})`;
+    },
   },
   {
-    key: 'contact', label: '연락처', width: 135, type: 'readonly',
-    getValue: (r) => r.guardian.contact,
+    key: 'contact', label: '연락처', width: 135, type: 'text',
+    getValue: (r, e) => e['contact'] ?? r.guardian.contact,
+    setValue: (_, v) => ({ field: 'contact', value: v }),
   },
   {
-    key: 'email', label: 'Email', width: 160, type: 'readonly',
-    getValue: (r) => r.guardian.email,
+    key: 'email', label: 'Email', width: 160, type: 'text',
+    getValue: (r, e) => e['email'] ?? r.guardian.email,
+    setValue: (_, v) => ({ field: 'email', value: v }),
   },
   {
     key: 'joined_date', label: '가입일', width: 109, sortKey: 'joined', type: 'calendar',
@@ -124,7 +131,7 @@ const studentColumns: ColumnDef<Student>[] = [
     },
   },
   {
-    key: 'camp_period', label: '참여 캠프 기간', width: 200, type: 'readonly',
+    key: 'camp_period', label: '참여 캠프 기간', width: 200, sortKey: 'camp_period', type: 'readonly',
     getValue: (r, e) => {
       const campId = e['current_camp_id'] ?? r.history.current_camp_id;
       const camp = campMap[campId] as Camp | undefined;
@@ -149,18 +156,26 @@ function applyEditsToStudent(s: Student, edits: Record<string, string>): Student
       case 'age':          result.age = parseInt(value, 10) || s.age; break;
       case 'birth_date':   result.birth_date = value; break;
       case 'grade':        result.grade = value; break;
-      case 'contact':      result.guardian.contact = value; break;
-      case 'email':        result.guardian.email = value; break;
+      case 'guardian_name':     result.guardian.name = value; break;
+      case 'guardian_relation': result.guardian.relation = value; break;
+      case 'contact':           result.guardian.contact = value; break;
+      case 'email':             result.guardian.email = value; break;
       case 'joined_date':  result.history.joined_date = value; break;
       case 'agent_id':     result.history.agent_id = value; break;
       case 'current_camp_id': result.history.current_camp_id = value; break;
+      case 'program_period': {
+        const [s, e] = value.split('||');
+        result.program_start = s || undefined;
+        result.program_end   = e || undefined;
+        break;
+      }
     }
   }
   return result;
 }
 
 // ── Excel helpers ─────────────────────────────────────────────────────────────
-function studentsToRows(list: Student[]) {
+function studentsToRows(list: Student[], agentIdToName: Record<string, string> = {}) {
   return list.map(s => ({
     'ID':             s.id,
     '이름(한글)':      s.name_ko,
@@ -176,7 +191,7 @@ function studentsToRows(list: Student[]) {
     '연락처':         s.guardian.contact,
     'Email':          s.guardian.email,
     '가입일':         s.history.joined_date,
-    'Agent':          s.history.agent_id,
+    'Agent':          agentIdToName[s.history.agent_id] ?? s.history.agent_id,
     '참여중인 캠프 ID': s.history.current_camp_id,
     '참여중인 캠프':   campMap[s.history.current_camp_id]?.name ?? s.history.current_camp_id,
   }));
@@ -223,6 +238,7 @@ export default function StudentBoardPage({
   onStudentUpdate,
   onStudentDelete,
   onCampCreate,
+  onClassCreate,
 }: {
   students?: Student[];
   agents?: Agent[];
@@ -233,25 +249,47 @@ export default function StudentBoardPage({
   onStudentUpdate?: (updated: Student) => void;
   onStudentDelete?: (ids: string[]) => void;
   onCampCreate?: (camp: Camp, className: string, studentIds: string[]) => void;
+  onClassCreate?: (campId: string, className: string, studentIds: string[]) => void;
 }) {
   const { showUndo } = useUndoToast();
   const [query,        setQuery]        = useState('');
   const [agentFilter,  setAgentFilter]  = useState('');
   const [campFilter,   setCampFilter]   = useState<string[]>([]);
-  const [dupFilter,    setDupFilter]    = useState(false);
-  const [unassignFilter, setUnassignFilter] = useState(false);
+  const [dupFilter,       setDupFilter]       = useState(false);
+  const [campStatusFilter, setCampStatusFilter] = useState('');
+  const [periodFilter,    setPeriodFilter]    = useState<{ start: string; end: string }>({ start: '', end: '' });
+  const [periodOpen,      setPeriodOpen]      = useState(false);
+  const [periodPos,       setPeriodPos]       = useState<{ top: number; left: number }>({ top: 0, left: 0 });
+  const periodRef = useRef<HTMLButtonElement>(null);
+  const [addingRow,  setAddingRow]  = useState(false);
+  const [newEdits,   setNewEdits]   = useState<Record<string, string>>({});
   const [selected,     setSelected]     = useState<Set<string>>(new Set());
   const [page,         setPage]         = useState(1);
   const [perPage,      setPerPage]      = useState(10);
-  const [sortKey,      setSortKey]      = useState<string | null>(null);
-  const [sortDir,      setSortDir]      = useState<'asc' | 'desc'>('asc');
+  const [sortKey,      setSortKey]      = useState<string | null>('camp_period');
+  const [sortDir,      setSortDir]      = useState<'asc' | 'desc'>('desc');
   const [localEdits,   setLocalEdits]   = useState<Record<string, Record<string, string>>>({});
   const [uploadSummary, setUploadSummary] = useState<{ added: number; updated: number; duplicate: number } | null>(null);
-  const [classModal,   setClassModal]   = useState<{ campName: string; className: string; startDate: string; endDate: string } | null>(null);
+  const [classModal, setClassModal] = useState<{
+    step: 1 | 2;
+    className: string;
+    campTab: 'existing' | 'new';
+    existingCampId: string;
+    newCampName: string;
+    newCampCode: string;
+    newLocation: string;
+    newCapacity: string;
+    newStatus: string;
+    newStartDate: string;
+    newEndDate: string;
+  } | null>(null);
+  const [newPeriodOpen, setNewPeriodOpen] = useState(false);
+  const [newPeriodPos, setNewPeriodPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
+  const newPeriodRef = useRef<HTMLButtonElement>(null);
   const uploadRef = useRef<HTMLInputElement>(null);
 
   function handleDownload() {
-    const ws = XLSX.utils.json_to_sheet(studentsToRows(students));
+    const ws = XLSX.utils.json_to_sheet(studentsToRows(students, agentIdToName));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, '학생목록');
     XLSX.writeFile(wb, '학생목록.xlsx');
@@ -292,33 +330,82 @@ export default function StudentBoardPage({
     reader.readAsArrayBuffer(file);
   }
 
+  const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const undoSnapshotRef = useRef<{ rowId: string; prevStudent: Student; prevEdits: Record<string, string> | undefined } | null>(null);
+
+  useEffect(() => () => { if (undoTimerRef.current) clearTimeout(undoTimerRef.current); }, []);
+
   function handleEdit(rowId: string, field: string, value: string) {
     const prevStudent = students.find(s => s.id === rowId);
-    const prevEdits = localEdits[rowId];
+
+    // 편집 세션 시작 시점의 원본 상태를 한 번만 캡처
+    if (!undoTimerRef.current) {
+      undoSnapshotRef.current = { rowId, prevStudent: prevStudent!, prevEdits: localEdits[rowId] };
+    }
+
     setLocalEdits(p => ({ ...p, [rowId]: { ...(p[rowId] ?? {}), [field]: value } }));
+
     if (onStudentUpdate && prevStudent) {
       const mergedEdits = { ...(localEdits[rowId] ?? {}), [field]: value };
       onStudentUpdate(applyEditsToStudent(prevStudent, mergedEdits));
 
-      const displayName = prevStudent.name_ko || prevStudent.name_en || '학생';
-      showUndo({
-        message: `'${displayName}' 변경됨`,
-        onUndo: () => {
-          onStudentUpdate(prevStudent);
-          setLocalEdits(p => {
-            const next = { ...p };
-            if (prevEdits) next[rowId] = prevEdits;
-            else delete next[rowId];
-            return next;
-          });
-        },
-      });
+      // 타이핑이 멈춘 뒤 800ms 후 토스트를 한 번만 표시
+      if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+      undoTimerRef.current = setTimeout(() => {
+        undoTimerRef.current = null;
+        const snap = undoSnapshotRef.current;
+        if (!snap) return;
+        undoSnapshotRef.current = null;
+        const displayName = snap.prevStudent.name_ko || snap.prevStudent.name_en || '학생';
+        showUndo({
+          message: `'${displayName}' 변경됨`,
+          onUndo: () => {
+            onStudentUpdate(snap.prevStudent);
+            setLocalEdits(p => {
+              const next = { ...p };
+              if (snap.prevEdits) next[snap.rowId] = snap.prevEdits;
+              else delete next[snap.rowId];
+              return next;
+            });
+          },
+        });
+      }, 800);
     }
   }
 
   function toggleSort(k: string) {
     if (sortKey === k) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
     else { setSortKey(k); setSortDir('asc'); }
+  }
+
+  function handleSaveNewRow() {
+    const name_ko = newEdits.name_ko?.trim() ?? '';
+    if (!name_ko) return;
+    const newStudent: Student = {
+      id: `STU-${Date.now()}`,
+      profile_img_url: null,
+      name_ko,
+      name_en: newEdits.name_en?.trim() ?? '',
+      gender: (newEdits.gender as Student['gender']) || 'Male',
+      age: parseInt((newEdits.age ?? '').replace('세', ''), 10) || 0,
+      grade: newEdits.grade ?? '',
+      birth_date: newEdits.birth_date ?? '',
+      guardian: {
+        name: newEdits.guardian_name?.trim() ?? '',
+        relation: newEdits.guardian_relation || 'Mother',
+        contact: newEdits.contact?.trim() ?? '',
+        email: newEdits.email?.trim() ?? '',
+      },
+      history: {
+        joined_date: newEdits.joined_date || new Date().toISOString().slice(0, 10),
+        agent_id: newEdits.agent_id || '',
+        current_camp_id: '',
+      },
+      camp_records: [],
+    };
+    onStudentsImport?.([newStudent]);
+    setAddingRow(false);
+    setNewEdits({});
   }
 
   const agentOpts     = useMemo(() => agents.map(a => a.name), [agents]);
@@ -364,6 +451,92 @@ export default function StudentBoardPage({
       },
       setValue: (_: Student, v: string) => ({ field: 'agent_id', value: agentNameToId[v] ?? v }),
     };
+    if (col.key === 'guardian') return {
+      ...col,
+      type: 'custom' as const,
+      render: ({ row, cellId, openCell, setOpenCell, onCellClick }: {
+        row: Student; cellId: string;
+        openCell: string | null; setOpenCell: (id: string | null) => void;
+        onCellClick: () => void;
+      }) => {
+        const edits = localEdits[row.id] ?? {};
+        const name = edits['guardian_name'] ?? row.guardian.name;
+        const rel  = edits['guardian_relation'] ?? row.guardian.relation;
+        const isEditing = openCell === cellId;
+        const lineStyle: React.CSSProperties = {
+          width: '100%', border: 'none', borderBottom: '1px solid var(--color-border-subtle)',
+          background: 'transparent', fontSize: 12, fontFamily: 'var(--font-ko)',
+          color: 'var(--color-ink-strong)', outline: 'none', padding: '1px 2px',
+        };
+        const isCustomRel = rel !== 'Father' && rel !== 'Mother';
+        if (isEditing) return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 3, padding: '4px 0' }} onClick={e => e.stopPropagation()}>
+            <input autoFocus value={name} placeholder="보호자 이름"
+              onChange={e => handleEdit(row.id, 'guardian_name', e.target.value)}
+              onKeyDown={e => { if (e.key === 'Escape' || e.key === 'Enter') setOpenCell(null); }}
+              style={lineStyle} />
+            <select value={isCustomRel ? 'Etc' : rel} onChange={e => handleEdit(row.id, 'guardian_relation', e.target.value)} style={{ ...lineStyle, cursor: 'pointer' }}>
+              <option value="Father">아빠</option>
+              <option value="Mother">엄마</option>
+              <option value="Etc">기타</option>
+            </select>
+            {isCustomRel && (
+              <input
+                placeholder="관계 입력 (예: 할머니)"
+                value={rel !== 'Etc' ? rel : ''}
+                onChange={e => handleEdit(row.id, 'guardian_relation', e.target.value || 'Etc')}
+                style={lineStyle}
+              />
+            )}
+          </div>
+        );
+        return (
+          <div onClick={e => { e.stopPropagation(); onCellClick(); setOpenCell(cellId); }}
+            style={{ height: '100%', display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', overflow: 'hidden' }}>
+            <span style={{ fontSize: 13, color: 'var(--color-text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name || '–'}</span>
+            <span style={{ fontSize: 11, color: 'var(--color-ink-mute)', flexShrink: 0 }}>({relLabel(rel)})</span>
+          </div>
+        );
+      },
+    };
+    if (col.key === 'camp_period') return {
+      ...col,
+      type: 'custom' as const,
+      getValue: (r: Student, e: Record<string, string>) => {
+        if (isEffectivelyUnassigned(r)) {
+          return e['program_period'] ?? `${r.program_start ?? ''}||${r.program_end ?? ''}`;
+        }
+        const campId = e['current_camp_id'] ?? r.history.current_camp_id;
+        const camp = liveCampMap[campId] as Camp | undefined;
+        if (!camp?.start_date || !camp?.end_date) return '';
+        const fmt = (iso: string) => iso.length >= 10 ? iso.slice(2).replace(/-/g, '/') : iso;
+        return `${fmt(camp.start_date)} ~ ${camp.end_date.slice(5).replace(/-/g, '/')}`;
+      },
+      setValue: (_: Student, v: string) => ({ field: 'program_period', value: v }),
+      render: ({ row, value, cellId, openCell, setOpenCell, onCellClick, onSave }: {
+        row: Student; value: string; cellId: string;
+        openCell: string | null; setOpenCell: (id: string | null) => void;
+        onCellClick: () => void; onSave: (v: string) => void;
+      }) => {
+        if (isEffectivelyUnassigned(row)) {
+          return (
+            <CalendarRangeCell
+              value={value}
+              cellId={cellId}
+              openCell={openCell}
+              setOpenCell={setOpenCell}
+              onSave={onSave}
+              onCellClick={onCellClick}
+            />
+          );
+        }
+        return (
+          <span style={{ fontSize: 13, color: 'var(--color-text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}>
+            {value}
+          </span>
+        );
+      },
+    };
     if (col.key === 'current_camp_id') return {
       ...col,
       type: 'custom' as const,
@@ -399,22 +572,37 @@ export default function StudentBoardPage({
     if (agentFilter) list = list.filter(s => s.history.agent_id === agentFilter);
     if (campFilter.length > 0) list = list.filter(s => campFilter.includes(s.history.current_camp_id));
     if (dupFilter) list = list.filter(s => s.duplicate_suspect);
-    if (unassignFilter) list = list.filter(s => isEffectivelyUnassigned(s));
-    if (unassignFilter && !sortKey) {
-      list.sort((a, b) => (b.program_start ?? '').localeCompare(a.program_start ?? ''));
-    } else if (sortKey) {
+    if (campStatusFilter) {
+      list = campStatusFilter === '미배정'
+        ? list.filter(s => isEffectivelyUnassigned(s))
+        : list.filter(s => liveCampMap[s.history.current_camp_id]?.status === campStatusFilter);
+    }
+    if (periodFilter.start || periodFilter.end) {
+      list = list.filter(s => {
+        const camp = liveCampMap[s.history.current_camp_id];
+        if (!camp?.start_date) return false;
+        if (periodFilter.start && camp.start_date < periodFilter.start) return false;
+        if (periodFilter.end && camp.start_date > periodFilter.end) return false;
+        return true;
+      });
+    }
+    if (sortKey) {
       list.sort((a, b) => {
         const va = sortKey==='name' ? a.name_ko : sortKey==='age' ? String(a.age)
           : sortKey==='joined' ? a.history.joined_date : sortKey==='birth' ? a.birth_date
-          : sortKey==='gender' ? a.gender : '';
+          : sortKey==='gender' ? a.gender
+          : sortKey==='camp_period' ? (liveCampMap[a.history.current_camp_id]?.start_date ?? '')
+          : '';
         const vb = sortKey==='name' ? b.name_ko : sortKey==='age' ? String(b.age)
           : sortKey==='joined' ? b.history.joined_date : sortKey==='birth' ? b.birth_date
-          : sortKey==='gender' ? b.gender : '';
+          : sortKey==='gender' ? b.gender
+          : sortKey==='camp_period' ? (liveCampMap[b.history.current_camp_id]?.start_date ?? '')
+          : '';
         return (sortDir === 'asc' ? 1 : -1) * va.localeCompare(vb);
       });
     }
     return list;
-  }, [students, query, agentFilter, campFilter, dupFilter, unassignFilter, sortKey, sortDir]);
+  }, [students, query, agentFilter, campFilter, dupFilter, campStatusFilter, periodFilter, sortKey, sortDir, liveCampMap]);
 
   const pageData = filtered.slice((page - 1) * perPage, page * perPage);
 
@@ -445,15 +633,57 @@ export default function StudentBoardPage({
             withCheckbox
             onChange={vs => { setCampFilter(vs); setPage(1); }}
           />
-          <button
-            className={`ew-filter-pill${unassignFilter ? ' open' : ''}`}
-            onClick={() => { setUnassignFilter(v => !v); setDupFilter(false); setPage(1); }}
-          >미배정</button>
+          <FilterPill
+            label="캠프 상태"
+            values={campStatusFilter ? [campStatusFilter] : []}
+            options={['준비중', '진행중', '미배정']}
+            withCheckbox
+            onChange={vs => { setCampStatusFilter(vs[0] ?? ''); setPage(1); }}
+          />
           {students.some(s => s.duplicate_suspect) && (
             <button
               className={`ew-filter-pill${dupFilter ? ' open' : ''}`}
-              onClick={() => { setDupFilter(v => !v); setUnassignFilter(false); setPage(1); }}
+              onClick={() => { setDupFilter(v => !v); setPage(1); }}
             >⚠ 중복의심 {students.filter(s => s.duplicate_suspect).length}</button>
+          )}
+          <button
+            ref={periodRef}
+            className={`ew-filter-pill${(periodFilter.start || periodFilter.end || periodOpen) ? ' open' : ''}`}
+            style={{ display: 'flex', alignItems: 'center', gap: 6 }}
+            onClick={() => {
+              if (!periodOpen) {
+                const rect = periodRef.current?.getBoundingClientRect();
+                if (rect) setPeriodPos({ top: rect.bottom + 6, left: rect.left });
+              }
+              setPeriodOpen(v => !v);
+            }}
+          >
+            <img src={(periodFilter.start || periodFilter.end || periodOpen) ? '/icon/Calendar_selected.svg' : '/icon/Calendar.svg'} alt="" style={{ width: 14, height: 14, flexShrink: 0 }} />
+            <span style={{ whiteSpace: 'nowrap' }}>
+              {periodFilter.start || periodFilter.end
+                ? `${periodFilter.start ? periodFilter.start.slice(2).replace(/-/g, '/') : '?'} ~ ${periodFilter.end ? periodFilter.end.slice(5).replace(/-/g, '/') : '?'}`
+                : '날짜 선택'}
+            </span>
+            {(periodFilter.start || periodFilter.end) && (
+              <span
+                style={{ marginLeft: 2, opacity: 0.5, fontSize: 15, lineHeight: 1 }}
+                onClick={e => { e.stopPropagation(); setPeriodFilter({ start: '', end: '' }); setPage(1); }}
+              >×</span>
+            )}
+          </button>
+          {periodOpen && createPortal(
+            <>
+              <div style={{ position: 'fixed', inset: 0, zIndex: 199 }} onClick={() => setPeriodOpen(false)} />
+              <div className="ew-smart-overlay-portal" style={{ position: 'fixed', top: periodPos.top, left: periodPos.left, zIndex: 200 }}>
+                <CalendarRangeOverlay
+                  key={`${periodFilter.start}||${periodFilter.end}`}
+                  startISO={periodFilter.start}
+                  endISO={periodFilter.end}
+                  onSelect={(start, end) => { setPeriodFilter({ start, end }); setPage(1); setPeriodOpen(false); }}
+                />
+              </div>
+            </>,
+            document.body
           )}
         </div>
       </div>
@@ -466,22 +696,29 @@ export default function StudentBoardPage({
         <span style={{ flex: 1, fontSize: 12, color: 'var(--color-text-muted)', fontFamily: 'var(--font-ko)', lineHeight: '26px' }}>
           {selected.size > 0 ? `${selected.size}명 선택됨` : ''}
         </span>
-        <button className="ew-btn ew-btn--primary ew-btn--xsm" onClick={onAdd}>학생 추가</button>
+        <button className="ew-btn ew-btn--primary ew-btn--xsm" onClick={() => { setAddingRow(true); setNewEdits({}); setPage(1); }}>학생 추가</button>
         {/* 클래스 생성: 2명 이상 선택 + 모두 미배정인 경우 */}
         {selected.size >= 2 && [...selected].every(id => {
           const s = students.find(x => x.id === id);
           return s && isEffectivelyUnassigned(s);
-        }) && onCampCreate && (
+        }) && (onCampCreate || onClassCreate) && (
           <button className="ew-btn ew-btn--primary ew-btn--xsm" onClick={() => {
             const selStudents = students.filter(s => selected.has(s.id));
             const dates = selStudents.map(s => ({ start: s.program_start ?? '', end: s.program_end ?? '' }));
             const sameStart = dates.every(d => d.start === dates[0].start);
             const sameEnd   = dates.every(d => d.end === dates[0].end);
             setClassModal({
-              campName: '',
+              step: 1,
               className: '',
-              startDate: sameStart ? dates[0].start : '',
-              endDate:   sameEnd   ? dates[0].end   : '',
+              campTab: 'existing',
+              existingCampId: '',
+              newCampName: '',
+              newCampCode: '',
+              newLocation: '',
+              newCapacity: '',
+              newStatus: '준비중',
+              newStartDate: sameStart ? dates[0].start : '',
+              newEndDate:   sameEnd   ? dates[0].end   : '',
             });
           }}>클래스 생성</button>
         )}
@@ -515,6 +752,9 @@ export default function StudentBoardPage({
 
       {/* Table */}
       <div className="ew-board" style={{ borderRadius: 0, border: 'none', borderTop: '1px solid var(--color-border-table)' }}>
+        {addingRow && <div style={{ padding: '6px 12px 4px', fontSize: 12, color: 'var(--color-primary)', fontFamily: 'var(--font-ko)', background: 'var(--color-primary-bg)', borderBottom: '1px solid var(--color-border-faint)' }}>
+          이름(한글)을 입력하면 저장 버튼이 활성화됩니다. <span style={{ color: 'var(--color-ink-mute)' }}>Tab으로 다음 필드로 이동</span>
+        </div>}
         <BoardTable
           data={pageData}
           allData={students as Student[]}
@@ -528,6 +768,87 @@ export default function StudentBoardPage({
           onEdit={handleEdit}
           onRowClick={onStudentSelect}
           tableId="students"
+          newRow={addingRow ? (() => {
+            const ni: React.CSSProperties = { width: '100%', height: 22, border: 'none', borderBottom: '1px solid var(--color-border-subtle)', background: 'transparent', fontSize: 13, fontFamily: 'var(--font-ko)', color: 'var(--color-ink-strong)', outline: 'none', padding: '0 2px' };
+            const si: React.CSSProperties = { ...ni, cursor: 'pointer' };
+            const canSave = !!(newEdits.name_ko?.trim());
+            return (
+              <tr style={{ background: 'var(--color-primary-bg)' }}>
+                <td style={{ textAlign: 'center', padding: '0 8px' }}>
+                  <div style={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+                    <button title="저장" disabled={!canSave} onClick={handleSaveNewRow}
+                      style={{ width: 22, height: 22, borderRadius: 4, border: 'none', cursor: canSave ? 'pointer' : 'not-allowed', background: canSave ? 'var(--color-primary)' : 'var(--color-border-subtle)', color: canSave ? '#fff' : 'var(--color-ink-faint)', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✓</button>
+                    <button title="취소" onClick={() => { setAddingRow(false); setNewEdits({}); }}
+                      style={{ width: 22, height: 22, borderRadius: 4, border: 'none', cursor: 'pointer', background: 'transparent', color: 'var(--color-ink-mute)', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+                  </div>
+                </td>
+                {/* 학생 이름 */}
+                <td style={{ padding: '6px 12px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                    <input autoFocus placeholder="이름(한글) *" value={newEdits.name_ko ?? ''} onChange={e => setNewEdits(p => ({ ...p, name_ko: e.target.value }))} style={{ ...ni, fontWeight: 500 }} />
+                    <input placeholder="이름(영문)" value={newEdits.name_en ?? ''} onChange={e => setNewEdits(p => ({ ...p, name_en: e.target.value }))} style={{ ...ni, fontSize: 11, color: 'var(--color-ink-mute)' }} />
+                  </div>
+                </td>
+                {/* 성별 */}
+                <td style={{ padding: '6px 12px' }}>
+                  <select value={newEdits.gender ?? 'Male'} onChange={e => setNewEdits(p => ({ ...p, gender: e.target.value }))} style={si}>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                    <option value="Prefer not to say">Prefer not to say</option>
+                  </select>
+                </td>
+                {/* 나이 */}
+                <td style={{ padding: '6px 12px' }}>
+                  <select value={newEdits.age ?? ''} onChange={e => setNewEdits(p => ({ ...p, age: e.target.value }))} style={si}>
+                    <option value="">-</option>
+                    {Array.from({ length: 20 }, (_, i) => `${i + 1}세`).map(a => <option key={a}>{a}</option>)}
+                  </select>
+                </td>
+                {/* 학년 */}
+                <td style={{ padding: '6px 12px' }}>
+                  <input placeholder="예: 중2" value={newEdits.grade ?? ''} onChange={e => setNewEdits(p => ({ ...p, grade: e.target.value }))} style={ni} />
+                </td>
+                {/* 생일 */}
+                <td style={{ padding: '6px 12px' }}>
+                  <input type="date" value={newEdits.birth_date ?? ''} onChange={e => setNewEdits(p => ({ ...p, birth_date: e.target.value }))} style={ni} />
+                </td>
+                {/* 보호자 */}
+                <td style={{ padding: '6px 12px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                    <input placeholder="보호자 이름" value={newEdits.guardian_name ?? ''} onChange={e => setNewEdits(p => ({ ...p, guardian_name: e.target.value }))} style={ni} />
+                    <select value={newEdits.guardian_relation ?? 'Mother'} onChange={e => setNewEdits(p => ({ ...p, guardian_relation: e.target.value }))} style={{ ...si, fontSize: 11 }}>
+                      <option value="Father">아빠</option>
+                      <option value="Mother">엄마</option>
+                      <option value="Etc">기타</option>
+                    </select>
+                  </div>
+                </td>
+                {/* 연락처 */}
+                <td style={{ padding: '6px 12px' }}>
+                  <input placeholder="010-0000-0000" value={newEdits.contact ?? ''} onChange={e => setNewEdits(p => ({ ...p, contact: e.target.value }))} style={ni} />
+                </td>
+                {/* Email */}
+                <td style={{ padding: '6px 12px' }}>
+                  <input placeholder="email@example.com" value={newEdits.email ?? ''} onChange={e => setNewEdits(p => ({ ...p, email: e.target.value }))} style={ni} />
+                </td>
+                {/* 가입일 */}
+                <td style={{ padding: '6px 12px' }}>
+                  <input type="date" value={newEdits.joined_date ?? new Date().toISOString().slice(0, 10)} onChange={e => setNewEdits(p => ({ ...p, joined_date: e.target.value }))} style={ni} />
+                </td>
+                {/* Agent */}
+                <td style={{ padding: '6px 12px' }}>
+                  <select value={agentIdToName[newEdits.agent_id ?? ''] ?? ''} onChange={e => setNewEdits(p => ({ ...p, agent_id: agentNameToId[e.target.value] ?? '' }))} style={si}>
+                    <option value="">-</option>
+                    {agentOpts.map(a => <option key={a}>{a}</option>)}
+                  </select>
+                </td>
+                {/* 현재 캠프 / 기간 — 저장 후 배정 */}
+                <td style={{ padding: '6px 12px' }}><span style={{ fontSize: 11, color: 'var(--color-ink-faint)', fontFamily: 'var(--font-ko)' }}>저장 후 배정</span></td>
+                <td />
+              </tr>
+            );
+          })() : undefined}
         />
         <Pagination
           total={filtered.length}
@@ -566,48 +887,188 @@ export default function StudentBoardPage({
         </div>
       )}
 
-      {/* 클래스 생성 모달 */}
-      {classModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ background: 'var(--color-canvas)', borderRadius: 12, padding: '28px 32px', minWidth: 380, boxShadow: '0 8px 32px rgba(0,0,0,0.18)', display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div style={{ fontSize: 'var(--text-lg)', fontWeight: 700, color: 'var(--color-ink-strong)', fontFamily: 'var(--font-ko)' }}>캠프 & 클래스 생성</div>
-            <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-ink-mute)', fontFamily: 'var(--font-ko)', margin: 0 }}>
-              선택한 학생 {selected.size}명을 배정할 캠프와 클래스를 만듭니다.
-            </p>
-            {[
-              { label: '캠프명', key: 'campName' as const, placeholder: '캠프 이름을 입력하세요' },
-              { label: '클래스명', key: 'className' as const, placeholder: '클래스 이름을 입력하세요' },
-              { label: '시작일', key: 'startDate' as const, placeholder: 'YYYY-MM-DD' },
-              { label: '종료일', key: 'endDate' as const, placeholder: 'YYYY-MM-DD' },
-            ].map(({ label, key, placeholder }) => (
-              <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <span style={{ fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--color-ink-soft)', fontFamily: 'var(--font-ko)' }}>{label}</span>
-                <input
-                  value={classModal[key]}
-                  onChange={e => setClassModal(prev => prev ? { ...prev, [key]: e.target.value } : prev)}
-                  placeholder={placeholder}
-                  style={{ height: 38, border: '1px solid var(--color-border-subtle)', borderRadius: 6, padding: '0 12px', fontSize: 'var(--text-base)', fontFamily: 'var(--font-ko)', outline: 'none', color: 'var(--color-ink-strong)', background: 'var(--color-canvas)' }}
-                />
-              </div>
-            ))}
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 4 }}>
-              <button className="ew-btn ew-btn--ghost ew-btn--sm" onClick={() => setClassModal(null)}>취소</button>
-              <button className="ew-btn ew-btn--primary ew-btn--sm" onClick={() => {
-                if (!classModal.campName.trim() || !classModal.className.trim()) return;
-                const campId = `CAMP-${Date.now()}`;
-                const newCamp: Camp = {
-                  id: campId, name: classModal.campName.trim(),
-                  location: '', country: '', accommodation: '',
-                  capacity: 0, status: '준비중',
-                  start_date: classModal.startDate, end_date: classModal.endDate, staff: [],
-                };
-                onCampCreate?.(newCamp, classModal.className.trim(), [...selected]);
-                setClassModal(null);
-                setSelected(new Set());
-              }}>생성</button>
+      {/* 클래스 생성 모달 — 2단계 */}
+      {classModal && (() => {
+        const inputStyle: React.CSSProperties = { width: '100%', boxSizing: 'border-box', height: 38, border: '1px solid var(--color-border-subtle)', borderRadius: 6, padding: '0 12px', fontSize: 'var(--text-base)', fontFamily: 'var(--font-ko)', outline: 'none', color: 'var(--color-ink-strong)', background: 'var(--color-canvas)' };
+        const labelStyle: React.CSSProperties = { fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--color-ink-soft)', fontFamily: 'var(--font-ko)' };
+
+        const sortedCamps = Object.values(liveCampMap).sort((a, b) => {
+          const order: Record<string, number> = { '진행중': 0, '준비중': 1 };
+          return (order[a.status] ?? 2) - (order[b.status] ?? 2);
+        });
+
+        function handleCreate() {
+          if (!classModal) return;
+          if (classModal.campTab === 'existing') {
+            if (!classModal.existingCampId) return;
+            onClassCreate?.(classModal.existingCampId, classModal.className.trim(), [...selected]);
+          } else {
+            if (!classModal.newCampName.trim()) return;
+            const campId = classModal.newCampCode.trim() || `CAMP-${Date.now()}`;
+            const newCamp: Camp = {
+              id: campId,
+              name: classModal.newCampName.trim(),
+              location: classModal.newLocation.trim(),
+              country: '',
+              accommodation: '',
+              capacity: parseInt(classModal.newCapacity, 10) || 0,
+              status: classModal.newStatus || '준비중',
+              start_date: classModal.newStartDate,
+              end_date: classModal.newEndDate,
+              staff: [],
+            };
+            onCampCreate?.(newCamp, classModal.className.trim(), [...selected]);
+          }
+          setClassModal(null);
+          setNewPeriodOpen(false);
+          setSelected(new Set());
+        }
+
+        return (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ background: 'var(--color-canvas)', borderRadius: 12, padding: '28px 32px', width: 440, boxShadow: '0 8px 32px rgba(0,0,0,0.18)', display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+              {classModal.step === 1 ? (<>
+                <div style={{ fontSize: 'var(--text-lg)', fontWeight: 700, color: 'var(--color-ink-strong)', fontFamily: 'var(--font-ko)' }}>클래스 생성</div>
+                <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-ink-mute)', fontFamily: 'var(--font-ko)', margin: 0 }}>
+                  선택한 학생 {selected.size}명을 배정할 클래스 이름을 입력하세요.
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <span style={labelStyle}>클래스명</span>
+                  <input
+                    autoFocus
+                    value={classModal.className}
+                    onChange={e => setClassModal(p => p ? { ...p, className: e.target.value } : p)}
+                    placeholder="클래스 이름을 입력하세요"
+                    style={inputStyle}
+                    onKeyDown={e => { if (e.key === 'Enter' && classModal.className.trim()) setClassModal(p => p ? { ...p, step: 2 } : p); }}
+                  />
+                </div>
+                <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                  <button className="ew-btn ew-btn--ghost ew-btn--sm" onClick={() => setClassModal(null)}>취소</button>
+                  <button className="ew-btn ew-btn--primary ew-btn--sm" onClick={() => { if (classModal.className.trim()) setClassModal(p => p ? { ...p, step: 2 } : p); }}>다음</button>
+                </div>
+              </>) : (<>
+                <div style={{ fontSize: 'var(--text-lg)', fontWeight: 700, color: 'var(--color-ink-strong)', fontFamily: 'var(--font-ko)' }}>캠프 선택</div>
+                <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-ink-mute)', fontFamily: 'var(--font-ko)', margin: 0 }}>
+                  <strong style={{ color: 'var(--color-ink-strong)' }}>{classModal.className}</strong> 클래스를 추가할 캠프를 선택하세요.
+                </p>
+
+                {/* 탭 */}
+                <div style={{ display: 'flex', borderBottom: '1px solid var(--color-border-subtle)', gap: 0 }}>
+                  {(['existing', 'new'] as const).map(tab => (
+                    <button key={tab}
+                      onClick={() => setClassModal(p => p ? { ...p, campTab: tab } : p)}
+                      style={{ flex: 1, height: 38, background: 'none', border: 'none', borderBottom: classModal.campTab === tab ? '2px solid var(--color-primary)' : '2px solid transparent', cursor: 'pointer', fontSize: 13, fontWeight: classModal.campTab === tab ? 600 : 400, color: classModal.campTab === tab ? 'var(--color-primary)' : 'var(--color-ink-mute)', fontFamily: 'var(--font-ko)', transition: 'all 0.15s', marginBottom: -1 }}
+                    >{tab === 'existing' ? '기존 캠프' : '신규 생성'}</button>
+                  ))}
+                </div>
+
+                {classModal.campTab === 'existing' ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 220, overflowY: 'auto' }}>
+                    {sortedCamps.length === 0
+                      ? <p style={{ fontSize: 13, color: 'var(--color-ink-mute)', fontFamily: 'var(--font-ko)', margin: 0 }}>등록된 캠프가 없습니다.</p>
+                      : sortedCamps.map(camp => {
+                          const badge = CAMP_BADGE[camp.status ?? ''];
+                          const isSelected = classModal.existingCampId === camp.id;
+                          return (
+                            <div key={camp.id}
+                              onClick={() => setClassModal(p => p ? { ...p, existingCampId: camp.id } : p)}
+                              style={{ padding: '10px 14px', borderRadius: 8, border: isSelected ? '2px solid var(--color-primary)' : '1px solid var(--color-border-subtle)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: isSelected ? 'var(--color-primary-bg)' : 'var(--color-canvas)' }}
+                            >
+                              <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--color-ink-strong)', fontFamily: 'var(--font-ko)' }}>{camp.name}</span>
+                              {camp.status && (
+                                <span style={{ fontSize: 11, borderRadius: 10, padding: '2px 8px', ...(badge ?? { bg: 'var(--color-bg-subtle)', color: 'var(--color-ink-mute)' }), background: badge?.bg ?? 'var(--color-bg-subtle)', color: badge?.color ?? 'var(--color-ink-mute)' }}>{camp.status}</span>
+                              )}
+                            </div>
+                          );
+                        })
+                    }
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        <span style={labelStyle}>캠프명 *</span>
+                        <input value={classModal.newCampName} onChange={e => setClassModal(p => p ? { ...p, newCampName: e.target.value } : p)} placeholder="캠프 이름" style={inputStyle} />
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        <span style={labelStyle}>캠프코드</span>
+                        <input value={classModal.newCampCode} onChange={e => setClassModal(p => p ? { ...p, newCampCode: e.target.value } : p)} placeholder="예: C26S" style={inputStyle} />
+                      </div>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        <span style={labelStyle}>지역</span>
+                        <input value={classModal.newLocation} onChange={e => setClassModal(p => p ? { ...p, newLocation: e.target.value } : p)} placeholder="예: 캐나다 밴쿠버" style={inputStyle} />
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        <span style={labelStyle}>정원</span>
+                        <input type="number" min="0" value={classModal.newCapacity} onChange={e => setClassModal(p => p ? { ...p, newCapacity: e.target.value } : p)} placeholder="0" style={inputStyle} />
+                      </div>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        <span style={labelStyle}>상태</span>
+                        <select value={classModal.newStatus} onChange={e => setClassModal(p => p ? { ...p, newStatus: e.target.value } : p)} style={{ ...inputStyle, cursor: 'pointer' }}>
+                          <option value="준비중">준비중</option>
+                          <option value="진행중">진행중</option>
+                          <option value="종료">종료</option>
+                        </select>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        <span style={labelStyle}>기간</span>
+                        <button
+                          ref={newPeriodRef}
+                          type="button"
+                          onClick={() => {
+                            if (!newPeriodOpen) {
+                              const rect = newPeriodRef.current?.getBoundingClientRect();
+                              if (rect) setNewPeriodPos({ top: rect.bottom + 4, left: rect.left });
+                            }
+                            setNewPeriodOpen(v => !v);
+                          }}
+                          style={{ ...inputStyle, textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, border: (classModal.newStartDate || classModal.newEndDate || newPeriodOpen) ? '1px solid var(--color-primary)' : '1px solid var(--color-border-subtle)' }}
+                        >
+                          <img src={(classModal.newStartDate || classModal.newEndDate || newPeriodOpen) ? '/icon/Calendar_selected.svg' : '/icon/Calendar.svg'} alt="" style={{ width: 14, height: 14, flexShrink: 0 }} />
+                          <span style={{ fontSize: 13, color: (classModal.newStartDate || classModal.newEndDate) ? 'var(--color-ink-strong)' : 'var(--color-ink-faint)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {classModal.newStartDate || classModal.newEndDate
+                              ? `${classModal.newStartDate ? classModal.newStartDate.slice(2).replace(/-/g, '/') : '?'} ~ ${classModal.newEndDate ? classModal.newEndDate.slice(5).replace(/-/g, '/') : '?'}`
+                              : '날짜 선택'}
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                  <button className="ew-btn ew-btn--ghost ew-btn--sm" onClick={() => setClassModal(p => p ? { ...p, step: 1 } : p)}>이전</button>
+                  <button className="ew-btn ew-btn--ghost ew-btn--sm" onClick={() => { setClassModal(null); setNewPeriodOpen(false); }}>취소</button>
+                  <button className="ew-btn ew-btn--primary ew-btn--sm" onClick={handleCreate}>생성</button>
+                </div>
+              </>)}
             </div>
           </div>
-        </div>
+        );
+      })()}
+
+      {newPeriodOpen && classModal && createPortal(
+        <>
+          <div style={{ position: 'fixed', inset: 0, zIndex: 1099 }} onClick={() => setNewPeriodOpen(false)} />
+          <div className="ew-smart-overlay-portal" style={{ position: 'fixed', top: newPeriodPos.top, left: newPeriodPos.left, zIndex: 1100 }}>
+            <CalendarRangeOverlay
+              key={`${classModal.newStartDate}||${classModal.newEndDate}`}
+              startISO={classModal.newStartDate}
+              endISO={classModal.newEndDate}
+              onSelect={(start, end) => {
+                setClassModal(p => p ? { ...p, newStartDate: start, newEndDate: end } : p);
+                setNewPeriodOpen(false);
+              }}
+            />
+          </div>
+        </>,
+        document.body
       )}
     </div>
   );

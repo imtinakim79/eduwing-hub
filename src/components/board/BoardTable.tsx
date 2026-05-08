@@ -22,6 +22,8 @@ interface BoardTableProps<T extends { id: string }> {
   onRowClick?: (rowId: string) => void;
   /** localStorage 저장 키 접두사. 미지정 시 너비 저장 안 함 */
   tableId?: string;
+  /** tbody 최상단에 삽입되는 고정 행 (신규 행 추가 등) */
+  newRow?: React.ReactNode;
 }
 
 export default function BoardTable<T extends { id: string }>({
@@ -39,6 +41,7 @@ export default function BoardTable<T extends { id: string }>({
   emptyMessage = '검색 결과가 없습니다.',
   onRowClick,
   tableId,
+  newRow,
 }: BoardTableProps<T>) {
   const [openCell,   setOpenCell]   = useState<string | null>(null);
   const [activeCell, setActiveCell] = useState<string | null>(null);
@@ -169,6 +172,7 @@ export default function BoardTable<T extends { id: string }>({
 
         {/* Body */}
         <tbody>
+          {newRow}
           {data.length === 0 ? (
             <tr>
               <td colSpan={columns.length + 1} style={{ textAlign: 'center', padding: 40, color: 'var(--color-text-muted)' }}>

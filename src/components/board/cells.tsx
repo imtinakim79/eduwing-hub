@@ -718,7 +718,7 @@ export function TagList({ items, color }: { items: string[]; color: string }) {
 }
 
 // ── CalendarRangeCell ─────────────────────────────────────────────────────────
-function CalendarRangeOverlay({ startISO, endISO, onSelect }: {
+export function CalendarRangeOverlay({ startISO, endISO, onSelect }: {
   startISO: string; endISO: string;
   onSelect: (start: string, end: string) => void;
 }) {
