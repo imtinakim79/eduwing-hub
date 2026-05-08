@@ -365,7 +365,7 @@ export default function StudentBoardPage({
   const campOpts = useMemo(() => [...new Set<string>(students.map(s => s.history.current_camp_id))], [students]);
 
   const filtered = useMemo(() => {
-    let list = [...students];
+    let list = students.filter(s => s.name_ko || s.name_en);
     if (query) {
       const q = query.toLowerCase();
       list = list.filter(s =>
